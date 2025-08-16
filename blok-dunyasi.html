@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blok Dünyası - Emir'in Oyun Dünyası</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #87CEEB, #98FB98);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .top-bar {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.2em;
+            margin: 0;
+        }
+
+        .home-btn {
+            background: linear-gradient(45deg, #FF8A80, #FFB74D);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-area {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .block-palette {
+            width: 200px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .palette-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .block-type {
+            width: 100%;
+            height: 50px;
+            margin-bottom: 10px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .block-type:hover {
+            transform: scale(1.05);
+            border-color: #FFD700;
+        }
+
+        .block-type.selected {
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .block-toprak { background: linear-gradient(135deg, #8B4513, #D2691E); }
+        .block-tas { background: linear-gradient(135deg, #696969, #A9A9A9); }
+        .block-odun { background: linear-gradient(135deg, #8B4513, #CD853F); }
+        .block-demir { background: linear-gradient(135deg, #708090, #C0C0C0); }
+        .block-su { background: linear-gradient(135deg, #1E90FF, #00BFFF); }
+        .block-cim { background: linear-gradient(135deg, #228B22, #32CD32); }
+        .block-elmas { background: linear-gradient(135deg, #87CEEB, #E0E6FF); color: #333; }
+        .block-lav { background: linear-gradient(135deg, #FF4500, #DC143C); }
+        .block-obsidyen { background: linear-gradient(135deg, #2F2F2F, #000000); }
+        .block-yaprak { background: linear-gradient(135deg, #32CD32, #228B22); }
+        .block-calisma-masasi { background: linear-gradient(135deg, #8B4513, #A0522D); }
+        .block-firin { background: linear-gradient(135deg, #696969, #808080); }
+        .block-ocak { background: linear-gradient(135deg, #2F4F4F, #708090); }
+        .block-tahta { background: linear-gradient(135deg, #DEB887, #F4A460); }
+        .block-cubuk { background: linear-gradient(135deg, #CD853F, #D2B48C); }
+        .block-balta { background: linear-gradient(135deg, #8B4513, #A0522D); }
+
+        .build-area {
+            flex: 1;
+            background: linear-gradient(135deg, #E3F2FD, #F3E5F5);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .build-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(500, 30px); /* 500 blok genişlik, her biri 30px */
+            grid-template-rows: repeat(15, 30px); /* 15 blok yükseklik */
+            gap: 1px;
+            background: #ccc;
+            border: 2px solid #888;
+            border-radius: 8px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .viewport {
+            width: 600px;
+            height: 450px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto;
+            border: 2px solid #888;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
+
+        .grid-cell {
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border: 1px solid #ddd;
+            position: relative;
+        }
+
+        .grid-cell:hover {
+            border-color: #FFD700;
+            transform: scale(1.05);
+            z-index: 1;
+        }
+
+        /* Grid hücrelerinde blok stilleri */
+        .grid-cell.block-toprak { background: linear-gradient(135deg, #8B4513, #D2691E); }
+        .grid-cell.block-tas { background: linear-gradient(135deg, #696969, #A9A9A9); }
+        .grid-cell.block-odun { background: linear-gradient(135deg, #8B4513, #CD853F); }
+        .grid-cell.block-demir { background: linear-gradient(135deg, #708090, #C0C0C0); }
+        .grid-cell.block-su { background: linear-gradient(135deg, #1E90FF, #00BFFF); }
+        .grid-cell.block-cim { background: linear-gradient(135deg, #228B22, #32CD32); }
+        .grid-cell.block-elmas { background: linear-gradient(135deg, #87CEEB, #E0E6FF); }
+        .grid-cell.block-lav { background: linear-gradient(135deg, #FF4500, #DC143C); }
+        .grid-cell.block-obsidyen { background: linear-gradient(135deg, #2F2F2F, #000000); }
+        .grid-cell.block-yaprak { background: linear-gradient(135deg, #32CD32, #228B22); }
+        .grid-cell.block-calisma-masasi { 
+            background: linear-gradient(135deg, #8B4513, #A0522D); 
+            position: relative;
+        }
+        .grid-cell.block-firin { 
+            background: linear-gradient(135deg, #696969, #808080); 
+            position: relative;
+        }
+        .grid-cell.block-ocak { 
+            background: linear-gradient(135deg, #2F4F4F, #708090); 
+            position: relative;
+        }
+        .grid-cell.block-tahta { background: linear-gradient(135deg, #DEB887, #F4A460); }
+        .grid-cell.block-cubuk { background: linear-gradient(135deg, #CD853F, #D2B48C); }
+        .grid-cell.block-balta { background: linear-gradient(135deg, #8B4513, #A0522D); }
+
+        /* Üretim bloku efektleri */
+        .grid-cell.block-firin::after {
+            content: '🔥';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.7em;
+            animation: flicker 2s infinite;
+        }
+
+        .grid-cell.block-ocak::after {
+            content: '💨';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.7em;
+            animation: smoke 3s infinite;
+        }
+
+        .grid-cell.block-calisma-masasi::after {
+            content: '⚒️';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.7em;
+            animation: hammer 1.5s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes smoke {
+            0% { transform: translateY(0); opacity: 0.8; }
+            50% { transform: translateY(-2px); opacity: 1; }
+            100% { transform: translateY(-4px); opacity: 0; }
+        }
+
+        @keyframes hammer {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        /* Karakter stili */
+        .character {
+            position: absolute;
+            width: 90%;
+            height: 90%;
+            background: linear-gradient(135deg, #000000, #333333);
+            border: 2px solid #FFD700;
+            border-radius: 15%;
+            top: 5%;
+            left: 5%;
+            z-index: 10;
+            transition: all 0.1s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .character.jumping {
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Kırılma progress bar */
+        .break-progress {
+            position: absolute;
+            top: -8px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            z-index: 15;
+            overflow: hidden;
+        }
+
+        .break-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573);
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 3px;
+        }
+
+        .grid-cell.breaking {
+            animation: breakShake 0.1s infinite;
+        }
+
+        @keyframes breakShake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-1px, -1px); }
+            50% { transform: translate(1px, -1px); }
+            75% { transform: translate(-1px, 1px); }
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, #FF4757, #FF6B9D);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn.clear {
+            background: linear-gradient(45deg, #FF6B6B, #EE5A24);
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #4ECDC4;
+        }
+
+        .instructions p {
+            margin: 5px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Envanter stilleri */
+        .inventory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .inventory-overlay.active {
+            display: flex;
+        }
+
+        .inventory-panel {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .inventory-header h3 {
+            margin: 0;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .inventory-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .inventory-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+
+        .inventory-slot {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            position: relative;
+        }
+
+        .inventory-slot:hover {
+            transform: scale(1.05);
+            border-color: #FFD700;
+        }
+
+        .inventory-slot.selected {
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .inventory-slot .block-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .inventory-slot .block-count {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .inventory-slot .block-name {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .inventory-footer {
+            text-align: center;
+            color: white;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* Crafting stilleri */
+        .crafting-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .crafting-section h4 {
+            color: white;
+            margin: 0 0 15px 0;
+            text-align: center;
+            font-size: 1.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .recipe {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .recipe:hover {
+            transform: scale(1.02);
+            border-color: #FFD700;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .recipe-input, .recipe-output {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .recipe-arrow {
+            margin: 0 15px;
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .recipe-icon {
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .recipe-count {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .recipe-name {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        /* Hotbar stilleri */
+        .hotbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #444;
+            z-index: 100;
+        }
+
+        .hotbar-slot {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #666;
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hotbar-slot:hover {
+            border-color: #FFD700;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .hotbar-slot.selected {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .hotbar-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .hotbar-count {
+            font-size: 0.7em;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Envanter açıkken hotbar göster */
+        .inventory-overlay.active ~ .hotbar {
+            bottom: 80px; /* Biraz yukarı taşı */
+            background: rgba(0, 0, 0, 0.9);
+            border-color: #FFD700;
+        }
+
+        /* Drag & Drop stilleri */
+        .hotbar-slot[draggable="true"] {
+            cursor: grab;
+        }
+
+        .hotbar-slot.dragging {
+            opacity: 0.5;
+            transform: scale(0.9);
+            cursor: grabbing;
+        }
+
+        .inventory-slot.drag-over {
+            border-color: #00FF00 !important;
+            background: rgba(0, 255, 0, 0.2) !important;
+            transform: scale(1.1) !important;
+        }
+
+        .hotbar-slot.drag-over {
+            border-color: #00FF00 !important;
+            background: rgba(0, 255, 0, 0.2) !important;
+        }
+
+        .drag-ghost {
+            width: 50px;
+            height: 50px;
+            opacity: 0.8;
+            border-radius: 8px;
+            transform: rotate(5deg);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            }
+            
+            .game-area {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .block-palette {
+                width: 100%;
+                order: 2;
+            }
+
+            .palette-title {
+                font-size: 1.1em;
+            }
+
+            .block-type {
+                height: 40px;
+                font-size: 0.9em;
+            }
+
+            .grid-container {
+                grid-template-columns: repeat(15, 1fr);
+                grid-template-rows: repeat(12, 1fr);
+                height: 300px;
+                max-width: 100%;
+            }
+
+            .top-bar h1 {
+                font-size: 1.5em;
+            }
+
+            .control-btn {
+                padding: 10px 18px;
+                font-size: 1em;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <h1>🧱 Blok Dünyası</h1>
+            <a href="index.html" class="home-btn">🏠 Ana Sayfa</a>
+        </div>
+
+        <div class="game-area">
+            <div class="block-palette">
+                <div class="palette-title">🎨 Blok Paleti</div>
+                <div class="block-type block-toprak selected" data-type="toprak">🟫 Toprak</div>
+                <div class="block-type block-tas" data-type="tas">🟪 Taş</div>
+                <div class="block-type block-odun" data-type="odun">🟤 Odun</div>
+                <div class="block-type block-demir" data-type="demir">⚫ Demir</div>
+                <div class="block-type block-su" data-type="su">🟦 Su</div>
+                <div class="block-type block-cim" data-type="cim">🟩 Çim</div>
+                <div class="block-type block-elmas" data-type="elmas">💎 Elmas</div>
+                <div class="block-type block-lav" data-type="lav">🔥 Lav</div>
+                <div class="block-type block-obsidyen" data-type="obsidyen">⬛ Obsidyen</div>
+                <div class="block-type block-yaprak" data-type="yaprak">🍃 Yaprak</div>
+                <div class="block-type block-calisma-masasi" data-type="calisma-masasi">🔨 Çalışma Masası</div>
+                <div class="block-type block-firin" data-type="firin">🔥 Fırın</div>
+                <div class="block-type block-ocak" data-type="ocak">🧱 Ocak</div>
+                <div class="block-type block-tahta" data-type="tahta">📋 Tahta</div>
+                <div class="block-type block-cubuk" data-type="cubuk">🥢 Çubuk</div>
+                <div class="block-type block-balta" data-type="balta">🪓 Balta</div>
+            </div>
+
+            <div class="build-area">
+                <div class="instructions">
+                    <p>🖱️ <strong>Sol Tık:</strong> Blok Koy | <strong>Sağ Tık:</strong> Blok Kır</p>
+                    <p>🎮 <strong>WASD:</strong> Hareket | <strong>Space:</strong> Zıpla | <strong>E:</strong> Envanter | <strong>1,2,3:</strong> Hotbar</p>
+                    <p>🎨 Alttaki hızlı envanteri veya sol paleti kullanın!</p>
+                </div>
+                
+                <div class="build-title">🏗️ İnşa Alanı</div>
+                <div class="viewport" id="viewport">
+                    <div class="grid-container" id="buildGrid"></div>
+                </div>
+                
+                <div class="controls">
+                    <button class="control-btn clear" onclick="clearGrid()">🧹 Temizle</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hotbar (Hızlı Envanter) -->
+        <div class="hotbar" id="hotbar">
+            <div class="hotbar-slot" data-slot="0">
+                <div class="hotbar-icon"></div>
+                <div class="hotbar-count"></div>
+            </div>
+            <div class="hotbar-slot" data-slot="1">
+                <div class="hotbar-icon"></div>
+                <div class="hotbar-count"></div>
+            </div>
+            <div class="hotbar-slot" data-slot="2">
+                <div class="hotbar-icon"></div>
+                <div class="hotbar-count"></div>
+            </div>
+        </div>
+        
+        <!-- Envanter -->
+        <div class="inventory-overlay" id="inventoryOverlay">
+            <div class="inventory-panel">
+                <div class="inventory-header">
+                    <h3>🎒 Envanter</h3>
+                    <button class="inventory-close" onclick="toggleInventory()">❌</button>
+                </div>
+                <div class="inventory-grid" id="inventoryGrid">
+                    <!-- Envanter slotları buraya eklenecek -->
+                </div>
+                
+                <!-- Crafting Bölümü -->
+                <div class="crafting-section" id="craftingSection" style="display: none;">
+                    <h4>🔨 Çalışma Masası</h4>
+                    <div class="crafting-recipes">
+                        <div class="recipe" onclick="craftPlanks()">
+                            <div class="recipe-input">
+                                <span class="recipe-icon block-icon block-odun"></span>
+                                <span class="recipe-count">1</span>
+                                <span class="recipe-name">Odun</span>
+                            </div>
+                            <div class="recipe-arrow">→</div>
+                            <div class="recipe-output">
+                                <span class="recipe-icon block-icon block-tahta"></span>
+                                <span class="recipe-count">4</span>
+                                <span class="recipe-name">Tahta</span>
+                            </div>
+                        </div>
+                        <div class="recipe" onclick="craftSticksFromWood()">
+                            <div class="recipe-input">
+                                <span class="recipe-icon block-icon block-odun"></span>
+                                <span class="recipe-count">2</span>
+                                <span class="recipe-name">Odun</span>
+                            </div>
+                            <div class="recipe-arrow">→</div>
+                            <div class="recipe-output">
+                                <span class="recipe-icon block-icon block-cubuk"></span>
+                                <span class="recipe-count">4</span>
+                                <span class="recipe-name">Çubuk</span>
+                            </div>
+                        </div>
+                        <div class="recipe" onclick="craftSticksFromPlanks()">
+                            <div class="recipe-input">
+                                <span class="recipe-icon block-icon block-tahta"></span>
+                                <span class="recipe-count">2</span>
+                                <span class="recipe-name">Tahta</span>
+                            </div>
+                            <div class="recipe-arrow">→</div>
+                            <div class="recipe-output">
+                                <span class="recipe-icon block-icon block-cubuk"></span>
+                                <span class="recipe-count">4</span>
+                                <span class="recipe-name">Çubuk</span>
+                            </div>
+                        </div>
+                        <div class="recipe" onclick="craftAxe()">
+                            <div class="recipe-input">
+                                <span class="recipe-icon block-icon block-cubuk"></span>
+                                <span class="recipe-count">2</span>
+                                <span class="recipe-name">Çubuk</span>
+                                <span style="margin: 0 5px;">+</span>
+                                <span class="recipe-icon block-icon block-tahta"></span>
+                                <span class="recipe-count">3</span>
+                                <span class="recipe-name">Tahta</span>
+                            </div>
+                            <div class="recipe-arrow">→</div>
+                            <div class="recipe-output">
+                                <span class="recipe-icon block-icon block-balta"></span>
+                                <span class="recipe-count">1</span>
+                                <span class="recipe-name">Balta</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="inventory-footer">
+                    <p>Kırdığınız bloklar burada toplanır. Üretim için çalışma masasına sol tık yapın!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Oyun durumu
+        let selectedBlockType = 'toprak';
+        const gridSize = { cols: 500, rows: 15 }; // 500x15 büyük harita
+        let grid = [];
+        let character = { row: 13, col: 250 }; // Karakterin pozisyonu (ortada başla)
+        let isJumping = false; // Zıplama durumu
+        let jumpHeight = 0; // Mevcut zıplama yüksekliği
+        
+        // Kamera sistemi
+        let camera = { x: 0, y: 0 };
+        const viewportWidth = 600;
+        const viewportHeight = 450;
+        const cellSize = 31; // 30px + 1px gap
+        
+        // Blok kırılma süreleri (saniye)
+        const breakTimes = {
+            'toprak': 3,
+            'tas': 5,
+            'odun': 4,
+            'demir': 7,
+            'cim': 1,
+            'elmas': 10,
+            'obsidyen': 20,
+            'su': 2,
+            'lav': 8,
+            'yaprak': 0.5,
+            'calisma-masasi': 4,
+            'firin': 4,
+            'ocak': 5,
+            'tahta': 2,
+            'cubuk': 1,
+            'balta': 3
+        };
+        
+        // Kırılma durumu
+        let breakingBlock = null;
+        let breakProgress = 0;
+        let breakTimer = null;
+        
+        // Envanter sistemi
+        let inventory = {};
+        let inventoryOpen = false;
+        let workbenchActive = false; // Çalışma masası kullanımda mı
+        
+        // Hotbar sistemi
+        let hotbar = [null, null, null]; // 3 slot
+        let selectedHotbarSlot = 0; // Seçili slot (0, 1, 2)
+        
+        // Araç sistemi
+        let tools = {}; // Araçların dayanıklılığını takip eder
+        
+        // Blok isimleri
+        const blockNames = {
+            'toprak': 'Toprak',
+            'tas': 'Taş',
+            'odun': 'Odun',
+            'demir': 'Demir',
+            'cim': 'Çim',
+            'elmas': 'Elmas',
+            'obsidyen': 'Obsidyen',
+            'su': 'Su',
+            'lav': 'Lav',
+            'yaprak': 'Yaprak',
+            'calisma-masasi': 'Çalışma Masası',
+            'firin': 'Fırın',
+            'ocak': 'Ocak',
+            'tahta': 'Tahta',
+            'cubuk': 'Çubuk',
+            'balta': 'Balta'
+        };
+
+        // Grid'i başlat
+        function initGrid() {
+            const gridContainer = document.getElementById('buildGrid');
+            gridContainer.innerHTML = '';
+            
+            // 500x15 büyük harita
+            const cols = gridSize.cols;
+            const rows = gridSize.rows;
+            
+            grid = [];
+            for (let row = 0; row < rows; row++) {
+                grid[row] = [];
+                for (let col = 0; col < cols; col++) {
+                    grid[row][col] = null;
+                    
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.style.position = 'relative';
+                    cell.style.width = '30px';
+                    cell.style.height = '30px';
+                    
+                    // Mouse eventleri
+                    cell.addEventListener('mousedown', handleCellClick);
+                    cell.addEventListener('click', handleCellClickSimple);
+                    cell.addEventListener('contextmenu', (e) => e.preventDefault());
+                    
+                    // Mouse leave - kırma işlemini durdur
+                    cell.addEventListener('mouseleave', () => {
+                        if (breakingBlock && breakingBlock.row === row && breakingBlock.col === col) {
+                            stopBreaking();
+                        }
+                    });
+                    
+                    // Mouse up - kırma işlemini durdur
+                    cell.addEventListener('mouseup', () => {
+                        if (breakingBlock && breakingBlock.row === row && breakingBlock.col === col) {
+                            stopBreaking();
+                        }
+                    });
+                    
+                    gridContainer.appendChild(cell);
+                }
+            }
+            
+            // Default zemin oluştur
+            createDefaultTerrain(rows, cols);
+            
+            // Karakteri yerleştir ve kamerayı ortala
+            character.row = rows - 7; // Çim katmanının üstü
+            character.col = 250; // Haritanın ortasında başla
+            placeCharacter();
+            updateCamera();
+        }
+
+        // Hücre tıklama işlemi
+        function handleCellClick(e) {
+            e.preventDefault();
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            
+            console.log('MouseDown:', e.button, 'Row:', row, 'Col:', col, 'Seçili blok:', selectedBlockType);
+            
+            if (e.button === 0) { // Sol tık - blok koy
+                placeBlock(row, col, selectedBlockType);
+            } else if (e.button === 2) { // Sağ tık - blok kır
+                startBreaking(row, col);
+            }
+        }
+
+        // Basit click işlemi (sol tık için)
+        function handleCellClickSimple(e) {
+            e.preventDefault();
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            
+            console.log('Click:', 'Row:', row, 'Col:', col, 'Seçili blok:', selectedBlockType);
+            
+            // Çalışma masası kontrolü
+            const existingBlock = grid[row][col];
+            if (existingBlock === 'calisma-masasi') {
+                // Çalışma masası tıklandı - crafting menüsünü aç
+                openWorkbench();
+                return;
+            }
+            
+            // Sol tık - blok koy
+            placeBlock(row, col, selectedBlockType);
+        }
+
+        // Blok yerleştir
+        function placeBlock(row, col, blockType) {
+            grid[row][col] = blockType;
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            // Blok stilini uygula
+            cell.className = `grid-cell block-${blockType}`;
+            
+            // Yerleştirme animasyonu
+            cell.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cell.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        // Blok kırma başlat
+        function startBreaking(row, col) {
+            const blockType = grid[row][col];
+            if (!blockType) return; // Boş hücreyi kıramaz
+            
+            // Önceki kırma işlemini iptal et
+            stopBreaking();
+            
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            const breakTime = getBreakTime(blockType); // Balta varsa hızlanır
+            
+            // Kırılma durumunu ayarla
+            breakingBlock = { row, col, blockType };
+            breakProgress = 0;
+            
+            // Progress bar ekle
+            const progressBar = document.createElement('div');
+            progressBar.className = 'break-progress';
+            progressBar.innerHTML = '<div class="break-progress-fill"></div>';
+            cell.appendChild(progressBar);
+            
+            // Kırılma animasyonu başlat
+            cell.classList.add('breaking');
+            
+            // Timer başlat
+            const startTime = Date.now();
+            breakTimer = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                breakProgress = Math.min(elapsed / breakTime, 1);
+                
+                // Progress bar güncelle
+                const fill = progressBar.querySelector('.break-progress-fill');
+                fill.style.width = (breakProgress * 100) + '%';
+                
+                if (breakProgress >= 1) {
+                    // Kırılma tamamlandı
+                    completeBreaking();
+                }
+            }, 50); // 50ms'de bir güncelle
+        }
+
+        // Kırma işlemini tamamla
+        function completeBreaking() {
+            if (!breakingBlock) return;
+            
+            const { row, col, blockType } = breakingBlock;
+            
+            // Bloğu envantere ekle
+            addToInventory(blockType);
+            
+            // Balta kullanıldıysa dayanıklılığını azalt
+            if (selectedBlockType === 'balta') {
+                useTool('balta');
+            }
+            
+            // Bloğu kaldır
+            grid[row][col] = null;
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            // Kırılma efektini temizle
+            stopBreaking();
+            
+            // Final animasyon
+            cell.style.transform = 'scale(0.8)';
+            cell.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                cell.className = 'grid-cell';
+                cell.style.transform = 'scale(1)';
+                cell.style.opacity = '1';
+            }, 150);
+        }
+
+        // Kırma işlemini durdur
+        function stopBreaking() {
+            if (breakTimer) {
+                clearInterval(breakTimer);
+                breakTimer = null;
+            }
+            
+            if (breakingBlock) {
+                const { row, col } = breakingBlock;
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                
+                // Progress bar ve animasyonu temizle
+                const progressBar = cell.querySelector('.break-progress');
+                if (progressBar) progressBar.remove();
+                cell.classList.remove('breaking');
+                
+                breakingBlock = null;
+                breakProgress = 0;
+            }
+        }
+
+        // Eski removeBlock fonksiyonu (hızlı kırma için)
+        function removeBlock(row, col) {
+            grid[row][col] = null;
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            // Kırma animasyonu
+            cell.style.transform = 'scale(0.8)';
+            cell.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                cell.className = 'grid-cell';
+                cell.style.transform = 'scale(1)';
+                cell.style.opacity = '1';
+            }, 150);
+        }
+
+        // Blok tipi seçimi
+        document.querySelectorAll('.block-type').forEach(block => {
+            block.addEventListener('click', function() {
+                // Önceki seçimi kaldır
+                document.querySelector('.block-type.selected').classList.remove('selected');
+                
+                // Yeni seçimi işaretle
+                this.classList.add('selected');
+                selectedBlockType = this.dataset.type;
+            });
+        });
+
+        // Default zemin oluştur
+        function createDefaultTerrain(rows, cols) {
+            // 6. katman (en alt) - Taş
+            for (let col = 0; col < cols; col++) {
+                placeBlock(rows - 1, col, 'tas');
+            }
+            
+            // 5. katman - Taş
+            for (let col = 0; col < cols; col++) {
+                placeBlock(rows - 2, col, 'tas');
+            }
+            
+            // 4. katman - Taş
+            for (let col = 0; col < cols; col++) {
+                placeBlock(rows - 3, col, 'tas');
+            }
+            
+            // 3. katman - Taş
+            for (let col = 0; col < cols; col++) {
+                placeBlock(rows - 4, col, 'tas');
+            }
+            
+            // 2. katman - Toprak
+            for (let col = 0; col < cols; col++) {
+                placeBlock(rows - 5, col, 'toprak');
+            }
+            
+            // 1. katman (en üst) - Çim
+            for (let col = 0; col < cols; col++) {
+                placeBlock(rows - 6, col, 'cim');
+            }
+            
+            // Ağaçları ekle
+            createTrees(rows, cols);
+        }
+
+        // Ağaç oluştur
+        function createTrees(rows, cols) {
+            // Harita boyunca ağaçlar yerleştir (her 12-13 blokta bir ağaç)
+            for (let i = 10; i < cols; i += 12) {
+                const treeCol = i + Math.floor(Math.random() * 8) - 4; // ±4 rastgelelik
+                if (treeCol >= 0 && treeCol < cols) {
+                    createTree(rows - 7, treeCol, 5);
+                }
+            }
+            
+            // Ekstra ağaçlar (daha yoğun orman)
+            for (let i = 6; i < cols; i += 15) {
+                const treeCol = i + Math.floor(Math.random() * 6) - 3; // ±3 rastgelelik
+                if (treeCol >= 0 && treeCol < cols) {
+                    createTree(rows - 7, treeCol, 4 + Math.floor(Math.random() * 2)); // 4-5 blok yüksek
+                }
+            }
+            
+            // Başlangıç bölgesinde daha fazla ağaç
+            createTree(rows - 7, 235, 5);
+            createTree(rows - 7, 245, 4);
+            createTree(rows - 7, 255, 5);
+            createTree(rows - 7, 265, 4);
+        }
+
+        // Tek ağaç oluştur
+        function createTree(startRow, col, height) {
+            // Gövde (odun) - alt 3 blok
+            const trunkHeight = Math.min(3, height - 1);
+            for (let i = 0; i < trunkHeight; i++) {
+                placeBlock(startRow - i, col, 'odun');
+            }
+            
+            // Taç (yaprak) - üst kısım
+            const leafStart = startRow - trunkHeight;
+            const leafHeight = height - trunkHeight;
+            
+            for (let i = 0; i < leafHeight; i++) {
+                const leafRow = leafStart - i;
+                
+                if (i === 0) {
+                    // En alt yaprak katmanı - 3x3
+                    placeBlock(leafRow, col - 1, 'yaprak');
+                    placeBlock(leafRow, col, 'yaprak');
+                    placeBlock(leafRow, col + 1, 'yaprak');
+                } else {
+                    // Üst yaprak katmanları - tek blok
+                    placeBlock(leafRow, col, 'yaprak');
+                }
+            }
+        }
+
+        // Karakteri yerleştir
+        function placeCharacter() {
+            // Önceki karakter temizle
+            document.querySelectorAll('.character').forEach(char => char.remove());
+            
+            const cell = document.querySelector(`[data-row="${character.row}"][data-col="${character.col}"]`);
+            if (cell) {
+                const characterDiv = document.createElement('div');
+                characterDiv.className = 'character';
+                characterDiv.style.bottom = `${jumpHeight * 100}%`;
+                cell.appendChild(characterDiv);
+            }
+        }
+
+        // Karakteri hareket ettir
+        function moveCharacter(newRow, newCol) {
+            // Sınır kontrolü
+            if (newRow < 0 || newRow >= gridSize.rows || newCol < 0 || newCol >= gridSize.cols) {
+                return false;
+            }
+            
+            // Blok çarpışma kontrolü (sadece boş alanlarda hareket)
+            const targetBlock = grid[newRow][newCol];
+            if (targetBlock) {
+                return false; // Herhangi bir blok varsa hareket edemez
+            }
+            
+            character.row = newRow;
+            character.col = newCol;
+            placeCharacter();
+            updateCamera(); // Kamerayı güncelle
+            return true;
+        }
+
+        // Kamera güncelleme
+        function updateCamera() {
+            const gridContainer = document.getElementById('buildGrid');
+            
+            // Karakterin pixel pozisyonu
+            const charX = character.col * cellSize;
+            const charY = character.row * cellSize;
+            
+            // Kamera pozisyonunu hesapla (karakter ortada olacak şekilde)
+            camera.x = charX - viewportWidth / 2;
+            camera.y = charY - viewportHeight / 2;
+            
+            // Kamera sınırları
+            const maxCameraX = (gridSize.cols * cellSize) - viewportWidth;
+            const maxCameraY = (gridSize.rows * cellSize) - viewportHeight;
+            
+            camera.x = Math.max(0, Math.min(camera.x, maxCameraX));
+            camera.y = Math.max(0, Math.min(camera.y, maxCameraY));
+            
+            // Grid'i hareket ettir
+            gridContainer.style.transform = `translate(-${camera.x}px, -${camera.y}px)`;
+        }
+
+        // Zıplama animasyonu
+        async function jump() {
+            console.log('Jump fonksiyonu çağrıldı. isJumping:', isJumping);
+            
+            if (isJumping) {
+                console.log('Zaten zıplıyor, çıkılıyor...');
+                return;
+            }
+            
+            console.log('Zıplama başlıyor...');
+            isJumping = true;
+            
+            // 3 saniye toplam süre, 5 blok yükseklik
+            // Yukarı çık (1.5 saniye)
+            for (let i = 1; i <= 5; i++) {
+                console.log('Yukarı çık, yükseklik:', i);
+                jumpHeight = i;
+                placeCharacter();
+                await new Promise(resolve => setTimeout(resolve, 300)); // 300ms * 5 = 1.5s
+            }
+            
+            // Aşağı in (1.5 saniye)
+            for (let i = 4; i >= 0; i--) {
+                console.log('Aşağı in, yükseklik:', i);
+                jumpHeight = i;
+                placeCharacter();
+                await new Promise(resolve => setTimeout(resolve, 300)); // 300ms * 5 = 1.5s
+            }
+            
+            console.log('Zıplama tamamlandı');
+            isJumping = false;
+        }
+
+        // Envantere blok ekle
+        function addToInventory(blockType) {
+            if (inventory[blockType]) {
+                inventory[blockType]++;
+            } else {
+                inventory[blockType] = 1;
+            }
+            updateInventoryDisplay();
+            updateHotbar();
+        }
+
+        // Envanterden blok kullan
+        function useFromInventory(blockType) {
+            if (inventory[blockType] && inventory[blockType] > 0) {
+                inventory[blockType]--;
+                if (inventory[blockType] === 0) {
+                    delete inventory[blockType];
+                }
+                updateInventoryDisplay();
+                updateHotbar();
+                return true;
+            }
+            return false;
+        }
+
+        // Envanter görünümünü güncelle
+        function updateInventoryDisplay() {
+            const inventoryGrid = document.getElementById('inventoryGrid');
+            inventoryGrid.innerHTML = '';
+
+            Object.entries(inventory).forEach(([blockType, count]) => {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                slot.dataset.blockType = blockType;
+                
+                const icon = document.createElement('div');
+                icon.className = `block-icon block-${blockType}`;
+                
+                const countDiv = document.createElement('div');
+                countDiv.className = 'block-count';
+                countDiv.textContent = count;
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'block-name';
+                nameDiv.textContent = blockNames[blockType] || blockType;
+                
+                slot.appendChild(icon);
+                slot.appendChild(countDiv);
+                slot.appendChild(nameDiv);
+                
+                // Slot tıklama - blok seçimi
+                slot.addEventListener('click', () => {
+                    selectFromInventory(blockType);
+                });
+                
+                // Drop event'leri
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('drop', handleDrop);
+                
+                inventoryGrid.appendChild(slot);
+            });
+        }
+
+        // Envanterden blok seç
+        function selectFromInventory(blockType) {
+            selectedBlockType = blockType;
+            
+            // Palette'te seçimi güncelle
+            document.querySelectorAll('.block-type').forEach(block => {
+                block.classList.remove('selected');
+                if (block.dataset.type === blockType) {
+                    block.classList.add('selected');
+                }
+            });
+            
+            // Envanter slotlarında seçimi güncelle
+            document.querySelectorAll('.inventory-slot').forEach(slot => {
+                slot.classList.remove('selected');
+                if (slot.dataset.blockType === blockType) {
+                    slot.classList.add('selected');
+                }
+            });
+            
+            console.log('Envanterden seçildi:', blockType);
+        }
+
+        // Envanter aç/kapa
+        function toggleInventory() {
+            inventoryOpen = !inventoryOpen;
+            const overlay = document.getElementById('inventoryOverlay');
+            
+            if (inventoryOpen) {
+                overlay.classList.add('active');
+                updateInventoryDisplay();
+                updateCraftingVisibility();
+            } else {
+                overlay.classList.remove('active');
+                workbenchActive = false;
+            }
+        }
+
+        // Çalışma masası aç
+        function openWorkbench() {
+            workbenchActive = true;
+            inventoryOpen = true;
+            
+            const overlay = document.getElementById('inventoryOverlay');
+            overlay.classList.add('active');
+            updateInventoryDisplay();
+            updateCraftingVisibility();
+            
+            showCraftingMessage('🔨 Çalışma Masası açıldı!');
+        }
+
+        // Crafting bölümünün görünürlüğünü güncelle
+        function updateCraftingVisibility() {
+            const craftingSection = document.getElementById('craftingSection');
+            
+            if (workbenchActive) {
+                craftingSection.style.display = 'block';
+            } else {
+                craftingSection.style.display = 'none';
+            }
+        }
+
+        // Tahta üretimi (1 odun = 4 tahta)
+        function craftPlanks() {
+            if (!workbenchActive) {
+                showCraftingMessage('❌ Çalışma masası gerekli! Çalışma masasına sol tık yapın.');
+                return;
+            }
+            
+            if (inventory['odun'] && inventory['odun'] >= 1) {
+                // 1 odun kullan
+                useFromInventory('odun');
+                
+                // 4 tahta ekle
+                for (let i = 0; i < 4; i++) {
+                    addToInventory('tahta');
+                }
+                
+                console.log('Tahta üretildi! 1 odun → 4 tahta');
+                
+                // Görsel feedback
+                showCraftingMessage('🔨 1 Odun → 4 Tahta üretildi!');
+            } else {
+                console.log('Yeterli odun yok!');
+                showCraftingMessage('❌ Yeterli odun yok! (1 odun gerekli)');
+            }
+        }
+
+        // Çubuk üretimi - Odundan (2 odun = 4 çubuk)
+        function craftSticksFromWood() {
+            if (!workbenchActive) {
+                showCraftingMessage('❌ Çalışma masası gerekli! Çalışma masasına sol tık yapın.');
+                return;
+            }
+            
+            if (inventory['odun'] && inventory['odun'] >= 2) {
+                // 2 odun kullan
+                useFromInventory('odun');
+                useFromInventory('odun');
+                
+                // 4 çubuk ekle
+                for (let i = 0; i < 4; i++) {
+                    addToInventory('cubuk');
+                }
+                
+                console.log('Çubuk üretildi! 2 odun → 4 çubuk');
+                
+                // Görsel feedback
+                showCraftingMessage('🔨 2 Odun → 4 Çubuk üretildi!');
+            } else {
+                console.log('Yeterli odun yok!');
+                showCraftingMessage('❌ Yeterli odun yok! (2 odun gerekli)');
+            }
+        }
+
+        // Çubuk üretimi - Tahtadan (2 tahta = 4 çubuk)
+        function craftSticksFromPlanks() {
+            if (!workbenchActive) {
+                showCraftingMessage('❌ Çalışma masası gerekli! Çalışma masasına sol tık yapın.');
+                return;
+            }
+            
+            if (inventory['tahta'] && inventory['tahta'] >= 2) {
+                // 2 tahta kullan
+                useFromInventory('tahta');
+                useFromInventory('tahta');
+                
+                // 4 çubuk ekle
+                for (let i = 0; i < 4; i++) {
+                    addToInventory('cubuk');
+                }
+                
+                console.log('Çubuk üretildi! 2 tahta → 4 çubuk');
+                
+                // Görsel feedback
+                showCraftingMessage('🔨 2 Tahta → 4 Çubuk üretildi!');
+            } else {
+                console.log('Yeterli tahta yok!');
+                showCraftingMessage('❌ Yeterli tahta yok! (2 tahta gerekli)');
+            }
+        }
+
+        // Balta üretimi (2 çubuk + 3 tahta = 1 balta)
+        function craftAxe() {
+            if (!workbenchActive) {
+                showCraftingMessage('❌ Çalışma masası gerekli! Çalışma masasına sol tık yapın.');
+                return;
+            }
+            
+            if (inventory['cubuk'] && inventory['cubuk'] >= 2 && 
+                inventory['tahta'] && inventory['tahta'] >= 3) {
+                
+                // 2 çubuk + 3 tahta kullan
+                useFromInventory('cubuk');
+                useFromInventory('cubuk');
+                useFromInventory('tahta');
+                useFromInventory('tahta');
+                useFromInventory('tahta');
+                
+                // 1 balta ekle
+                addToInventory('balta');
+                
+                // Yeni balta için dayanıklılık ayarla (10 kullanım)
+                const axeId = 'balta_' + Date.now();
+                tools[axeId] = { type: 'balta', durability: 10, maxDurability: 10 };
+                
+                console.log('Balta üretildi! 2 çubuk + 3 tahta → 1 balta');
+                
+                // Görsel feedback
+                showCraftingMessage('🔨 2 Çubuk + 3 Tahta → 1 Balta üretildi!');
+            } else {
+                console.log('Yeterli malzeme yok!');
+                showCraftingMessage('❌ Yeterli malzeme yok! (2 çubuk + 3 tahta gerekli)');
+            }
+        }
+
+        // Crafting mesajı göster
+        function showCraftingMessage(message) {
+            // Geçici mesaj div'i oluştur
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #4CAF50, #45a049);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                font-size: 1.1em;
+                font-weight: bold;
+                z-index: 2000;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            `;
+            messageDiv.textContent = message;
+            
+            document.body.appendChild(messageDiv);
+            
+            // 2 saniye sonra kaldır
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 2000);
+        }
+
+        // Hotbar güncelle
+        function updateHotbar() {
+            // En çok olan 3 blok tipini hotbar'a yerleştir
+            const sortedInventory = Object.entries(inventory)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+            
+            // Hotbar'ı temizle
+            hotbar = [null, null, null];
+            
+            // Yeni blokları yerleştir
+            sortedInventory.forEach(([blockType, count], index) => {
+                hotbar[index] = { type: blockType, count: count };
+            });
+            
+            // Görünümü güncelle
+            updateHotbarDisplay();
+        }
+
+        // Hotbar görünümünü güncelle
+        function updateHotbarDisplay() {
+            for (let i = 0; i < 3; i++) {
+                const slot = document.querySelector(`[data-slot="${i}"]`);
+                const icon = slot.querySelector('.hotbar-icon');
+                const count = slot.querySelector('.hotbar-count');
+                
+                if (hotbar[i]) {
+                    icon.className = `hotbar-icon block-${hotbar[i].type}`;
+                    count.textContent = hotbar[i].count;
+                    slot.style.opacity = '1';
+                    
+                    // Drag yapılabilir yap
+                    slot.setAttribute('draggable', 'true');
+                    slot.dataset.blockType = hotbar[i].type;
+                    slot.dataset.blockCount = hotbar[i].count;
+                } else {
+                    icon.className = 'hotbar-icon';
+                    count.textContent = '';
+                    slot.style.opacity = '0.3';
+                    
+                    // Drag yapılamaz yap
+                    slot.setAttribute('draggable', 'false');
+                    slot.removeAttribute('data-block-type');
+                    slot.removeAttribute('data-block-count');
+                }
+                
+                // Seçili slot
+                if (i === selectedHotbarSlot) {
+                    slot.classList.add('selected');
+                } else {
+                    slot.classList.remove('selected');
+                }
+            }
+        }
+
+        // Hotbar slot seçimi
+        function selectHotbarSlot(slotIndex) {
+            selectedHotbarSlot = slotIndex;
+            
+            // Seçili bloğu güncelle
+            if (hotbar[slotIndex]) {
+                selectedBlockType = hotbar[slotIndex].type;
+                
+                // Palette'te seçimi güncelle
+                document.querySelectorAll('.block-type').forEach(block => {
+                    block.classList.remove('selected');
+                    if (block.dataset.type === selectedBlockType) {
+                        block.classList.add('selected');
+                    }
+                });
+            }
+            
+            updateHotbarDisplay();
+        }
+
+        // Grid'i temizle
+        function clearGrid() {
+            if (confirm('Tüm blokları silmek istediğinize emin misiniz?')) {
+                initGrid();
+            }
+        }
+
+        // Klavye kontrolleri
+        document.addEventListener('keydown', async function(e) {
+            // Sadece input alanında değilse hareket et
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            console.log('Tuş basıldı:', e.key, 'Code:', e.code);
+            
+            switch(e.key.toLowerCase()) {
+                case 'w':
+                    e.preventDefault();
+                    moveCharacter(character.row - 1, character.col);
+                    break;
+                case 's':
+                    e.preventDefault();
+                    moveCharacter(character.row + 1, character.col);
+                    break;
+                case 'a':
+                    e.preventDefault();
+                    moveCharacter(character.row, character.col - 1);
+                    break;
+                case 'd':
+                    e.preventDefault();
+                    moveCharacter(character.row, character.col + 1);
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    console.log('Space tuşu basıldı, zıplama başlıyor...');
+                    await jump();
+                    break;
+                case 'e':
+                    e.preventDefault();
+                    toggleInventory();
+                    break;
+                case '1':
+                    e.preventDefault();
+                    selectHotbarSlot(0);
+                    break;
+                case '2':
+                    e.preventDefault();
+                    selectHotbarSlot(1);
+                    break;
+                case '3':
+                    e.preventDefault();
+                    selectHotbarSlot(2);
+                    break;
+            }
+            
+            // Space tuşu için alternatif kontrol
+            if (e.code === 'Space') {
+                e.preventDefault();
+                console.log('Space code algılandı, zıplama başlıyor...');
+                await jump();
+            }
+        });
+
+        // Sayfa yüklendiğinde grid'i başlat
+        document.addEventListener('DOMContentLoaded', function() {
+            initGrid();
+            updateHotbarDisplay();
+            
+            // Hotbar slot tıklama event'leri
+            document.querySelectorAll('.hotbar-slot').forEach((slot, index) => {
+                slot.addEventListener('click', () => {
+                    selectHotbarSlot(index);
+                });
+            });
+            
+            // Drag & Drop event'lerini ayarla
+            setupDragAndDrop();
+        });
+
+        // Drag & Drop sistemini kurulum
+        function setupDragAndDrop() {
+            // Hotbar slotları için drag event'leri
+            document.querySelectorAll('.hotbar-slot').forEach(slot => {
+                slot.addEventListener('dragstart', handleDragStart);
+                slot.addEventListener('dragend', handleDragEnd);
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('drop', handleDrop);
+            });
+        }
+
+        // Drag başlangıcı
+        function handleDragStart(e) {
+            if (this.getAttribute('draggable') === 'false') {
+                e.preventDefault();
+                return;
+            }
+            
+            this.classList.add('dragging');
+            
+            // Transfer edilecek veriyi ayarla
+            e.dataTransfer.setData('text/plain', JSON.stringify({
+                source: 'hotbar',
+                slotIndex: parseInt(this.dataset.slot),
+                blockType: this.dataset.blockType,
+                blockCount: parseInt(this.dataset.blockCount)
+            }));
+            
+            // Ghost image oluştur
+            const icon = this.querySelector('.hotbar-icon');
+            const ghostImage = icon.cloneNode(true);
+            ghostImage.className += ' drag-ghost';
+            document.body.appendChild(ghostImage);
+            e.dataTransfer.setDragImage(ghostImage, 25, 25);
+            
+            // Ghost image'i temizle
+            setTimeout(() => document.body.removeChild(ghostImage), 0);
+        }
+
+        // Drag bitişi
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            
+            // Tüm drag-over sınıflarını temizle
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+
+        // Drag over
+        function handleDragOver(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        }
+
+        // Drop
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            
+            try {
+                const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                
+                if (dragData.source === 'hotbar' && this.classList.contains('inventory-slot')) {
+                    // Hotbar'dan envantere transfer
+                    transferFromHotbarToInventory(dragData.slotIndex, dragData.blockType, dragData.blockCount);
+                }
+            } catch (error) {
+                console.error('Drag & drop error:', error);
+            }
+        }
+
+        // Hotbar'dan envantere transfer
+        function transferFromHotbarToInventory(slotIndex, blockType, blockCount) {
+            // Hotbar'dan kaldır
+            hotbar[slotIndex] = null;
+            
+            // Envantere ekle
+            if (inventory[blockType]) {
+                inventory[blockType] += blockCount;
+            } else {
+                inventory[blockType] = blockCount;
+            }
+            
+            // Görünümleri güncelle
+            updateHotbarDisplay();
+            updateInventoryDisplay();
+            
+            console.log(`${blockCount} ${blockType} hotbar'dan envantere taşındı`);
+            showCraftingMessage(`📦 ${blockCount} ${blockNames[blockType]} envantere taşındı!`);
+        }
+
+        // Araç kullanımı
+        function useTool(toolType) {
+            // Aktif araçları bul
+            const activeTools = Object.keys(tools).filter(id => tools[id].type === toolType);
+            
+            if (activeTools.length === 0) return;
+            
+            // İlk aracı kullan
+            const toolId = activeTools[0];
+            tools[toolId].durability--;
+            
+            console.log(`${toolType} kullanıldı. Kalan dayanıklılık: ${tools[toolId].durability}`);
+            
+            // Araç kırıldı mı?
+            if (tools[toolId].durability <= 0) {
+                // Araç kırıldı
+                delete tools[toolId];
+                
+                // Envanterden kaldır
+                if (inventory[toolType] && inventory[toolType] > 0) {
+                    useFromInventory(toolType);
+                }
+                
+                showCraftingMessage(`💥 ${blockNames[toolType]} kırıldı!`);
+                console.log(`${toolType} kırıldı ve envanterden kaldırıldı`);
+            }
+        }
+
+        // Kırma süresini hesapla (balta varsa hızlandır)
+        function getBreakTime(blockType) {
+            let baseTime = breakTimes[blockType] || 3;
+            
+            // Balta kullanılıyorsa 2x hızlı
+            if (selectedBlockType === 'balta') {
+                baseTime = baseTime / 2;
+            }
+            
+            return baseTime;
+        }
+
+        // Pencere boyutu değiştiğinde grid'i yeniden çiz
+        window.addEventListener('resize', function() {
+            setTimeout(initGrid, 100);
+        });
+
+        // Sağ tık menüsünü engelle
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+    </script>
+</body>
+</html>
