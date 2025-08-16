@@ -228,6 +228,39 @@
             box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
         }
 
+        /* Komut ekleme butonları */
+        .cmd-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn-cmd {
+            background: #6c5ce7;
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            flex: 0 0 auto;
+        }
+
+        .btn-cmd:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn-cmd:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-cmd-danger {
+            background: #e74c3c;
+        }
+
         .buttons-row {
             display: flex;
             gap: 15px;
@@ -284,6 +317,12 @@
             border: 2px solid #dee2e6;
             border-radius: 5px;
             font-size: 14px;
+        }
+        /* Üst çubuk - uzay oyunundaki yapıya benzer */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
         }
 
         /* Durum göstergesi */
@@ -458,6 +497,9 @@
 </head>
 <body>
     <div class="container">
+        <div class="top-bar">
+            <a class="btn" href="index.html" aria-label="Ana sayfaya dön">🏠 Ana Sayfa</a>
+        </div>
         <!-- Başlık -->
         <div class="header">
             <h1>🐸 Kurbağa Labirenti 🧀</h1>
@@ -481,16 +523,20 @@
                         type="text" 
                         id="commands" 
                         class="command-input"
-                        placeholder="sağ-düz-düz-düz-sol-düz"
-                        value="sağ-düz-düz-düz-sol-düz"
+                        placeholder="sağ-düz-düz-sağ-düz-düz-sol"
+                        value="sağ-düz-düz-sağ-düz-düz-sol"
                     >
                     <div class="error-message" id="error-message"></div>
+                    <div class="cmd-buttons" aria-label="Komut ekleme butonları">
+                        <button type="button" class="btn-cmd" onclick="appendCommand('sağ')" aria-label="Komut ekle: sağ">sağ</button>
+                        <button type="button" class="btn-cmd" onclick="appendCommand('sol')" aria-label="Komut ekle: sol">sol</button>
+                        <button type="button" class="btn-cmd" onclick="appendCommand('düz')" aria-label="Komut ekle: düz">düz</button>
+                        <button type="button" class="btn-cmd" onclick="appendCommand('geri')" aria-label="Komut ekle: geri">geri</button>
+                        <button type="button" class="btn-cmd btn-cmd-danger" onclick="clearCommands()" aria-label="Komutları sil">🗑️ Komutları Sil</button>
+                    </div>
                 </div>
 
                 <div class="buttons-row">
-                    <a class="btn" href="index.html" aria-label="Ana sayfaya dön">
-                        🏠 Ana Sayfa
-                    </a>
                     <button class="btn btn-primary" id="run-btn" onclick="runProgram()">
                         ▶️ Çalıştır
                     </button>
@@ -862,6 +908,22 @@
                 runProgram();
             }
         });
+
+        // Komut ekleme yardımcıları
+        function appendCommand(cmd) {
+            const input = document.getElementById('commands');
+            const sep = input.value.trim().length === 0 ? '' : (input.value.includes(',') ? ', ' : '-');
+            input.value = input.value.trim() + (sep ? sep : '') + cmd;
+            input.focus();
+        }
+
+        function clearCommands() {
+            const input = document.getElementById('commands');
+            input.value = '';
+            hideError();
+            updateStatus('ready', '🟢 Hazır - Komutları gir ve çalıştır!');
+            input.focus();
+        }
 
         // Sayfa yüklendiğinde oyunu başlat
         document.addEventListener('DOMContentLoaded', initGame);

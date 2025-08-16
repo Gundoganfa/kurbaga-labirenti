@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Saat Ustası 🕒</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: 'Trebuchet MS', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			min-height: 100vh;
+			background: radial-gradient(900px 600px at 50% -10%, #1e293b, #0b1022 60%, #060912 100%);
+			color: #e2e8f0;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 1000px;
+			margin: 0 auto;
+			background: rgba(17, 24, 39, 0.75);
+			backdrop-filter: blur(4px);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+			padding: 24px;
+		}
+
+		.header { text-align: center; margin-bottom: 14px; }
+		.header h1 { font-size: 2.2rem; color: #c7d2fe; text-shadow: 0 0 12px rgba(99,102,241,0.35); margin-bottom: 6px; }
+		.subtitle { color: #94a3b8; font-size: 0.95rem; }
+
+		.topbar { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 12px 0; }
+		.badges { display: flex; gap: 8px; flex-wrap: wrap; }
+		.badge { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); padding: 8px 12px; border-radius: 999px; font-weight: 800; color: #dbeafe; }
+
+		.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; }
+		select, button { padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15, 23, 42, 0.6); color: #e2e8f0; }
+		button { font-weight: 800; cursor: pointer; transition: transform .1s ease, box-shadow .2s ease, background .2s ease; }
+		button:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(99,102,241,0.18); }
+		.btn-primary { background: linear-gradient(180deg, rgba(56,189,248,0.35), rgba(56,189,248,0.2)); }
+		.btn-warning { background: linear-gradient(180deg, rgba(251,191,36,0.32), rgba(251,191,36,0.18)); }
+		.btn-danger { background: linear-gradient(180deg, rgba(248,113,113,0.32), rgba(248,113,113,0.18)); }
+
+		.stage { display: grid; grid-template-columns: 1fr 320px; gap: 14px; }
+		@media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+
+		.clock-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+		.clock {
+			width: 320px; height: 320px; border-radius: 50%;
+			background: radial-gradient(circle at 50% 45%, #0f172a, #111827 55%, #0b1221);
+			border: 6px solid rgba(255,255,255,0.08);
+			box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 8px 30px rgba(0,0,0,0.35);
+			position: relative;
+		}
+		.face-mark { position: absolute; inset: 6px; border-radius: 50%; }
+		/* saat çizgileri */
+		.tick { position: absolute; left: 50%; top: 8px; width: 3px; height: 14px; background: #93c5fd; transform-origin: center 152px; opacity: 0.7; }
+		.tick.b { height: 10px; background: #60a5fa; opacity: 0.5; }
+
+		.center-dot { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 16px rgba(245,158,11,0.6); }
+
+		.hand { position: absolute; left: 50%; top: 50%; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); border-radius: 6px; }
+		.hand.hour { width: 10px; height: 84px; background: linear-gradient(180deg, #fca5a5, #ef4444); box-shadow: 0 0 12px rgba(239,68,68,0.45); }
+		.hand.minute { width: 6px; height: 120px; background: linear-gradient(180deg, #86efac, #22c55e); box-shadow: 0 0 12px rgba(34,197,94,0.45); }
+
+		.digital { font-size: 1.3rem; font-weight: 900; color: #a7f3d0; }
+		.target { font-size: 1.1rem; color: #fde68a; }
+
+		.panel { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+		.panel h3 { margin-bottom: 4px; color: #dbeafe; }
+		.row { display: flex; gap: 8px; flex-wrap: wrap; }
+		.row .btn { padding: 10px 12px; border-radius: 10px; }
+		/* Genel buton renk ve kare buton ayarı */
+		.btn { color: #eaf2ff; }
+		a.btn { text-decoration: none; }
+		.btn-square { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; font-size: 24px; padding: 0; }
+		/* Komut grupları */
+		.cmd-group { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+		.cmd-title { font-weight: 900; letter-spacing: .3px; color: #c7d2fe; text-shadow: 0 0 10px rgba(99,102,241,.25); }
+		.btn-hour { background: linear-gradient(180deg, rgba(248,113,113,0.42), rgba(239,68,68,0.24)); border: 1px solid rgba(239,68,68,0.45); }
+		.btn-minute { background: linear-gradient(180deg, rgba(134,239,172,0.42), rgba(34,197,94,0.24)); border: 1px solid rgba(34,197,94,0.45); }
+		.btn-check { background: linear-gradient(180deg, rgba(59,130,246,0.42), rgba(96,165,250,0.24)); border: 1px solid rgba(96,165,250,0.45); }
+		.btn-danger { color: #ffffff; }
+
+		.status { text-align: center; padding: 10px; border-radius: 10px; font-weight: 800; min-height: 42px; }
+		.status.ready { color: #c7f9cc; }
+		.status.running { color: #fef08a; }
+		.status.success { color: #a7f3d0; }
+		.status.fail { color: #fecaca; }
+
+		/* mini konfeti */
+		.confetti { pointer-events: none; position: absolute; inset: 0; overflow: hidden; }
+		.dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; opacity: 0; animation: pop 800ms ease-out forwards; }
+		@keyframes pop { 0%{transform:translateY(0) scale(0.2); opacity:0} 30%{opacity:1} 100%{transform:translateY(-80px) scale(1); opacity:0} }
+
+		/* Mobil font override */
+		@media (max-width: 768px) { body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; } }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>🕒 Saat Ustası</h1>
+			<div class="subtitle">Hedef saati yakalamak için akrep ve yelkovanı ayarla!</div>
+		</div>
+
+		<div class="topbar" aria-live="polite">
+			<div class="badges">
+				<span id="round-badge" class="badge">Tur: 0/10</span>
+				<span id="score-badge" class="badge">Puan: 0</span>
+				<span id="streak-badge" class="badge">Seri: 0🔥</span>
+				<span id="lives-badge" class="badge">❤️❤️❤️</span>
+			</div>
+			<div class="row">
+				<button id="new-btn" class="btn-primary">🆕 Yeni Tur</button>
+				<button id="reset-btn" class="btn-warning">↩️ Sıfırla</button>
+				<a class="btn btn-danger" href="index.html" aria-label="Ana sayfa">🏠 Ana Sayfa</a>
+			</div>
+		</div>
+
+		<div class="stage">
+			<div class="clock-wrap">
+				<div class="clock" id="clock">
+					<div class="face-mark" id="marks"></div>
+					<div class="hand hour" id="h"></div>
+					<div class="hand minute" id="m"></div>
+					<div class="center-dot"></div>
+					<div class="confetti" id="confetti"></div>
+				</div>
+				<div class="digital">Senin saatin: <span id="digital">12:00</span></div>
+				<div class="target">🎯 Hedef: <span id="target">--:--</span></div>
+				<div id="status" class="status ready">🟢 Hazır — Akrep/Yelkovan butonlarını kullan veya klavyeden ayarla.</div>
+			</div>
+
+			<div class="panel">
+				<h3>Kontroller</h3>
+				<div class="row">
+					<label for="mode">Zorluk</label>
+					<select id="mode">
+						<option value="hour">Saat</option>
+						<option value="half">Yarım</option>
+						<option value="quarter">Çeyrek</option>
+						<option value="minute" selected>Dakika</option>
+					</select>
+				</div>
+				<div class="cmd-group">
+					<div class="cmd-title">Akrep</div>
+					<div class="row">
+						<button class="btn btn-hour btn-square" id="hour-inc" aria-label="Akrep ileri (saat yönü)">+</button>
+						<button class="btn btn-hour btn-square" id="hour-dec" aria-label="Akrep geri (saat yönünün tersi)">−</button>
+					</div>
+				</div>
+				<div class="cmd-group">
+					<div class="cmd-title">Yelkovan</div>
+					<div class="row">
+						<button class="btn btn-minute btn-square" id="min-inc" aria-label="Yelkovan ileri (saat yönü)">+</button>
+						<button class="btn btn-minute btn-square" id="min-dec" aria-label="Yelkovan geri (saat yönünün tersi)">−</button>
+					</div>
+				</div>
+				<div class="row">
+					<button class="btn btn-check" id="check-btn">✅ Kontrol Et</button>
+				</div>
+				<div class="row" style="opacity:.85; color:#9fb3c8; font-size:.9rem;">Kısayol: ←/→ Akrep, ↑/↓ Yelkovan, Enter Kontrol</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const $ = (id) => document.getElementById(id);
+		const delay = (ms) => new Promise(r => setTimeout(r, ms));
+		function rand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+		const game = {
+			round: 0,
+			maxRounds: 10,
+			score: 0,
+			streak: 0,
+			best: 0,
+			lives: 3,
+			current: { h: 12, m: 0 },
+			target: { h: 12, m: 0 }
+		};
+
+		function updateBadges(){
+			$('round-badge').textContent = `Tur: ${game.round}/${game.maxRounds}`;
+			$('score-badge').textContent = `Puan: ${game.score}`;
+			$('streak-badge').textContent = `Seri: ${game.streak}🔥`;
+			$('lives-badge').textContent = '❤️'.repeat(game.lives) + '🤍'.repeat(Math.max(0, 3-game.lives));
+		}
+
+		function fmt(n){ return String(n).padStart(2,'0'); }
+		function showDigital(){ $('digital').textContent = `${fmt(game.current.h)}:${fmt(game.current.m)}`; }
+		function showTarget(){ $('target').textContent = `${fmt(game.target.h)}:${fmt(game.target.m)}`; }
+
+		function setHands(){
+			const h = $('h'), m = $('m');
+			const hh = (game.current.h % 12) * 30 + game.current.m * 0.5; // hour angle
+			const mm = game.current.m * 6; // minute angle
+			h.style.transform = `translate(-50%, -100%) rotate(${hh}deg)`;
+			m.style.transform = `translate(-50%, -100%) rotate(${mm}deg)`;
+			showDigital();
+		}
+
+		// Saat yönü: +, saat yönünün tersi: -
+		function incHour(d){ game.current.h = ((game.current.h - 1 + d + 12) % 12) + 1; setHands(); }
+		function incMin(d){ game.current.m = (game.current.m + d + 60) % 60; setHands(); }
+
+		function marks(){
+			const root = $('marks'); root.innerHTML='';
+			for(let i=0;i<60;i++){
+				const t = document.createElement('div');
+				t.className = 'tick' + (i%5? ' b':'' );
+				t.style.transform = `translateX(-50%) rotate(${i*6}deg)`;
+				root.appendChild(t);
+			}
+		}
+
+		function generateTarget(){
+			const mode = $('mode').value;
+			let minuteSet = [];
+			if (mode==='hour') minuteSet=[0];
+			else if (mode==='half') minuteSet=[0,30];
+			else if (mode==='quarter') minuteSet=[0,15,30,45];
+			else minuteSet = Array.from({length:60},(_,i)=>i);
+			game.target.h = rand(1,12);
+			game.target.m = minuteSet[rand(0, minuteSet.length-1)];
+			showTarget();
+		}
+
+		function setStatus(kind, text){ const s=$('status'); s.className = `status ${kind}`; s.textContent = text; }
+		function confetti(){
+			const root = $('confetti');
+			for (let i=0;i<24;i++){
+				const d = document.createElement('div'); d.className='dot';
+				d.style.left = rand(20,80)+'%'; d.style.bottom='10%';
+				d.style.background = ['#f43f5e','#f97316','#22c55e','#3b82f6','#a855f7','#eab308'][rand(0,5)];
+				d.style.animationDelay = (i*8)+'ms';
+				root.appendChild(d); setTimeout(()=>d.remove(), 900);
+			}
+		}
+
+		function isCorrect(){ return game.current.h === game.target.h && game.current.m === game.target.m; }
+
+		async function checkAnswer(){
+			if (isCorrect()){
+				setStatus('success','Harika! Doğru saat!');
+				game.streak += 1; game.score += 1; updateBadges(); confetti();
+				await delay(600); nextRound();
+			} else {
+				setStatus('fail','Olmadı! Akrep ve yelkovanı tekrar dene.');
+				game.streak = 0; game.lives = Math.max(0, game.lives-1); updateBadges();
+				if (game.lives===0){ setStatus('fail','Canlar bitti. Yeni tur ile tekrar deneyelim!'); return; }
+			}
+		}
+
+		function resetGame(){
+			game.round=0; game.score=0; game.streak=0; game.best=0; game.lives=3;
+			game.current={h:12,m:0}; setHands(); updateBadges(); setStatus('ready','Hazır');
+			showTarget();
+		}
+
+		function nextRound(){
+			if (game.round>=game.maxRounds){ setStatus('success',`Tebrikler! Tur bitti 🎉 — Puan: ${game.score}`); return; }
+			game.round += 1; updateBadges();
+			generateTarget(); setStatus('running','Yeni hedef ayarlandı.');
+		}
+
+		function newRun(){ resetGame(); nextRound(); }
+
+		document.addEventListener('DOMContentLoaded', ()=>{
+			marks(); setHands(); showTarget(); updateBadges(); setStatus('ready','Hazır');
+			$('hour-inc').addEventListener('click', ()=>incHour(+1));
+			$('hour-dec').addEventListener('click', ()=>incHour(-1));
+			$('min-inc').addEventListener('click', ()=>incMin(+1));
+			$('min-dec').addEventListener('click', ()=>incMin(-1));
+			$('check-btn').addEventListener('click', checkAnswer);
+			$('new-btn').addEventListener('click', newRun);
+			$('reset-btn').addEventListener('click', resetGame);
+			$('mode').addEventListener('change', ()=>{ generateTarget(); setStatus('running','Zorluk değişti, yeni hedef.'); });
+			// Klavye
+			document.addEventListener('keydown', (e)=>{
+				if (e.key==='ArrowLeft'){ incHour(-1); e.preventDefault(); }
+				else if (e.key==='ArrowRight'){ incHour(+1); e.preventDefault(); }
+				else if (e.key==='ArrowUp'){ incMin(+1); e.preventDefault(); }
+				else if (e.key==='ArrowDown'){ incMin(-1); e.preventDefault(); }
+				else if (e.key==='Enter'){ checkAnswer(); e.preventDefault(); }
+			});
+		});
+	</script>
+</body>
+</html>
+
+
