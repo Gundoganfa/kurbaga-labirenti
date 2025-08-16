@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Uzay Macerası 🚀</title>
+	<style>
+		/* Uzay Macerası - Tek dosyalık oyun (HTML+CSS+JS) */
+		/* Amaç: Uzay gemisini komutlarla yıldızlara götür, asteroitlerden kaçın, ara ara çıkan matematik sorularını çöz. */
+
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+
+		body {
+			font-family: 'Trebuchet MS', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			min-height: 100vh;
+			background: radial-gradient(1200px 600px at 50% -10%, #1f2a44, #0b1022 60%, #060912 100%);
+			color: #ecf0f1;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 1000px;
+			margin: 0 auto;
+			background: rgba(15, 22, 43, 0.7);
+			backdrop-filter: blur(4px);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+			padding: 24px;
+		}
+
+		.header {
+			text-align: center;
+			margin-bottom: 18px;
+		}
+
+		.header h1 {
+			font-size: 2.2rem;
+			color: #a6d8ff;
+			text-shadow: 0 0 12px rgba(102, 179, 255, 0.35);
+			margin-bottom: 6px;
+		}
+
+		.subtitle {
+			color: #94a3b8;
+			font-size: 0.95rem;
+			margin-bottom: 14px;
+		}
+
+		.controls, .space-controls {
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.1);
+			border-radius: 12px;
+			padding: 14px;
+			margin-bottom: 14px;
+		}
+
+		.control-group { margin-bottom: 12px; }
+
+		label { display: block; margin-bottom: 6px; color: #b0c4de; font-weight: 600; }
+
+		.command-input {
+			width: 100%;
+			padding: 12px;
+			border-radius: 10px;
+			border: 1px solid rgba(255,255,255,0.15);
+			background: rgba(8, 13, 30, 0.6);
+			outline: none;
+			color: #e6f1ff;
+			font-size: 15px;
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		}
+
+		.command-input::placeholder { color: #6b7b99; }
+
+		.buttons-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+		.btn {
+			padding: 12px 18px;
+			border-radius: 10px;
+			border: 1px solid rgba(255,255,255,0.1);
+			background: linear-gradient(180deg, rgba(80,140,255,0.25), rgba(80,140,255,0.15));
+			color: #eaf2ff;
+			font-weight: 700;
+			letter-spacing: 0.2px;
+			cursor: pointer;
+			transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+		}
+
+		.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(80,140,255,0.25); }
+		.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+		.btn-primary { background: linear-gradient(180deg, rgba(56,189,248,0.35), rgba(56,189,248,0.2)); }
+		.btn-warning { background: linear-gradient(180deg, rgba(251,191,36,0.32), rgba(251,191,36,0.18)); }
+		.btn-danger { background: linear-gradient(180deg, rgba(248,113,113,0.32), rgba(248,113,113,0.18)); }
+
+		.speed-selector { display: flex; align-items: center; gap: 10px; }
+		.speed-selector select {
+			padding: 10px 12px;
+			border-radius: 10px;
+			border: 1px solid rgba(255,255,255,0.15);
+			background: rgba(8, 13, 30, 0.6);
+			color: #e6f1ff;
+		}
+
+		.info-row { display: flex; gap: 10px; flex-wrap: wrap; }
+		.badge {
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			padding: 8px 12px;
+			border-radius: 999px;
+			font-weight: 700;
+			color: #dbeafe;
+		}
+
+		.status {
+			margin-top: 10px;
+			text-align: center;
+			padding: 12px;
+			border-radius: 10px;
+			font-weight: 700;
+			min-height: 44px;
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.1);
+		}
+
+		.status.ready { color: #c7f9cc; }
+		.status.running { color: #fef08a; }
+		.status.success { color: #a7f3d0; }
+		.status.fail { color: #fecaca; }
+
+		.error { display: none; margin-top: 8px; color: #fecaca; font-weight: 700; }
+
+		.space-area { display: flex; flex-direction: column; gap: 14px; }
+		.grid-wrap { display: flex; justify-content: center; }
+
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(15, 40px);
+			grid-template-rows: repeat(15, 40px);
+			gap: 2px;
+			background: rgba(255,255,255,0.08);
+			padding: 6px;
+			border-radius: 12px;
+			box-shadow: inset 0 0 18px rgba(0,0,0,0.35);
+		}
+
+		.cell {
+			width: 40px; height: 40px; border-radius: 6px;
+			display: flex; align-items: center; justify-content: center;
+			font-size: 18px; color: #e2e8f0;
+			position: relative;
+		}
+
+		.cell.empty { background: linear-gradient(180deg, #111827, #0b1221); }
+		.cell.asteroid { background: radial-gradient(circle at 30% 30%, #6b7280, #374151 60%, #111827); box-shadow: inset -2px -2px 6px rgba(0,0,0,0.35); }
+		.cell.star { background: linear-gradient(180deg, #1f2937, #0b1221); }
+		.cell.star::after {
+			content: '✦';
+			position: absolute; color: #facc15; text-shadow: 0 0 8px rgba(250, 204, 21, 0.7);
+			font-size: 18px; transform: translateY(-1px);
+		}
+
+		/* Farklı renk temaları */
+		.cell.star.yellow::after { color: #fde047; text-shadow: 0 0 8px rgba(253,224,71,0.8); }
+		.cell.star.blue::after { color: #38bdf8; text-shadow: 0 0 8px rgba(56,189,248,0.8); }
+		.cell.star.pink::after { color: #f472b6; text-shadow: 0 0 8px rgba(244,114,182,0.8); }
+		.cell.star.green::after { color: #86efac; text-shadow: 0 0 8px rgba(134,239,172,0.8); }
+		.cell.star.orange::after { color: #fb923c; text-shadow: 0 0 8px rgba(251,146,60,0.8); }
+
+		.cell.start { outline: 2px dashed #38bdf8; }
+		.cell.ship-cell { outline: 2px solid rgba(99, 102, 241, 0.6); }
+
+		.ship {
+			width: 28px; height: 28px;
+			border-radius: 50%;
+			display: flex; align-items: center; justify-content: center;
+			background: radial-gradient(circle at 50% 35%, #93c5fd, #60a5fa 55%, #2563eb);
+			box-shadow: 0 4px 16px rgba(59,130,246,0.45);
+			color: #0b1022; font-size: 16px;
+			position: relative; z-index: 2;
+			transform: rotate(0deg);
+			transition: transform 0.2s ease;
+		}
+
+		.ship.dir-up { transform: rotate(0deg); }
+		.ship.dir-right { transform: rotate(90deg); }
+		.ship.dir-down { transform: rotate(180deg); }
+		.ship.dir-left { transform: rotate(270deg); }
+
+		.ship.shake { animation: shake 250ms ease-in-out; }
+		@keyframes shake { 0%,100%{ transform: translateX(0)} 25%{ transform: translateX(-3px)} 75%{ transform: translateX(3px)} }
+
+		.legend { font-size: 0.9rem; color: #9fb3c8; text-align: center; }
+		.legend code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 6px; }
+
+		.top-bar { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+
+		/* Responsive */
+		@media (max-width: 640px) {
+			.grid { grid-template-columns: repeat(15, 30px); grid-template-rows: repeat(15, 30px); }
+			.cell { width: 30px; height: 30px; font-size: 14px; }
+			.ship { width: 22px; height: 22px; font-size: 12px; }
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>🚀 Uzay Macerası</h1>
+			<div class="subtitle">Klavyeden ok tuşları ile yıldızları avlayın! Yıldızlar 15 saniye sonra kendiliğinden kaybolur; kaçırırsanız puan alamazsınız.</div>
+			<p class="legend">Yön tuşları: <code>↑</code> <code>↓</code> <code>←</code> <code>→</code> — Amaç: Asteroitlere çarpmadan olabildiğince çok yıldız toplayın.</p>
+		</div>
+
+		<div class="space-controls top-bar">
+			<div class="info-row">
+				<span class="badge" id="score-badge">Puan: 0</span>
+				<span class="badge" id="stars-badge">Yıldız: 0/0</span>
+			</div>
+			<div class="buttons-row">
+				<button class="btn btn-warning" onclick="generateSpace()" aria-label="Yeni uzay oluştur">🌌 Yeni Uzay</button>
+				<a class="btn" href="index.html" aria-label="Ana sayfaya dön">🏠 Ana Sayfa</a>
+			</div>
+		</div>
+
+		<div class="space-area">
+			<div class="grid-wrap">
+				<div class="grid" id="grid"></div>
+			</div>
+
+			<div class="controls" aria-live="polite">
+				<div class="buttons-row">
+					<button id="reset-btn" class="btn btn-danger" onclick="resetGame()">🔄 Sıfırla</button>
+				</div>
+				<div class="error" id="error"></div>
+				<div id="status" class="status ready">🟢 Hazır - Ok tuşları ile hareket et</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Oyun sabitleri ve durum
+		const GRID_SIZE = 15;
+		const NUM_ASTEROIDS = 32; // iç bölgede rastgele asteroit
+		const MAX_STARS = 6; // aynı anda görünen yıldız sayısı
+
+		const SYMBOL = { EMPTY: 0, ASTEROID: 1 };
+		const DIRS = { up: 'up', down: 'down', left: 'left', right: 'right' };
+
+		let grid = [];
+		let stars = new Map(); // key: "x,y" -> {x,y,color,timeoutId,spawnedAt}
+		const STAR_COLORS = ['yellow','blue','pink','green','orange'];
+		let game = {
+			ship: { x: 1, y: GRID_SIZE - 2, dir: DIRS.up },
+			isRunning: false,
+			currentStep: 0,
+			totalSteps: 0,
+			starsTotal: 0,
+			starsCollected: 0,
+			score: 0
+		};
+
+		// Başlat
+		document.addEventListener('DOMContentLoaded', () => {
+			generateSpace();
+			resetGame(false);
+		});
+
+		function generateEmptyGrid() {
+			grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(SYMBOL.EMPTY));
+			// Kenarlar duvar gibi: asteroit koy (ışın kalkanı gibi sınır)
+			for (let y = 0; y < GRID_SIZE; y++) {
+				for (let x = 0; x < GRID_SIZE; x++) {
+					if (x === 0 || y === 0 || x === GRID_SIZE - 1 || y === GRID_SIZE - 1) {
+						grid[y][x] = SYMBOL.ASTEROID;
+					}
+				}
+			}
+		}
+
+		function clearAllStars() {
+			for (const st of stars.values()) {
+				if (st.timeoutId) clearTimeout(st.timeoutId);
+			}
+			stars.clear();
+		}
+
+		function generateSpace() {
+			if (game.isRunning) return;
+			generateEmptyGrid();
+			clearAllStars();
+
+			// İç asteroitleri yerleştir
+			let placed = 0;
+			while (placed < NUM_ASTEROIDS) {
+				const x = rand(1, GRID_SIZE - 2);
+				const y = rand(1, GRID_SIZE - 2);
+				if (grid[y][x] === SYMBOL.EMPTY && !isNearStart(x, y)) {
+					grid[y][x] = SYMBOL.ASTEROID;
+					placed++;
+				}
+			}
+
+			// İlk yıldızları üret
+			for (let i = 0; i < MAX_STARS; i++) spawnStar();
+
+			game.starsTotal = MAX_STARS; // anlık hedef sayacı
+			renderGrid();
+			updateBadges();
+			setStatus('ready', 'Hazır - Klavyedeki ok tuşları ile çalıştır');
+		}
+
+		function isNearStart(x, y) {
+			const sx = 1, sy = GRID_SIZE - 2;
+			return Math.abs(x - sx) + Math.abs(y - sy) <= 2;
+		}
+
+		function renderGrid() {
+			const el = document.getElementById('grid');
+			el.innerHTML = '';
+			for (let y = 0; y < GRID_SIZE; y++) {
+				for (let x = 0; x < GRID_SIZE; x++) {
+					const cell = document.createElement('div');
+					cell.className = 'cell';
+					cell.id = `cell-${x}-${y}`;
+					if (grid[y][x] === SYMBOL.ASTEROID) cell.classList.add('asteroid');
+					else cell.classList.add('empty');
+
+					if (x === 1 && y === GRID_SIZE - 2) cell.classList.add('start');
+					el.appendChild(cell);
+				}
+			}
+			// Yıldızları boya
+			for (const st of stars.values()) {
+				const c = document.getElementById(`cell-${st.x}-${st.y}`);
+				if (c) { c.classList.remove('empty'); c.classList.add('star', st.color); }
+			}
+			renderShip();
+		}
+
+		function renderShip() {
+			// Temizle
+			document.querySelectorAll('.ship').forEach(n => n.remove());
+			document.querySelectorAll('.ship-cell').forEach(n => n.classList.remove('ship-cell'));
+
+			const cell = document.getElementById(`cell-${game.ship.x}-${game.ship.y}`);
+			if (!cell) return;
+			cell.classList.add('ship-cell');
+			const ship = document.createElement('div');
+			ship.className = `ship dir-${game.ship.dir}`;
+			ship.textContent = '🚀';
+			cell.appendChild(ship);
+		}
+
+		function parseCommands(raw) {
+			if (!raw || !raw.trim()) throw new Error('Komut girmelisin.');
+			const parts = raw.toLowerCase().replace(/[\s,]+/g, '-').split('-').filter(Boolean);
+			const valid = ['yukarı','yukari','aşağı','asagi','sağ','sag','sol'];
+			const invalid = parts.filter(p => !valid.includes(p));
+			if (invalid.length) throw new Error(`Geçersiz komut(lar): ${invalid.join(', ')}`);
+			if (parts.length > 200) throw new Error('Çok fazla komut! Lütfen 200\'den az komut girin.');
+			return parts;
+		}
+
+		function setStatus(kind, text) {
+			const s = document.getElementById('status');
+			s.className = `status ${kind}`;
+			s.textContent = text;
+		}
+
+		function showError(msg) {
+			const e = document.getElementById('error');
+			e.textContent = msg; e.style.display = 'block';
+		}
+		function hideError() { const e = document.getElementById('error'); e.style.display = 'none'; }
+
+		function updateBadges() {
+			document.getElementById('score-badge').textContent = `Puan: ${game.score}`;
+			document.getElementById('stars-badge').textContent = `Yıldız: ${game.starsCollected}`;
+		}
+
+		function disableControls(disabled) {
+			document.getElementById('run-btn').disabled = disabled;
+			document.getElementById('reset-btn').disabled = disabled;
+			document.getElementById('commands').disabled = disabled;
+			document.getElementById('speed').disabled = disabled;
+		}
+
+		function resetGame(resetSpace = true) {
+			game.ship = { x: 1, y: GRID_SIZE - 2, dir: DIRS.up };
+			game.isRunning = false;
+			game.currentStep = 0;
+			game.totalSteps = 0;
+			game.starsCollected = 0;
+			game.score = 0;
+			if (resetSpace) generateSpace(); else { renderGrid(); }
+			setStatus('ready', '🟢 Hazır - Komutlarını yaz ve çalıştır!');
+			updateBadges();
+			hideError();
+			disableControls(false);
+		}
+
+		function rotate(dir) {
+			game.ship.dir = dir;
+			renderShip();
+		}
+
+		function nextPosition(x, y, dir) {
+			if (dir === DIRS.up) return { x, y: y - 1 };
+			if (dir === DIRS.down) return { x, y: y + 1 };
+			if (dir === DIRS.left) return { x: x - 1, y };
+			return { x: x + 1, y };
+		}
+
+		function isBlocked(x, y) {
+			if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return true;
+			return grid[y][x] === SYMBOL.ASTEROID;
+		}
+
+		function collectIfStar(x, y) {
+			const key = `${x},${y}`;
+			if (stars.has(key)) {
+				const st = stars.get(key);
+				if (st.timeoutId) clearTimeout(st.timeoutId);
+				stars.delete(key);
+				const c = document.getElementById(`cell-${x}-${y}`);
+				if (c) c.classList.remove('star','yellow','blue','pink','green','orange');
+				game.starsCollected += 1;
+				game.score += 1; // her yıldız +1 puan
+				updateBadges();
+				// yeni yıldız doğsun
+				spawnStar();
+				return true;
+			}
+			return false;
+		}
+
+		function spawnStar() {
+			// uygun boş hücre bul
+			let tries = 0;
+			while (tries < 200) {
+				tries++;
+				const x = rand(1, GRID_SIZE - 2);
+				const y = rand(1, GRID_SIZE - 2);
+				const key = `${x},${y}`;
+				if (grid[y][x] !== SYMBOL.EMPTY) continue;
+				if (stars.has(key)) continue;
+				if (isNearStart(x, y)) continue;
+				const color = STAR_COLORS[rand(0, STAR_COLORS.length - 1)];
+				const timeoutId = setTimeout(() => {
+					// kendiliğinden yok ol
+					const cell = document.getElementById(`cell-${x}-${y}`);
+					if (cell) cell.classList.remove('star','yellow','blue','pink','green','orange');
+					stars.delete(key);
+					// yıldız sayısı azaldı, yenisini doğur
+					spawnStar();
+				}, 15000);
+				stars.set(key, { x, y, color, timeoutId, spawnedAt: Date.now() });
+				// hücreyi güncelle
+				const c = document.getElementById(`cell-${x}-${y}`);
+				if (c) { c.classList.remove('empty'); c.classList.add('star', color); }
+				return;
+			}
+		}
+
+		async function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+		// askMath kaldırıldı (manüel mod)
+
+		async function runProgram() {
+			hideError();
+			// Program modu devre dışı — sadece manuel ok tuşları aktif
+			setStatus('ready', 'ℹ️ Manuel mod: Ok tuşları ile yıldızları avlayın.');
+		}
+
+		// Manuel tek adım hareket (ok tuşları)
+		async function manualMove(dir) {
+			if (game.isRunning) return; // program çalışırken manuel kontrol kapalı
+			rotate(dir);
+			const { x: nx, y: ny } = nextPosition(game.ship.x, game.ship.y, game.ship.dir);
+			if (isBlocked(nx, ny)) {
+				const shipEl = document.querySelector('.ship');
+				if (shipEl) { shipEl.classList.add('shake'); setTimeout(() => shipEl.classList.remove('shake'), 250); }
+				setStatus('fail', '🪨 Asteroide çarptın! Yolunu değiştir.');
+				return;
+			}
+			game.ship.x = nx; game.ship.y = ny; renderShip();
+			const gotStar = collectIfStar(nx, ny);
+			if (gotStar) {
+				if (game.starsCollected % 3 === 0) { await askMath(); }
+			}
+			if (game.starsCollected === game.starsTotal) {
+				setStatus('success', '🎉 Tüm yıldızlar toplandı! Görev tamamlandı.');
+				return;
+			}
+			setStatus('running', '🛰️ Manuel hareket');
+		}
+
+		// Yardımcılar
+		function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+		// Klavye: ok tuşları ile manuel hareket
+		document.addEventListener('keydown', async (e) => {
+			const target = e.target;
+			const isTyping = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+			if (!isTyping && !game.isRunning) {
+				if (e.key === 'ArrowUp') { e.preventDefault(); await manualMove(DIRS.up); return; }
+				if (e.key === 'ArrowDown') { e.preventDefault(); await manualMove(DIRS.down); return; }
+				if (e.key === 'ArrowLeft') { e.preventDefault(); await manualMove(DIRS.left); return; }
+				if (e.key === 'ArrowRight') { e.preventDefault(); await manualMove(DIRS.right); return; }
+			}
+			// Enter işlevi kaldırıldı
+		});
+	</script>
+</body>
+</html>

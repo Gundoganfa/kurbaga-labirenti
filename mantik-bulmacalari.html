@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Mantık Bulmacaları 🧩</title>
+	<style>
+		/* Mantık Bulmacaları — tek dosya (HTML+CSS+JS), dış kütüphane yok */
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: 'Trebuchet MS', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			min-height: 100vh;
+			background: linear-gradient(120deg, #6a85b6 0%, #bac8e0 100%);
+			color: #2c3e50;
+			padding: 20px;
+		}
+		.container {
+			max-width: 1000px;
+			margin: 0 auto;
+			background: #ffffffee;
+			border-radius: 16px;
+			box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+			border: 1px solid #e5ecf3;
+			padding: 22px;
+		}
+		.header { text-align: center; margin-bottom: 16px; }
+		.header h1 { font-size: 2.2rem; color: #2d5b9b; text-shadow: 0 2px 0 #ffffff; margin-bottom: 6px; }
+		.subtitle { color: #5d6f86; margin-bottom: 10px; }
+
+		.topbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; }
+		.badges { display: flex; gap: 8px; flex-wrap: wrap; }
+		.badge { background: #eef5ff; border: 1px solid #cfe1ff; color: #2d5b9b; padding: 8px 12px; border-radius: 999px; font-weight: 700; }
+		.controls { background: #f7fafc; border: 1px solid #e3eef7; border-radius: 12px; padding: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+		.control { display: flex; align-items: center; gap: 6px; }
+		select, button { padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #1f2937; }
+		button { font-weight: 700; cursor: pointer; transition: transform .1s ease, box-shadow .2s ease; }
+		button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+		.btn-primary { background: linear-gradient(180deg, #93c5fd, #60a5fa); color: #fff; border: 1px solid #60a5fa; }
+		.btn-warning { background: linear-gradient(180deg, #fcd34d, #f59e0b); color: #fff; border: 1px solid #f59e0b; }
+		.btn-danger { background: linear-gradient(180deg, #fca5a5, #ef4444); color: #fff; border: 1px solid #ef4444; }
+
+		.content { display: grid; grid-template-columns: 1fr 280px; gap: 14px; }
+		@media (max-width: 800px) { .content { grid-template-columns: 1fr; } }
+
+		.board-wrap { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+		.preview { display: grid; gap: 2px; background: #e6eef7; padding: 6px; border-radius: 8px; border: 1px solid #d5e3f2; }
+		.preview .p { width: 12px; height: 12px; border-radius: 3px; }
+		.p.on { background: #06b6d4; }
+		.p.off { background: #c7d2fe; opacity: 0.6; }
+
+		.board { display: grid; gap: 4px; background: #e6eef7; padding: 10px; border-radius: 12px; border: 1px solid #d5e3f2; box-shadow: inset 0 0 12px rgba(0,0,0,0.05); }
+		.cell { width: 52px; height: 52px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; cursor: pointer; user-select: none; outline: none; }
+		.cell.on { background: linear-gradient(180deg, #22d3ee, #06b6d4); color: #083344; border: 2px solid #0891b2; }
+		.cell.off { background: linear-gradient(180deg, #e2e8f0, #cbd5e1); color: #475569; border: 2px solid #cbd5e1; }
+		.cell:focus { box-shadow: 0 0 0 3px rgba(99,102,241,0.35); }
+		.cell.hint { animation: hintPulse 1s ease-in-out 2; box-shadow: 0 0 0 4px rgba(250,204,21,0.6) !important; }
+		@keyframes hintPulse { 0%{ transform: scale(1)} 50%{ transform: scale(1.05)} 100%{ transform: scale(1)} }
+
+		.sidepanel { display: flex; flex-direction: column; gap: 10px; }
+		.panel { background: #f7fafc; border: 1px solid #e3eef7; border-radius: 12px; padding: 12px; }
+		.panel h3 { color: #334155; margin-bottom: 8px; font-size: 1rem; }
+		.status { text-align: center; padding: 10px; border-radius: 10px; font-weight: 800; min-height: 40px; }
+		.status.ready { background: #dcfce7; color: #14532d; }
+		.status.running { background: #fff7ed; color: #7c2d12; }
+		.status.success { background: #dbeafe; color: #1e3a8a; }
+
+		.footer { margin-top: 14px; text-align: center; color: #64748b; }
+		.footer a { color: #2563eb; text-decoration: none; font-weight: 700; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>🧩 Mantık Bulmacaları</h1>
+			<div class="subtitle">Hedef deseni yakalamak için hücrelere tıkla. Seçili kurala göre hücreler değişir. Çözülebilir bulmaca, geri al ve ipucu desteği!</div>
+		</div>
+
+		<div class="topbar">
+			<div class="badges">
+				<span class="badge" id="moves-badge">Hamle: 0</span>
+				<span class="badge" id="stars-badge">Yıldız: 0⭐</span>
+			</div>
+			<div class="controls">
+				<div class="control">
+					<label for="size">Boyut</label>
+					<select id="size">
+						<option value="5">5x5</option>
+						<option value="6" selected>6x6</option>
+						<option value="7">7x7</option>
+					</select>
+				</div>
+				<div class="control">
+					<label for="rule">Kural</label>
+					<select id="rule">
+						<option value="plus" selected>Artı</option>
+						<option value="diag">Çapraz</option>
+						<option value="plusdiag">Artı+Çapraz</option>
+					</select>
+				</div>
+				<div class="control">
+					<label for="difficulty">Zorluk</label>
+					<select id="difficulty">
+						<option value="easy">Kolay</option>
+						<option value="medium" selected>Orta</option>
+						<option value="hard">Zor</option>
+					</select>
+				</div>
+				<button class="btn-primary" id="new-btn">🆕 Yeni Bulmaca</button>
+				<button class="btn-warning" id="reset-btn">↩️ Sıfırla</button>
+				<button id="undo-btn">↶ Geri Al</button>
+				<button id="hint-btn">💡 İpucu</button>
+				<a class="btn-danger" href="index.html" aria-label="Ana sayfa">🏠 Ana Sayfa</a>
+			</div>
+		</div>
+
+		<div class="content">
+			<div class="board-wrap">
+				<div class="panel">
+					<h3>🎯 Hedef Desen</h3>
+					<div id="preview" class="preview" aria-label="Hedef önizleme"></div>
+				</div>
+				<div id="board" class="board" aria-label="Bulmaca ızgarası" role="grid"></div>
+				<div id="status" class="status ready">Hazır</div>
+			</div>
+
+			<div class="sidepanel">
+				<div class="panel">
+					<h3>📘 Nasıl Oynanır</h3>
+					<p>Bir hücreye tıkladığında, seçilen kurala göre (Artı/Çapraz/Artı+Çapraz) o hücre ve komşularının durumu değişir. Amaç, ızgarayı üstteki hedef deseni ile aynı hale getirmektir.</p>
+				</div>
+				<div class="panel">
+					<h3>⌨️ Klavye</h3>
+					<p>Ok tuşları ile hücreler arasında gezinebilir, <strong>Enter/Boşluk</strong> ile tıklayabilirsin. <strong>Geri Al</strong> son hamleyi geri alır.</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer">
+			Kazanmak için minimum hamlede çözmeye çalış! Yıldızlar, ideal hamle sayına göre verilir.
+		</div>
+	</div>
+
+	<script>
+		// Durum
+		let state = {
+			size: 6,
+			rule: 'plus',
+			difficulty: 'medium',
+			target: [], // boolean[][]
+			board: [], // boolean[][]
+			history: [], // {changed:[{x,y}]}
+			moves: 0,
+			ideal: 0,
+			focus: { x: 0, y: 0 },
+			solutionSet: new Set() // karıştırma çözümü (mod2) — ipucu için
+		};
+
+		// Başlat
+		document.addEventListener('DOMContentLoaded', () => {
+			bindUI();
+			newPuzzle();
+		});
+
+		function bindUI() {
+			document.getElementById('size').addEventListener('change', (e) => { state.size = clampSize(parseInt(e.target.value, 10)); newPuzzle(); });
+			document.getElementById('rule').addEventListener('change', (e) => { state.rule = e.target.value; renderAll(); });
+			document.getElementById('difficulty').addEventListener('change', (e) => { state.difficulty = e.target.value; newPuzzle(); });
+			document.getElementById('new-btn').addEventListener('click', newPuzzle);
+			document.getElementById('reset-btn').addEventListener('click', resetPuzzle);
+			document.getElementById('undo-btn').addEventListener('click', undo);
+			document.getElementById('hint-btn').addEventListener('click', giveHint);
+
+			document.addEventListener('keydown', onKey);
+		}
+
+		function clampSize(n) { return Math.min(7, Math.max(5, n)); }
+
+		// Veri yardımcıları
+		function makeGrid(size, val=false) { return Array.from({length:size}, () => Array(size).fill(val)); }
+		function copyGrid(g) { return g.map(row => row.slice()); }
+		function equalGrids(a,b){ for (let y=0;y<a.length;y++){ for (let x=0;x<a.length;x++){ if (a[y][x]!==b[y][x]) return false; } } return true; }
+
+		// Hedefi üret — basit ama hoş desenler
+		function generateTargetPattern(size) {
+			const g = makeGrid(size, false);
+			const kind = Math.floor(Math.random()*5);
+			for (let y=0;y<size;y++) {
+				for (let x=0;x<size;x++) {
+					let on = false;
+					if (kind===0) { // diyagonal
+						on = (x===y) || (x+y===size-1);
+					} else if (kind===1) { // çerçeve
+						on = (x===0||y===0||x===size-1||y===size-1);
+					} else if (kind===2) { // satranç
+						on = ((x+y)%2===0);
+					} else if (kind===3) { // artı şekli
+						on = (x===Math.floor(size/2) || y===Math.floor(size/2));
+					} else { // dairesel halka tahmini
+						const cx=(size-1)/2, cy=(size-1)/2; const dx=x-cx, dy=y-cy; const d=Math.sqrt(dx*dx+dy*dy);
+						on = Math.abs(d-Math.min(cx,cy)+1)<1.2;
+					}
+					g[y][x]=on;
+				}
+			}
+			return g;
+		}
+
+		function applyRuleAt(grid, x, y, rule) {
+			const size = grid.length; const changed=[];
+			function flip(ix,iy){ if(ix<0||iy<0||ix>=size||iy>=size) return; grid[iy][ix]=!grid[iy][ix]; changed.push({x:ix,y:iy}); }
+			flip(x,y);
+			if (rule==='plus' || rule==='plusdiag') {
+				flip(x+1,y); flip(x-1,y); flip(x,y+1); flip(x,y-1);
+			}
+			if (rule==='diag' || rule==='plusdiag') {
+				flip(x+1,y+1); flip(x-1,y-1); flip(x+1,y-1); flip(x-1,y+1);
+			}
+			return changed;
+		}
+
+		function randomInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+		function difficultySteps(size, diff){
+			if (diff==='easy') return size + 2;
+			if (diff==='hard') return size*size - Math.floor(size/2);
+			return size*2; // medium
+		}
+
+		function newPuzzle(){
+			const size = state.size;
+			state.target = generateTargetPattern(size);
+			state.board = copyGrid(state.target);
+			state.history = [];
+			state.moves = 0; state.ideal = 0; state.solutionSet = new Set();
+
+			// Çözülebilir başlangıç için hedef üzerinde N rastgele hamle uygula (mod2 iz kaydı)
+			const N = difficultySteps(size, state.difficulty);
+			const posCount = new Map();
+			for (let i=0;i<N;i++){
+				const x=randomInt(0,size-1), y=randomInt(0,size-1);
+				applyRuleAt(state.board, x, y, state.rule);
+				const key=`${x},${y}`; posCount.set(key,(posCount.get(key)||0)+1);
+			}
+			// ideal: mod2 kalan tıklamalar sayısı
+			let ideal=0; const solSet=new Set();
+			for (const [key,count] of posCount){ if (count%2===1){ ideal++; solSet.add(key);} }
+			state.ideal = ideal; state.solutionSet = solSet;
+
+			renderAll();
+			updateStatus('ready', 'Hazır — Hedef deseni yakala!');
+			updateBadges();
+		}
+
+		function resetPuzzle(){
+			state.board = copyGrid(state.target);
+			state.history = [];
+			state.moves = 0;
+			renderAll(); updateBadges(); updateStatus('ready','Sıfırlandı.');
+		}
+
+		function undo(){
+			const step = state.history.pop();
+			if (!step) return;
+			for (const c of step.changed){ // tekrar flip ederek geri al
+				state.board[c.y][c.x] = !state.board[c.y][c.x];
+			}
+			state.moves = Math.max(0, state.moves-1);
+			renderAll(); updateBadges(); updateStatus('running','Geri alındı');
+		}
+
+		function giveHint(){
+			if (isSolved()) { updateStatus('success','Zaten çözüldü! 🎉'); return; }
+			// solutionSet'ten rastgele bir hücreyi vurgula
+			const arr = Array.from(state.solutionSet);
+			if (!arr.length) { updateStatus('running','İpucu yok. Devam!'); return; }
+			const pick = arr[randomInt(0, arr.length-1)];
+			const [x,y] = pick.split(',').map(Number);
+			const el = document.getElementById(`cell-${x}-${y}`);
+			if (el){ el.classList.add('hint'); setTimeout(()=>el.classList.remove('hint'), 1200); }
+			updateStatus('running','İpucu: parlayan hücreyi dene.');
+		}
+
+		function clickCell(x,y){
+			const changed = applyRuleAt(state.board, x, y, state.rule);
+			state.history.push({ changed });
+			state.moves++;
+			renderAll(); updateBadges();
+			if (isSolved()) { onSolved(); } else { updateStatus('running', `Hamle (${state.moves})`); }
+		}
+
+		function isSolved(){ return equalGrids(state.board, state.target); }
+
+		function onSolved(){
+			// Yıldız hesapla: ideal'e göre
+			let stars=1;
+			if (state.moves <= state.ideal) stars=3;
+			else if (state.moves <= state.ideal+2) stars=2;
+			updateStatus('success', `Tebrikler! Çözdün 🎉 — Yıldız: ${'⭐'.repeat(stars)}`);
+			document.getElementById('stars-badge').textContent = `Yıldız: ${stars}⭐`;
+			// küçük konfeti efekti (CSS animasyonu yerine hızlı highlight)
+			flashSolved();
+		}
+
+		function flashSolved(){
+			const board = document.getElementById('board');
+			board.style.boxShadow = '0 0 0 6px rgba(34,197,94,0.35) inset, 0 0 25px rgba(34,197,94,0.4)';
+			setTimeout(()=>{ board.style.boxShadow = 'inset 0 0 12px rgba(0,0,0,0.05)'; }, 800);
+		}
+
+		function renderAll(){ renderPreview(); renderBoard(); }
+
+		function renderPreview(){
+			const p = document.getElementById('preview');
+			p.style.gridTemplateColumns = `repeat(${state.size}, 12px)`;
+			p.style.gridTemplateRows = `repeat(${state.size}, 12px)`;
+			p.innerHTML = '';
+			for (let y=0;y<state.size;y++){
+				for (let x=0;x<state.size;x++){
+					const d = document.createElement('div');
+					d.className = 'p ' + (state.target[y][x] ? 'on':'off');
+					p.appendChild(d);
+				}
+			}
+		}
+
+		function renderBoard(){
+			const b = document.getElementById('board');
+			b.style.gridTemplateColumns = `repeat(${state.size}, 52px)`;
+			b.style.gridTemplateRows = `repeat(${state.size}, 52px)`;
+			b.innerHTML = '';
+			for (let y=0;y<state.size;y++){
+				for (let x=0;x<state.size;x++){
+					const cell = document.createElement('button');
+					cell.type = 'button';
+					cell.id = `cell-${x}-${y}`;
+					cell.className = 'cell ' + (state.board[y][x] ? 'on':'off');
+					cell.setAttribute('role','gridcell');
+					cell.setAttribute('aria-label', `Hücre ${x+1}, ${y+1}`);
+					cell.addEventListener('click', () => clickCell(x,y));
+					b.appendChild(cell);
+				}
+			}
+			// odak
+			focusCell(state.focus.x, state.focus.y);
+		}
+
+		function focusCell(x,y){
+			state.focus = {x,y};
+			const el = document.getElementById(`cell-${x}-${y}`);
+			if (el) el.focus();
+		}
+
+		function moveFocus(dx,dy){
+			let nx = Math.min(state.size-1, Math.max(0, state.focus.x + dx));
+			let ny = Math.min(state.size-1, Math.max(0, state.focus.y + dy));
+			focusCell(nx, ny);
+		}
+
+		function onKey(e){
+			const tag = e.target && e.target.tagName;
+			if (tag==='INPUT' || tag==='SELECT' || tag==='TEXTAREA') return;
+			if (e.key==='ArrowUp'){ e.preventDefault(); moveFocus(0,-1); }
+			else if (e.key==='ArrowDown'){ e.preventDefault(); moveFocus(0,1); }
+			else if (e.key==='ArrowLeft'){ e.preventDefault(); moveFocus(-1,0); }
+			else if (e.key==='ArrowRight'){ e.preventDefault(); moveFocus(1,0); }
+			else if (e.key==='Enter' || e.key===' '){ e.preventDefault(); clickCell(state.focus.x, state.focus.y); }
+		}
+
+		function updateStatus(kind, text){
+			const s = document.getElementById('status');
+			s.className = `status ${kind}`; s.textContent = text;
+		}
+		function updateBadges(){
+			document.getElementById('moves-badge').textContent = `Hamle: ${state.moves}`;
+			const stars = (state.moves<=state.ideal?3:(state.moves<=state.ideal+2?2:1));
+			document.getElementById('stars-badge').textContent = `Yıldız: ${stars}⭐`;
+		}
+	</script>
+</body>
+</html>
