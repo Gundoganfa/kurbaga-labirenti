@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kurbağa Labirenti - Kodlama Oyunu</title>
+    <style>
+        /* Genel sayfa stilleri */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #27ae60;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            background: #f39c12;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Oyun alanı */
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .maze-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .maze {
+            display: grid;
+            grid-template-columns: repeat(12, 40px);
+            grid-template-rows: repeat(12, 40px);
+            gap: 1px;
+            background: #34495e;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .cell.empty {
+            background: #ecf0f1;
+        }
+
+        .cell.wall {
+            background: #2c3e50;
+        }
+
+        .cell.start {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+
+        .cell.cheese {
+            background: #f1c40f;
+        }
+
+        .cell.path {
+            background: #e8f6f3;
+            border: 2px dotted #27ae60;
+        }
+
+        .frog {
+            width: 30px;
+            height: 30px;
+            background: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Kurbağa yön göstergeleri */
+        .frog.direction-up {
+            transform: rotate(0deg);
+        }
+
+        .frog.direction-right {
+            transform: rotate(90deg);
+        }
+
+        .frog.direction-down {
+            transform: rotate(180deg);
+        }
+
+        .frog.direction-left {
+            transform: rotate(270deg);
+        }
+
+        .frog.shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+
+        /* Shake animasyonu ile yön kombinasyonları */
+        .frog.shake.direction-up {
+            animation: shakeUp 0.3s ease-in-out;
+        }
+
+        .frog.shake.direction-right {
+            animation: shakeRight 0.3s ease-in-out;
+        }
+
+        .frog.shake.direction-down {
+            animation: shakeDown 0.3s ease-in-out;
+        }
+
+        .frog.shake.direction-left {
+            animation: shakeLeft 0.3s ease-in-out;
+        }
+
+        @keyframes shakeUp {
+            0%, 100% { transform: rotate(0deg) translateX(0); }
+            25% { transform: rotate(0deg) translateX(-3px); }
+            75% { transform: rotate(0deg) translateX(3px); }
+        }
+
+        @keyframes shakeRight {
+            0%, 100% { transform: rotate(90deg) translateX(0); }
+            25% { transform: rotate(90deg) translateX(-3px); }
+            75% { transform: rotate(90deg) translateX(3px); }
+        }
+
+        @keyframes shakeDown {
+            0%, 100% { transform: rotate(180deg) translateX(0); }
+            25% { transform: rotate(180deg) translateX(-3px); }
+            75% { transform: rotate(180deg) translateX(3px); }
+        }
+
+        @keyframes shakeLeft {
+            0%, 100% { transform: rotate(270deg) translateX(0); }
+            25% { transform: rotate(270deg) translateX(-3px); }
+            75% { transform: rotate(270deg) translateX(3px); }
+        }
+
+        /* Kontroller */
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #e9ecef;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .command-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: monospace;
+            background: white;
+        }
+
+        .command-input:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .speed-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .speed-selector select {
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Durum göstergesi */
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.success {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Responsive tasarım */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .maze {
+                grid-template-columns: repeat(12, 30px);
+                grid-template-rows: repeat(12, 30px);
+            }
+
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+            }
+
+            .frog {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+
+            /* Mobilde yön göstergeleri */
+            .frog.direction-up {
+                transform: rotate(0deg);
+            }
+
+            .frog.direction-right {
+                transform: rotate(90deg);
+            }
+
+            .frog.direction-down {
+                transform: rotate(180deg);
+            }
+
+            .frog.direction-left {
+                transform: rotate(270deg);
+            }
+
+            /* Mobilde shake animasyonları */
+            .frog.shake.direction-up {
+                animation: shakeUp 0.3s ease-in-out;
+            }
+
+            .frog.shake.direction-right {
+                animation: shakeRight 0.3s ease-in-out;
+            }
+
+            .frog.shake.direction-down {
+                animation: shakeDown 0.3s ease-in-out;
+            }
+
+            .frog.shake.direction-left {
+                animation: shakeLeft 0.3s ease-in-out;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .credits {
+                margin-top: 20px;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .credits .ai-badge {
+                padding: 3px 8px;
+                font-size: 12px;
+            }
+
+            .buttons-row {
+                flex-direction: column;
+            }
+
+            .btn {
+                min-width: 100%;
+            }
+        }
+
+        /* Yapım bilgisi footer */
+        .credits {
+            margin-top: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #e74c3c, #f39c12, #f1c40f, #27ae60, #3498db, #9b59b6);
+            background-size: 300% 300%;
+            animation: rainbow 3s ease infinite;
+            padding: 15px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .credits .emoji {
+            display: inline-block;
+            animation: bounce 2s infinite;
+            margin: 0 5px;
+        }
+
+        .credits .ai-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 0 5px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Başlık -->
+        <div class="header">
+            <h1>🐸 Kurbağa Labirenti 🧀</h1>
+            <div class="hint">
+                🎯 Amaç: Kurbağayı peynire ulaştır! Komutları yazıp çalıştır butonuna bas.
+            </div>
+        </div>
+
+        <!-- Oyun alanı -->
+        <div class="game-area">
+            <!-- Labirent -->
+            <div class="maze-container">
+                <div class="maze" id="maze"></div>
+            </div>
+
+            <!-- Kontroller -->
+            <div class="controls">
+                <div class="control-group">
+                    <label for="commands">Komutları gir (- veya , ile ayır):</label>
+                    <input 
+                        type="text" 
+                        id="commands" 
+                        class="command-input"
+                        placeholder="sağ-düz-düz-düz-sol-düz"
+                        value="sağ-düz-düz-düz-sol-düz"
+                    >
+                    <div class="error-message" id="error-message"></div>
+                </div>
+
+                <div class="buttons-row">
+                    <button class="btn btn-primary" id="run-btn" onclick="runProgram()">
+                        ▶️ Çalıştır
+                    </button>
+                    <button class="btn btn-secondary" id="reset-btn" onclick="resetGame()">
+                        🔄 Sıfırla
+                    </button>
+                    <div class="speed-selector">
+                        <label for="speed">Hız:</label>
+                        <select id="speed">
+                            <option value="250">Hızlı (0.25s)</option>
+                            <option value="500">Orta (0.5s)</option>
+                            <option value="1000" selected>Yavaş (1s)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Durum göstergesi -->
+            <div class="status ready" id="status">
+                🟢 Hazır - Komutları gir ve çalıştır!
+            </div>
+        </div>
+
+        <!-- Yapım Bilgisi -->
+        <div class="credits">
+            <span class="emoji">🎮</span>
+            <strong>Mehmet Emir Gündoğan</strong> tarafından 
+            <span class="ai-badge">🤖 Yapay Zeka</span>
+            'ya yaptırılmış prototip oyun
+            <span class="emoji">✨</span>
+        </div>
+    </div>
+
+    <script>
+        // Oyun durumu ve değişkenler
+        let gameState = {
+            frogPosition: { x: 1, y: 1 },
+            frogDirection: 'up', // up, down, left, right
+            isRunning: false,
+            currentStep: 0,
+            totalSteps: 0,
+            path: [] // Kurbağanın gittiği yol
+        };
+
+        // Labirent matrisi (0=boş, 1=duvar)
+        const maze = [
+            [1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,0,0,0,0,1],
+            [1,0,1,0,1,0,1,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1,0,1],
+            [1,1,1,0,1,1,1,1,0,0,0,1],
+            [1,0,0,0,0,0,0,1,0,1,1,1],
+            [1,0,1,1,1,1,0,1,0,0,0,1],
+            [1,0,0,0,0,0,0,1,1,1,0,1],
+            [1,1,1,1,1,1,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        const startPos = { x: 1, y: 1 };
+        const cheesePos = { x: 10, y: 10 };
+
+        // Oyunu başlat
+        function initGame() {
+            renderMaze();
+            resetGame();
+        }
+
+        // Labirenti oluştur
+        function renderMaze() {
+            const mazeElement = document.getElementById('maze');
+            mazeElement.innerHTML = '';
+
+            for (let y = 0; y < 12; y++) {
+                for (let x = 0; x < 12; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${x}-${y}`;
+
+                    if (maze[y][x] === 1) {
+                        cell.classList.add('wall');
+                    } else {
+                        cell.classList.add('empty');
+                    }
+
+                    // Özel hücreler
+                    if (x === startPos.x && y === startPos.y) {
+                        cell.classList.add('start');
+                        cell.textContent = 'BAŞLA';
+                    } else if (x === cheesePos.x && y === cheesePos.y) {
+                        cell.classList.add('cheese');
+                        cell.textContent = '🧀';
+                    }
+
+                    mazeElement.appendChild(cell);
+                }
+            }
+        }
+
+        // Kurbağayı render et
+        function renderFrog() {
+            // Önce tüm kurbağaları temizle
+            document.querySelectorAll('.frog').forEach(frog => frog.remove());
+
+            // Yeni konumda kurbağa ekle
+            const cell = document.getElementById(`cell-${gameState.frogPosition.x}-${gameState.frogPosition.y}`);
+            if (cell) {
+                const frog = document.createElement('div');
+                frog.className = `frog direction-${gameState.frogDirection}`;
+                frog.textContent = '🐸';
+                
+                cell.appendChild(frog);
+            }
+        }
+
+        // Komutları parse et
+        function parseCommands(input) {
+            if (!input.trim()) {
+                throw new Error('Komut girmelisin!');
+            }
+
+            const commands = input.toLowerCase()
+                .replace(/[,\s]+/g, '-')
+                .split('-')
+                .filter(cmd => cmd.length > 0);
+
+            const validCommands = ['sağ', 'sol', 'düz', 'geri', 'sag', 'saga'];
+            const invalidCommands = [];
+
+            commands.forEach(cmd => {
+                // Küçük tolerans sağla
+                const normalized = cmd.replace(/ğ/g, 'g').replace(/ı/g, 'i');
+                if (!validCommands.includes(cmd) && !validCommands.includes(normalized)) {
+                    invalidCommands.push(cmd);
+                }
+            });
+
+            if (invalidCommands.length > 0) {
+                throw new Error(`Geçersiz komut(lar): ${invalidCommands.join(', ')}`);
+            }
+
+            if (commands.length > 200) {
+                throw new Error('Çok fazla komut! Lütfen 200\'den az komut girin.');
+            }
+
+            return commands;
+        }
+
+        // Yön değiştir
+        function turnDirection(currentDir, command) {
+            const directions = ['up', 'right', 'down', 'left'];
+            const currentIndex = directions.indexOf(currentDir);
+
+            if (command === 'sağ' || command === 'sag' || command === 'saga') {
+                return directions[(currentIndex + 1) % 4];
+            } else if (command === 'sol') {
+                return directions[(currentIndex + 3) % 4];
+            }
+            return currentDir;
+        }
+
+        // İleri hareket et
+        function moveForward(pos, direction, steps = 1) {
+            const newPos = { ...pos };
+            
+            for (let i = 0; i < steps; i++) {
+                let nextX = newPos.x;
+                let nextY = newPos.y;
+
+                switch (direction) {
+                    case 'up': nextY--; break;
+                    case 'down': nextY++; break;
+                    case 'left': nextX--; break;
+                    case 'right': nextX++; break;
+                }
+
+                // Sınır ve duvar kontrolü
+                if (nextX < 0 || nextX >= 12 || nextY < 0 || nextY >= 12 || maze[nextY][nextX] === 1) {
+                    return { position: newPos, blocked: true };
+                }
+
+                newPos.x = nextX;
+                newPos.y = nextY;
+            }
+
+            return { position: newPos, blocked: false };
+        }
+
+        // Tek adım uygula - duvara çarpınca true döner (oyun dursun)
+        function executeStep(command) {
+            const normalizedCommand = command.replace(/ğ/g, 'g').replace(/ı/g, 'i');
+            
+            if (normalizedCommand === 'sag' || normalizedCommand === 'saga' || command === 'sağ') {
+                gameState.frogDirection = turnDirection(gameState.frogDirection, 'sağ');
+                return false; // Dönerken duvara çarpmaz
+            } else if (command === 'sol') {
+                gameState.frogDirection = turnDirection(gameState.frogDirection, 'sol');
+                return false; // Dönerken duvara çarpmaz
+            } else if (command === 'düz' || command === 'duz') {
+                const result = moveForward(gameState.frogPosition, gameState.frogDirection);
+                if (result.blocked) {
+                    // Duvara çarpma efekti
+                    const frog = document.querySelector('.frog');
+                    if (frog) {
+                        frog.classList.add('shake');
+                        setTimeout(() => frog.classList.remove('shake'), 300);
+                    }
+                    return true; // Duvara çarptı, oyunu durdur
+                } else {
+                    // İz bırak
+                    const currentCell = document.getElementById(`cell-${gameState.frogPosition.x}-${gameState.frogPosition.y}`);
+                    if (currentCell && !currentCell.classList.contains('start')) {
+                        currentCell.classList.add('path');
+                    }
+                    
+                    gameState.frogPosition = result.position;
+                    gameState.path.push({ ...result.position });
+                    return false; // Başarılı hareket
+                }
+            } else if (command === 'geri') {
+                // Ters yöne dön, ilerle, sonra tekrar eski yöne dön
+                const originalDir = gameState.frogDirection;
+                gameState.frogDirection = turnDirection(gameState.frogDirection, 'sağ');
+                gameState.frogDirection = turnDirection(gameState.frogDirection, 'sağ');
+                
+                const result = moveForward(gameState.frogPosition, gameState.frogDirection);
+                gameState.frogDirection = originalDir; // Yönü geri döndür
+                
+                if (result.blocked) {
+                    const frog = document.querySelector('.frog');
+                    if (frog) {
+                        frog.classList.add('shake');
+                        setTimeout(() => frog.classList.remove('shake'), 300);
+                    }
+                    return true; // Duvara çarptı, oyunu durdur
+                } else {
+                    const currentCell = document.getElementById(`cell-${gameState.frogPosition.x}-${gameState.frogPosition.y}`);
+                    if (currentCell && !currentCell.classList.contains('start')) {
+                        currentCell.classList.add('path');
+                    }
+                    
+                    gameState.frogPosition = result.position;
+                    gameState.path.push({ ...result.position });
+                    return false; // Başarılı hareket
+                }
+            }
+            
+            return false; // Varsayılan: oyun devam etsin
+        }
+
+        // Oyunu sıfırla
+        function resetGame() {
+            gameState.frogPosition = { ...startPos };
+            gameState.frogDirection = 'up';
+            gameState.isRunning = false;
+            gameState.currentStep = 0;
+            gameState.totalSteps = 0;
+            gameState.path = [];
+
+            // İzleri temizle
+            document.querySelectorAll('.path').forEach(cell => {
+                cell.classList.remove('path');
+            });
+
+            renderFrog();
+            updateStatus('ready', '🟢 Hazır - Komutları gir ve çalıştır!');
+            
+            // Butonları etkinleştir
+            document.getElementById('run-btn').disabled = false;
+            document.getElementById('reset-btn').disabled = false;
+            
+            // Hata mesajını gizle
+            hideError();
+        }
+
+        // Durumu güncelle
+        function updateStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+
+        // Hata göster
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Hata gizle
+        function hideError() {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.style.display = 'none';
+        }
+
+        // Başarı kontrolü
+        function checkWin() {
+            return gameState.frogPosition.x === cheesePos.x && gameState.frogPosition.y === cheesePos.y;
+        }
+
+        // Programı çalıştır
+        async function runProgram() {
+            hideError();
+            
+            const commandsInput = document.getElementById('commands');
+            const speed = parseInt(document.getElementById('speed').value);
+
+            try {
+                const commands = parseCommands(commandsInput.value);
+                
+                gameState.isRunning = true;
+                gameState.currentStep = 0;
+                gameState.totalSteps = commands.length;
+
+                // Butonları devre dışı bırak
+                document.getElementById('run-btn').disabled = true;
+                document.getElementById('reset-btn').disabled = true;
+
+                for (let i = 0; i < commands.length; i++) {
+                    if (!gameState.isRunning) break;
+
+                    gameState.currentStep = i + 1;
+                    updateStatus('running', `🏃 Yürüyor (${gameState.currentStep}/${gameState.totalSteps})`);
+
+                    const hitWall = executeStep(commands[i]);
+                    renderFrog();
+
+                    // Duvara çarpma kontrolü
+                    if (hitWall) {
+                        updateStatus('fail', '🧱 Duvara çarptın! Yolunu kontrol et ve tekrar dene.');
+                        break;
+                    }
+
+                    // Kazanma kontrolü
+                    if (checkWin()) {
+                        updateStatus('success', '🎉 Tebrikler! Peyniri buldun! 🧀✨');
+                        break;
+                    }
+
+                    // Bekleme
+                    await new Promise(resolve => setTimeout(resolve, speed));
+                }
+
+                // Eğer kazanmadıysa
+                if (gameState.isRunning && !checkWin()) {
+                    updateStatus('fail', '❌ Tekrar dene! Peynire ulaşamadın.');
+                }
+
+                gameState.isRunning = false;
+
+                // Butonları yeniden etkinleştir
+                document.getElementById('run-btn').disabled = false;
+                document.getElementById('reset-btn').disabled = false;
+
+            } catch (error) {
+                showError(error.message);
+                updateStatus('fail', '❌ Hata! Komutlarını kontrol et.');
+                
+                // Butonları yeniden etkinleştir
+                document.getElementById('run-btn').disabled = false;
+                document.getElementById('reset-btn').disabled = false;
+            }
+        }
+
+        // Enter tuşu desteği
+        document.getElementById('commands').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !gameState.isRunning) {
+                runProgram();
+            }
+        });
+
+        // Sayfa yüklendiğinde oyunu başlat
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
