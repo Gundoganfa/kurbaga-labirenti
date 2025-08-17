@@ -1,0 +1,24 @@
+# Kebapci oyunu - henüz geliştirme aşamasında
+Kebapci/
+
+# Genel dosyalar
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# IDE dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node.js (gelecekte kullanılırsa)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Geçici dosyalar
+temp/
+tmp/
