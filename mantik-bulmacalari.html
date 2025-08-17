@@ -48,11 +48,43 @@
 		.p.on { background: #06b6d4; }
 		.p.off { background: #c7d2fe; opacity: 0.6; }
 
-		.board { display: grid; gap: 4px; background: #e6eef7; padding: 10px; border-radius: 12px; border: 1px solid #d5e3f2; box-shadow: inset 0 0 12px rgba(0,0,0,0.05); }
-		.cell { width: 52px; height: 52px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; cursor: pointer; user-select: none; outline: none; }
+		.board {
+		display: grid;
+		gap: 4px;
+		background: #e6eef7;
+		padding: 10px;
+		border-radius: 12px;
+		border: 1px solid #d5e3f2;
+		box-shadow: inset 0 0 12px rgba(0,0,0,0.05);
+
+		/* Yeni: responsive kare ızgara */
+		width: 100%;
+		max-width: min(96vw, 560px); /* telefonda ekran içine sığsın */
+		grid-template-columns: repeat(var(--size), 1fr);
+		}
+
+		.cell {
+		/* Eski width/height yerine kare oranı */
+		aspect-ratio: 1 / 1;
+		width: 100%;
+
+		border-radius: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 800;
+		cursor: pointer;
+		user-select: none;
+		outline: none;
+
+		/* Yazı boyutu da esnek olsun */
+		font-size: clamp(11px, 3.2vw, 18px);
+		}
+
 		.cell.on { background: linear-gradient(180deg, #22d3ee, #06b6d4); color: #083344; border: 2px solid #0891b2; }
 		.cell.off { background: linear-gradient(180deg, #e2e8f0, #cbd5e1); color: #475569; border: 2px solid #cbd5e1; }
 		.cell:focus { box-shadow: 0 0 0 3px rgba(99,102,241,0.35); }
+
 		.cell.hint { animation: hintPulse 1s ease-in-out 2; box-shadow: 0 0 0 4px rgba(250,204,21,0.6) !important; }
 		@keyframes hintPulse { 0%{ transform: scale(1)} 50%{ transform: scale(1.05)} 100%{ transform: scale(1)} }
 
@@ -323,31 +355,33 @@
 			}
 		}
 
-		function renderBoard(){
+		function renderBoard() {
 			const b = document.getElementById('board');
-			b.style.gridTemplateColumns = `repeat(${state.size}, 52px)`;
-			b.style.gridTemplateRows = `repeat(${state.size}, 52px)`;
+			// Yeni: grid sütun sayısını CSS değişkeni ile ver
+			b.style.setProperty('--size', state.size);
+
 			b.innerHTML = '';
-			for (let y=0;y<state.size;y++){
-				for (let x=0;x<state.size;x++){
-					const cell = document.createElement('button');
-					cell.type = 'button';
-					cell.id = `cell-${x}-${y}`;
-					cell.className = 'cell ' + (state.board[y][x] ? 'on':'off');
-					cell.setAttribute('role','gridcell');
-					cell.setAttribute('aria-label', `Hücre ${x+1}, ${y+1}`);
-					cell.addEventListener('click', () => clickCell(x,y));
-					b.appendChild(cell);
+			for (let y = 0; y < state.size; y++) {
+				for (let x = 0; x < state.size; x++) {
+				const cell = document.createElement('button');
+				cell.type = 'button';
+				cell.id = `cell-${x}-${y}`;
+				cell.className = 'cell ' + (state.board[y][x] ? 'on' : 'off');
+				cell.setAttribute('role', 'gridcell');
+				cell.setAttribute('aria-label', `Hücre ${x + 1}, ${y + 1}`);
+				cell.addEventListener('click', () => clickCell(x, y));
+				b.appendChild(cell);
 				}
-			}
-			// odak
-			focusCell(state.focus.x, state.focus.y);
+			}		
+			const fx = Math.min(state.size - 1, Math.max(0, state.focus.x));
+			const fy = Math.min(state.size - 1, Math.max(0, state.focus.y));
+			focusCell(fx, fy);
 		}
 
-		function focusCell(x,y){
-			state.focus = {x,y};
+		function focusCell(x, y) {
+			state.focus = { x, y };
 			const el = document.getElementById(`cell-${x}-${y}`);
-			if (el) el.focus();
+			if (el) el.focus({ preventScroll: true });
 		}
 
 		function moveFocus(dx,dy){
