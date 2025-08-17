@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Masa Tenisi</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:Arial,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,"Helvetica Neue",sans-serif;background:#003500;}
+  canvas{display:block;width:100%;height:100%;background:#006400;touch-action:none;pointer-events:none;} /* menüyle asla çakışmasın */
+
+  /* UI */
+  .controls{position:absolute;width:100%;display:flex;justify-content:space-between;padding:20px;z-index:6;pointer-events:auto;}
+  .controls button{width:80px;height:80px;border-radius:50%;border:none;font-size:32px;font-weight:700;background:rgba(255,255,255,.85);cursor:pointer}
+  #top-controls{top:10px;display:none}
+  #bottom-controls{bottom:10px;display:none}
+  #pauseBtn{position:absolute;top:50%;left:10px;transform:translateY(-50%);width:60px;height:60px;border-radius:50%;border:none;font-size:24px;background:rgba(255,255,255,.85);z-index:7;display:none;cursor:pointer}
+
+  /* Overlays */
+  #menu,#pauseMenu,#aboutOverlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.8);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    color:#fff;z-index:1000;pointer-events:auto;text-align:center;padding:20px
+  }
+  #pauseMenu{display:none}
+  #aboutOverlay{background:rgba(0,0,0,.9);display:none}
+  #aboutOverlay.show{display:flex}
+  #menu h1,#pauseMenu h1{margin:0 0 16px 0;font-size:42px}
+  #menu button,#pauseMenu button,#aboutOverlay button{
+    padding:14px 28px;margin:8px;font-size:18px;border:none;border-radius:10px;background:#fff;color:#000;cursor:pointer
+  }
+
+  #scoreBoard{
+    position:absolute;top:50%;right:10px;transform:translateY(-50%);
+    background:rgba(255,255,255,.2);border:2px solid #fff;padding:10px;border-radius:10px;
+    color:#fff;font-size:24px;text-align:center;width:60px;z-index:4;display:none
+  }
+  #scoreBoard div{padding:4px 0}
+  #countdown{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;color:#fff;z-index:900;text-shadow:0 8px 24px rgba(0,0,0,.6)}
+  .controls button:active,#pauseBtn:active{transform:scale(.95) translateY(-1px)}
+  *{-webkit-user-select:none;user-select:none}
+</style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="menu">
+    <h1>Masa Tenisi</h1>
+    <button id="singleBtn">Single Player</button>
+    <button id="multiBtn">Multiplayer</button>
+    <button id="aboutBtn">Hakkında</button>
+    <a href="index.html" style="padding:14px 28px;margin:8px;font-size:18px;border:none;border-radius:10px;background:#fff;color:#000;cursor:pointer;text-decoration:none;display:inline-block;">🏠 Ana Sayfa</a>
+  </div>
+
+  <div id="aboutOverlay">
+    <h1>Masa Tenisi</h1>
+    <p>Versiyon: v1.0</p>
+    <p>Basit bir masa tenisi oyunu. Tek/Çok oyuncu, duraklatma ve geri sayım destekli.</p>
+    <button id="closeAboutBtn">Kapat</button>
+  </div>
+
+  <div id="pauseMenu">
+    <h1>Duraklatıldı</h1>
+    <button id="resumeBtn">Devam</button>
+    <button id="resetBtn">Sıfırla</button>
+    <button id="mainMenuBtn">Ana Menü</button>
+  </div>
+
+  <button id="pauseBtn">II</button>
+
+  <div id="scoreBoard">
+    <div id="scoreP1">0</div>
+    <div id="scoreP2">0</div>
+  </div>
+
+  <div id="top-controls" class="controls">
+    <button id="p2-left">◀</button>
+    <button id="p2-right">▶</button>
+  </div>
+  <div id="bottom-controls" class="controls">
+    <button id="p1-left">◀</button>
+    <button id="p1-right">▶</button>
+  </div>
+
+  <div id="countdown">3</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Safe query helper
+  const $ = (id)=>document.getElementById(id);
+
+  const canvas = $('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // UI refs
+  const menu = $('menu');
+  const pauseMenu = $('pauseMenu');
+  const pauseBtn = $('pauseBtn');
+  const about = $('aboutOverlay');
+  const countdownEl = $('countdown');
+  const scoreP1El = $('scoreP1');
+  const scoreP2El = $('scoreP2');
+  const scoreBoard = $('scoreBoard');
+  const topCtr = $('top-controls');
+  const bottomCtr = $('bottom-controls');
+
+  // Buttons (null-safe)
+  $('aboutBtn')?.addEventListener('click', ()=>about.classList.add('show'));
+  $('closeAboutBtn')?.addEventListener('click', ()=>about.classList.remove('show'));
+  $('singleBtn')?.addEventListener('click', ()=>startGame('single'));
+  $('multiBtn')?.addEventListener('click', ()=>startGame('multi'));
+  $('resumeBtn')?.addEventListener('click', ()=>resumeWithCountdown());
+  $('resetBtn')?.addEventListener('click', ()=>{ resetScores(); serveWithCountdown(); });
+  $('mainMenuBtn')?.addEventListener('click', ()=>backToMenu());
+  pauseBtn?.addEventListener('click', ()=>pauseGame());
+
+  // Mobile control press/hold helpers
+  function hold(button, on, off){
+    if(!button) return;
+    const start=e=>{ e.preventDefault(); on(); };
+    const end  =e=>{ e.preventDefault(); off(); };
+    ['pointerdown','touchstart','mousedown'].forEach(ev=>button.addEventListener(ev,start,{passive:false}));
+    ['pointerup','pointercancel','touchend','touchcancel','mouseup','mouseleave'].forEach(ev=>button.addEventListener(ev,end,{passive:false}));
+  }
+  hold($('p1-left'),  ()=>input.p1Left=true,  ()=>input.p1Left=false);
+  hold($('p1-right'), ()=>input.p1Right=true, ()=>input.p1Right=false);
+  hold($('p2-left'),  ()=>input.p2Left=true,  ()=>input.p2Left=false);
+  hold($('p2-right'), ()=>input.p2Right=true, ()=>input.p2Right=false);
+
+  // Game state
+  let W=0,H=0,dpr=Math.max(1,window.devicePixelRatio||1);
+  let mode='single'; // 'single' | 'multi'
+  let running=false, paused=false, rafId=0, lastTime=0;
+
+  const input={p1Left:false,p1Right:false,p2Left:false,p2Right:false};
+  const score={p1:0,p2:0};
+
+  const p1={x:0,y:0,w:140,h:14,speed:600};
+  const p2={x:0,y:0,w:140,h:14,speed:600};
+  const ball={x:0,y:0,r:8,vx:0,vy:0,speedBase:380,speedMax:1200};
+
+  // DPI-aware canvas
+  function resizeCanvas(){
+    dpr=Math.max(1,window.devicePixelRatio||1);
+    const rect=canvas.getBoundingClientRect();
+    canvas.width=Math.round(rect.width*dpr);
+    canvas.height=Math.round(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    W=rect.width; H=rect.height;
+    p1.y=H-30; p2.y=30;
+    p1.x=clamp(p1.x||W/2,p1.w/2,W-p1.w/2);
+    p2.x=clamp(p2.x||W/2,p2.w/2,W-p2.w/2);
+    drawTable();
+  }
+  window.addEventListener('resize', resizeCanvas, {passive:true});
+  resizeCanvas();
+
+  // Keyboard
+  document.addEventListener('keydown', (e)=>{
+    switch(e.code){
+      case 'ArrowLeft': input.p1Left=true; e.preventDefault(); break;
+      case 'ArrowRight': input.p1Right=true; e.preventDefault(); break;
+      case 'KeyA': input.p2Left=true; break;
+      case 'KeyD': input.p2Right=true; break;
+      case 'Space':
+        if(running && !paused) pauseGame();
+        e.preventDefault();
+        break;
+    }
+  }, {passive:false});
+  document.addEventListener('keyup', (e)=>{
+    switch(e.code){
+      case 'ArrowLeft': input.p1Left=false; break;
+      case 'ArrowRight': input.p1Right=false; break;
+      case 'KeyA': input.p2Left=false; break;
+      case 'KeyD': input.p2Right=false; break;
+    }
+  });
+
+  function startGame(selectedMode){
+    mode=selectedMode;
+    menu.style.display='none';
+    about.classList.remove('show');
+    pauseMenu.style.display='none';
+    pauseBtn.style.display='block';
+    scoreBoard.style.display='block';
+    bottomCtr.style.display='flex';
+    topCtr.style.display=(mode==='multi'?'flex':'none');
+
+    resetScores();
+    centerPaddles();
+    serveWithCountdown();
+  }
+
+  function backToMenu(){
+    running=false; paused=false; cancelAnimationFrame(rafId);
+    menu.style.display='flex';
+    pauseMenu.style.display='none';
+    pauseBtn.style.display='none';
+    scoreBoard.style.display='none';
+    topCtr.style.display='none';
+    bottomCtr.style.display='none';
+    drawTable();
+  }
+
+  function pauseGame(){
+    if(!running || paused) return;
+    paused=true;
+    pauseMenu.style.display='flex';
+    cancelAnimationFrame(rafId);
+  }
+  function resumeWithCountdown(){
+    if(!paused) return;
+    pauseMenu.style.display='none';
+    startCountdown(3, ()=>{
+      paused=false; lastTime=performance.now(); loop(lastTime);
+    });
+  }
+
+  function resetScores(){ score.p1=0; score.p2=0; updateScoreUI(); }
+  function updateScoreUI(){ scoreP1El.textContent=score.p1; scoreP2El.textContent=score.p2; }
+  function centerPaddles(){ p1.x=W/2; p1.y=H-30; p2.x=W/2; p2.y=30; }
+
+  function serveWithCountdown(loser=null){
+    running=false; ball.x=W/2; ball.y=H/2; ball.vx=0; ball.vy=0;
+    startCountdown(3, ()=>{
+      const angle=randRange(-0.35,0.35);
+      const dir=(loser==='p1')?1:(loser==='p2')?-1:(Math.random()<0.5?-1:1);
+      const speed=ball.speedBase;
+      ball.vx=Math.sin(angle)*speed;
+      ball.vy=Math.cos(angle)*speed*dir;
+      lastTime=performance.now();
+      running=true; paused=false;
+      loop(lastTime);
+    });
+  }
+
+  function startCountdown(n=3,done){
+    countdownEl.style.display='block';
+    let i=n; countdownEl.textContent=i;
+    const iv=setInterval(()=>{
+      i--;
+      if(i>0){ countdownEl.textContent=i; }
+      else{
+        countdownEl.textContent='GO!';
+        setTimeout(()=>{ countdownEl.style.display='none'; clearInterval(iv); done&&done(); },400);
+      }
+    },1000);
+  }
+
+  function loop(ts){
+    if(!running || paused) return;
+    const dt=Math.min(0.032,(ts-lastTime)/1000); lastTime=ts;
+    update(dt); draw(); rafId=requestAnimationFrame(loop);
+  }
+
+  function update(dt){
+    // Paddles
+    const p1dir=(input.p1Right?1:0)-(input.p1Left?1:0);
+    p1.x=clamp(p1.x+p1dir*p1.speed*dt, p1.w/2, W-p1.w/2);
+
+    if(mode==='multi'){
+      const p2dir=(input.p2Right?1:0)-(input.p2Left?1:0);
+      p2.x=clamp(p2.x+p2dir*p2.speed*dt, p2.w/2, W-p2.w/2);
+    }else{
+      const target=ball.x, diff=target-p2.x, aiSpeed=520;
+      p2.x=clamp(p2.x+clamp(diff,-aiSpeed*dt,aiSpeed*dt), p2.w/2, W-p2.w/2);
+    }
+
+    // Ball
+    ball.x+=ball.vx*dt; ball.y+=ball.vy*dt;
+
+    // Walls
+    if(ball.x-ball.r<=0){ ball.x=ball.r; ball.vx=Math.abs(ball.vx); }
+    if(ball.x+ball.r>=W){ ball.x=W-ball.r; ball.vx=-Math.abs(ball.vx); }
+
+    // Paddle collisions
+    if(ball.vy>0 && ball.y+ball.r>=p1.y-p1.h/2 && ball.y-ball.r<=p1.y+p1.h/2 && Math.abs(ball.x-p1.x)<=p1.w/2+ball.r){
+      collideWithPaddle(p1,+1);
+    }
+    if(ball.vy<0 && ball.y-ball.r<=p2.y+p2.h/2 && ball.y+ball.r>=p2.y-p2.h/2 && Math.abs(ball.x-p2.x)<=p2.w/2+ball.r){
+      collideWithPaddle(p2,-1);
+    }
+
+    // Scoring
+    if(ball.y-ball.r>H){ score.p2++; updateScoreUI(); serveWithCountdown('p1'); }
+    else if(ball.y+ball.r<0){ score.p1++; updateScoreUI(); serveWithCountdown('p2'); }
+  }
+
+  function collideWithPaddle(p,dirY){
+    ball.y=p.y+dirY*(p.h/2+ball.r+0.1);
+    const rel=clamp((ball.x-p.x)/(p.w/2),-1,1);
+    const maxAngle=Math.PI*0.55/2; // ~50°
+    const angle=rel*maxAngle;
+    const speed=clamp(Math.hypot(ball.vx,ball.vy)*1.05,ball.speedBase,ball.speedMax);
+    ball.vx=Math.sin(angle)*speed;
+    ball.vy=Math.cos(angle)*speed*-dirY;
+    if(Math.abs(ball.vy)<120) ball.vy=120*-dirY;
+  }
+
+  function drawTable(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#006400'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=2; ctx.setLineDash([10,10]);
+    ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke(); ctx.setLineDash([]);
+  }
+  function draw(){
+    drawTable();
+    ctx.fillStyle='#fff';
+    drawRectCentered(p1.x,p1.y,p1.w,p1.h);
+    drawRectCentered(p2.x,p2.y,p2.w,p2.h);
+    ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+  }
+
+  // Utils
+  function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+  function randRange(a,b){ return a+Math.random()*(b-a); }
+  function drawRectCentered(x,y,w,h){ ctx.fillRect(x-w/2,y-h/2,w,h); }
+
+  // İlk çizim (arka plan)
+  drawTable();
+
+  // Basit global hata yakalayıcı (butonlar bağlanmazsa gör)
+  window.addEventListener('error', (e)=>{
+    alert('Hata: '+(e?.message||'bilinmiyor'));
+  });
+});
+</script>
+</body>
+</html>
