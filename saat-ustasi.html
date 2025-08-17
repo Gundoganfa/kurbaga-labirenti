@@ -51,6 +51,8 @@
 			border: 6px solid rgba(255,255,255,0.08);
 			box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 8px 30px rgba(0,0,0,0.35);
 			position: relative;
+			/* Drag için dokunma hareketini devre dışı bırak (mobilde kaydırma olmasın) */
+			touch-action: none;
 		}
 		.face-mark { position: absolute; inset: 6px; border-radius: 50%; }
 		/* saat çizgileri */
@@ -59,9 +61,10 @@
 
 		.center-dot { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 16px rgba(245,158,11,0.6); }
 
-		.hand { position: absolute; left: 50%; top: 50%; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); border-radius: 6px; }
+		.hand { position: absolute; left: 50%; top: 50%; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); border-radius: 6px; cursor: grab; }
 		.hand.hour { width: 10px; height: 84px; background: linear-gradient(180deg, #fca5a5, #ef4444); box-shadow: 0 0 12px rgba(239,68,68,0.45); }
 		.hand.minute { width: 6px; height: 120px; background: linear-gradient(180deg, #86efac, #22c55e); box-shadow: 0 0 12px rgba(34,197,94,0.45); }
+		.hand.dragging { cursor: grabbing; }
 
 		.digital { font-size: 1.3rem; font-weight: 900; color: #a7f3d0; }
 		.target { font-size: 1.1rem; color: #fde68a; }
@@ -122,14 +125,14 @@
 			<div class="clock-wrap">
 				<div class="clock" id="clock">
 					<div class="face-mark" id="marks"></div>
-					<div class="hand hour" id="h"></div>
-					<div class="hand minute" id="m"></div>
+					<div class="hand hour" id="h" title="Akrep: sürükle"></div>
+					<div class="hand minute" id="m" title="Yelkovan: sürükle"></div>
 					<div class="center-dot"></div>
 					<div class="confetti" id="confetti"></div>
 				</div>
 				<div class="digital">Senin saatin: <span id="digital">12:00</span></div>
 				<div class="target">🎯 Hedef: <span id="target">--:--</span></div>
-				<div id="status" class="status ready">🟢 Hazır — Akrep/Yelkovan butonlarını kullan veya klavyeden ayarla.</div>
+				<div id="status" class="status ready" aria-live="polite">🟢 Hazır — Akrep/Yelkovan butonlarını kullan, klavyeden ayarla veya sürükle.</div>
 			</div>
 
 			<div class="panel">
@@ -227,7 +230,7 @@
 			showTarget();
 		}
 
-		function setStatus(kind, text){ const s=$('status'); s.className = `status ${kind}`; s.textContent = text; }
+		function setStatus(kind, text){ const s=$('status'); s.className = `status ${kind}`; if (text!=null) s.textContent = text; }
 		function confetti(){
 			const root = $('confetti');
 			for (let i=0;i<24;i++){
@@ -267,8 +270,44 @@
 
 		function newRun(){ resetGame(); nextRound(); }
 
+		// === Drag & Drop (Pointer) ===
+		let dragging = null; // 'hour' | 'minute' | null
+
+		function getClockCenter(){
+			const rect = $('clock').getBoundingClientRect();
+			return { cx: rect.left + rect.width/2, cy: rect.top + rect.height/2 };
+		}
+
+		function angleFromPointer(e){
+			const { cx, cy } = getClockCenter();
+			const x = e.clientX - cx;
+			const y = cy - e.clientY; // ekran eksenini saat yönü için tersle
+			let deg = Math.atan2(x, y) * (180/Math.PI); // 0°: tepe, saat yönünde artar
+			if (deg < 0) deg += 360;
+			return deg;
+		}
+
+		function onPointerMove(e){
+			if (!dragging) return;
+			e.preventDefault();
+			const deg = angleFromPointer(e);
+			if (dragging === 'minute'){
+				const newM = Math.round(deg / 6) % 60; // 6° = 1 dk
+				game.current.m = (newM + 60) % 60;
+			} else if (dragging === 'hour'){
+				// Mevcut dakikayı koruyarak akrebi en yakın saate hizala
+				const base = deg - game.current.m * 0.5; // dakikanın akrep üzerindeki etkisini düş
+				let h0 = Math.round(base / 30) % 12; // 30° = 1 saat
+				if (h0 < 0) h0 += 12;
+				game.current.h = (h0 === 0 ? 12 : h0);
+			}
+			setHands();
+			setStatus('running','Sürükleniyor…');
+		}
+
 		document.addEventListener('DOMContentLoaded', ()=>{
 			marks(); setHands(); showTarget(); updateBadges(); setStatus('ready','Hazır');
+
 			$('hour-inc').addEventListener('click', ()=>incHour(+1));
 			$('hour-dec').addEventListener('click', ()=>incHour(-1));
 			$('min-inc').addEventListener('click', ()=>incMin(+1));
@@ -277,6 +316,7 @@
 			$('new-btn').addEventListener('click', newRun);
 			$('reset-btn').addEventListener('click', resetGame);
 			$('mode').addEventListener('change', ()=>{ generateTarget(); setStatus('running','Zorluk değişti, yeni hedef.'); });
+
 			// Klavye
 			document.addEventListener('keydown', (e)=>{
 				if (e.key==='ArrowLeft'){ incHour(-1); e.preventDefault(); }
@@ -285,9 +325,28 @@
 				else if (e.key==='ArrowDown'){ incMin(-1); e.preventDefault(); }
 				else if (e.key==='Enter'){ checkAnswer(); e.preventDefault(); }
 			});
+
+			// Pointer (mouse + dokunma) — akrep & yelkovan sürükleme
+			const hourEl = $('h');
+			const minEl = $('m');
+
+			function startDrag(which){
+				dragging = which;
+				(which==='hour'?hourEl:minEl).classList.add('dragging');
+			}
+			function endDrag(){
+				if (dragging){ (dragging==='hour'?hourEl:minEl).classList.remove('dragging'); }
+				dragging = null;
+				setStatus('running', null); // metni değiştirme, sınıfı koru
+			}
+
+			hourEl.addEventListener('pointerdown', (e)=>{ e.preventDefault(); startDrag('hour'); });
+			minEl.addEventListener('pointerdown', (e)=>{ e.preventDefault(); startDrag('minute'); });
+
+			document.addEventListener('pointermove', onPointerMove, { passive: false });
+			document.addEventListener('pointerup', endDrag);
+			document.addEventListener('pointercancel', endDrag);
 		});
 	</script>
 </body>
 </html>
-
-
