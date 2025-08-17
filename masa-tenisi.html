@@ -13,7 +13,8 @@
   .controls button{width:80px;height:80px;border-radius:50%;border:none;font-size:32px;font-weight:700;background:rgba(255,255,255,.85);cursor:pointer}
   #top-controls{top:10px;display:none}
   #bottom-controls{bottom:10px;display:none}
-  #pauseBtn{position:absolute;top:50%;left:10px;transform:translateY(-50%);width:60px;height:60px;border-radius:50%;border:none;font-size:24px;background:rgba(255,255,255,.85);z-index:7;display:none;cursor:pointer}
+  #pauseBtn{position:absolute;top:20px;left:20px;width:60px;height:60px;border-radius:50%;border:none;font-size:24px;background:rgba(255,255,255,.85);z-index:7;display:none;cursor:pointer}
+  #backBtn{position:absolute;top:20px;right:20px;width:60px;height:60px;border-radius:50%;border:none;font-size:20px;background:rgba(255,255,255,.85);z-index:7;display:none;cursor:pointer}
 
   /* Overlays */
   #menu,#pauseMenu,#aboutOverlay{
@@ -65,7 +66,8 @@
     <button id="mainMenuBtn">Ana Menü</button>
   </div>
 
-  <button id="pauseBtn">II</button>
+  <button id="pauseBtn">⏸️</button>
+  <button id="backBtn">🏠</button>
 
   <div id="scoreBoard">
     <div id="scoreP1">0</div>
@@ -112,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('resetBtn')?.addEventListener('click', ()=>{ resetScores(); serveWithCountdown(); });
   $('mainMenuBtn')?.addEventListener('click', ()=>backToMenu());
   pauseBtn?.addEventListener('click', ()=>pauseGame());
+  $('backBtn')?.addEventListener('click', ()=>backToMenu());
 
   // Mobile control press/hold helpers
   function hold(button, on, off){
@@ -182,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     about.classList.remove('show');
     pauseMenu.style.display='none';
     pauseBtn.style.display='block';
+    $('backBtn').style.display='block';
     scoreBoard.style.display='block';
     bottomCtr.style.display='flex';
     topCtr.style.display=(mode==='multi'?'flex':'none');
@@ -196,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     menu.style.display='flex';
     pauseMenu.style.display='none';
     pauseBtn.style.display='none';
+    $('backBtn').style.display='none';
     scoreBoard.style.display='none';
     topCtr.style.display='none';
     bottomCtr.style.display='none';
