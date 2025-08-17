@@ -925,8 +925,46 @@
             input.focus();
         }
 
+        // Mobil cihaz tespiti
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (window.innerWidth <= 768);
+        }
+
+        // Mobil için input ayarları
+        function setupMobileInput() {
+            const commandsInput = document.getElementById('commands');
+            
+            if (isMobileDevice()) {
+                // Mobilde text input'u readonly yap - klavye açılmasın
+                commandsInput.setAttribute('readonly', 'true');
+                commandsInput.style.cursor = 'default';
+                
+                // Mobilde touch ile focus olmasını engelle
+                commandsInput.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    commandsInput.blur();
+                });
+                
+                // Mobilde click ile focus olmasını engelle
+                commandsInput.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    commandsInput.blur();
+                });
+                
+                // Hint mesajını güncelle
+                const label = document.querySelector('label[for="commands"]');
+                if (label) {
+                    label.textContent = 'Komutlar (mobilde butonları kullan):';
+                }
+            }
+        }
+
         // Sayfa yüklendiğinde oyunu başlat
-        document.addEventListener('DOMContentLoaded', initGame);
+        document.addEventListener('DOMContentLoaded', () => {
+            initGame();
+            setupMobileInput();
+        });
     </script>
 </body>
 </html>
