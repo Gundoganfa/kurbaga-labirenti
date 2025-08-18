@@ -332,7 +332,10 @@
     UI.timer.textContent = `⏱️ ${formatTime(S.timeLeft)}`;
     if(S.turboActive){
       UI.turboBadge.hidden = false;
-      UI.turboBadge.textContent = `Turbo ${Math.ceil(S.turboTime)}s`;
+      // Keep icon-only; update accessible title/label with remaining time
+      const tLeft = Math.ceil(S.turboTime);
+      UI.turboBadge.title = `Turbo ${tLeft}s`;
+      UI.turboBadge.setAttribute('aria-label', `Turbo ${tLeft}s`);
     }else UI.turboBadge.hidden = true;
   }
 

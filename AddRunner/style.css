@@ -61,14 +61,15 @@ body{
 .start-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px}
 
 /* Game Layout */
-.game{display:grid; grid-template-rows:auto 1fr auto; gap:10px; padding:10px; width:100%}
+.game{display:grid; grid-template-rows:auto 1fr auto; gap:10px; padding:10px; width:100%; height:100dvh; overflow:hidden}
 .hud{background:var(--surface); border-radius:var(--radius); padding:10px}
-.hud__row{display:flex; align-items:center; justify-content:space-between; gap:10px}
-.problem{font-size:clamp(22px,6vw,34px); font-weight:800; letter-spacing:.5px}
+.hud__row{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.problem{font-size:clamp(22px,6vw,34px); font-weight:800; letter-spacing:.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .hearts{font-size:clamp(18px,4.5vw,26px)}
-.stats{display:flex; gap:10px; align-items:center; color:var(--muted)}
-.badge{background:linear-gradient(180deg,#32d06a,#25a34f); color:#04290f; padding:4px 8px; border-radius:999px; font-weight:800}
-.controls{display:flex; gap:6px}
+.stats{display:flex; gap:8px; align-items:center; color:var(--muted); flex:1 1 auto; min-width:0; flex-wrap:wrap; overflow:hidden}
+.stats > span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.badge{background:linear-gradient(180deg,#32d06a,#25a34f); color:#04290f; padding:3px 6px; border-radius:999px; font-weight:800; font-size:12px; white-space:nowrap}
+.controls{display:flex; gap:6px; flex:0 0 auto}
 
 .scene-wrap{background:linear-gradient(180deg,#0b1329,#0b1430); border-radius:var(--radius); overflow:hidden; position:relative}
 .scene{width:100%; height:100%; display:block}
@@ -91,7 +92,38 @@ body{
 
 /* Portrait defaults */
 @media (orientation: portrait){
-  .scene-wrap{min-height:min(46vh,480px)}
+  /* Fix grid row heights so HUD cannot grow and push content */
+  .game{grid-template-rows: 104px 1fr auto}
+  /* Lock HUD height in portrait */
+  .hud{position:relative; height:104px; overflow:hidden}
+  /* Reserve enough space for the answers (2x2) so they don't get pushed off-screen */
+  .answers{min-height:calc(var(--btn-h) * 2 + 10px)}
+  /* Allow scene to shrink a bit more when HUD grows (e.g., Turbo badge shows) */
+  .scene-wrap{min-height:min(36vh,400px)}
+}
+
+/* Compact HUD for narrow screens to avoid overflow */
+@media (max-width: 480px){
+  :root{ --btn-h: 52px }
+  .hud{position:relative; height:104px; overflow:hidden}
+  .hud__row{row-gap:6px}
+  .stats{gap:6px}
+  .problem{font-size:clamp(20px,5.5vw,28px)}
+  .stats > span{font-size:12px}
+  .icon-btn{width:40px; height:40px}
+  #turboBadge.badge{font-size:11px; padding:2px 6px; position:absolute; right:56px; top:8px}
+  /* Move controls to next line and right-align */
+  .hearts{order:1}
+  .stats{order:2}
+  .controls{order:3; width:100%; justify-content:flex-end}
+}
+
+/* Extra narrow phones */
+@media (max-width: 360px){
+  .hud{max-height:88px}
+  .problem{font-size:clamp(18px,5vw,24px)}
+  #turboBadge.badge{top:4px; right:52px}
+  .scene-wrap{min-height:min(36vh,380px)}
 }
 
 /* Reduced motion */
