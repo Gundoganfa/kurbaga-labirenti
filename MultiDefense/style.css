@@ -1,0 +1,72 @@
+:root{
+  --bg:#0b0f1a; --surface:#101a2b; --accent:#2f7bfd; --good:#33d07a; --bad:#ff5d5d; --muted:#9fb0d9;
+  --text:#e8f0ff; --shadow:rgba(0,0,0,.35); --radius:14px; --btn-h:56px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;}
+body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto; color:var(--text); background:linear-gradient(180deg,#0b0f1a,#0b1329);}
+
+.app{min-height:100dvh; display:flex; align-items:stretch; justify-content:center;}
+
+/* Shared UI */
+.title{font-size:clamp(24px,6vw,36px); margin:10px 0}
+.subtitle{font-size:clamp(14px,4vw,18px); color:var(--muted); margin:6px 0 12px}
+.screen,.overlay{position:fixed; inset:0; display:grid; place-items:center; background:rgba(8,12,22,.65);}
+.screen[hidden],.overlay[hidden]{display:none}
+.screen__panel,.overlay__panel{background:var(--surface); border-radius:var(--radius); padding:16px 14px; width:min(92vw,520px); box-shadow:0 10px 24px var(--shadow)}
+
+.btn,.icon-btn,.answer{cursor:pointer; border:none; border-radius:12px; background:var(--surface); color:var(--text); box-shadow:0 6px 16px var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);}
+.btn{padding:14px 18px; min-height:var(--btn-h); font-weight:700; display:inline-flex; align-items:center; gap:6px}
+.btn--primary{background:linear-gradient(180deg,#2f7bfd,#2157d9)}
+.icon-btn{width:44px; height:44px; display:inline-grid; place-items:center; font-size:20px}
+.btn:active,.icon-btn:active,.answer:active{transform:translateY(1px)}
+.start-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+
+/* Game Layout */
+.game{display:grid; grid-template-rows:96px 1fr auto; gap:10px; padding:10px; width:100%; height:100dvh; overflow:hidden}
+.hud{background:var(--surface); border-radius:var(--radius); padding:10px; position:relative; height:96px; overflow:hidden}
+.hud__row{display:flex; align-items:center; justify-content:space-between; gap:10px; height:100%}
+.problem{display:none}
+.hearts{font-size:clamp(18px,4.5vw,26px)}
+.stats{display:flex; gap:10px; align-items:center; color:var(--muted); flex:1 1 auto; min-width:0}
+.stats > span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.controls{display:flex; gap:6px}
+.badge{position:absolute; right:10px; top:8px; background:linear-gradient(180deg,#32d06a,#25a34f); color:#04290f; padding:4px 8px; border-radius:999px; font-weight:800; font-size:14px; pointer-events:none; opacity:0; transition:opacity .15s ease}
+.badge--on{opacity:1}
+
+.field{background:linear-gradient(180deg,#0b1329,#0b1430); border-radius:var(--radius); overflow:hidden}
+.canvas{width:100%; height:100%; display:block}
+
+.answers{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.answer{min-height:var(--btn-h); font-size:clamp(18px,5.2vw,28px); font-weight:800; letter-spacing:.5px}
+.answer--good{outline:2px solid var(--good)}
+.answer--bad{outline:2px solid var(--bad)}
+
+/* Landscape: field left, panel right */
+@media (orientation: landscape){
+  .game{grid-template-columns:1fr min(42vw,520px); grid-template-rows:auto 1fr; grid-template-areas:
+    "field hud"
+    "field answers"; column-gap:10px}
+  .hud{grid-area:hud}
+  .field{grid-area:field; min-height:min(62vh,560px)}
+  .answers{grid-area:answers; grid-template-columns:1fr; align-content:start}
+}
+
+/* Feedback */
+.flash{animation:flash .25s ease}
+@keyframes flash{from{filter:brightness(1.25)}to{filter:brightness(1)}}
+.shake{animation:shake .25s ease}
+@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *{scroll-behavior:auto !important; animation:none !important; transition:none !important}
+}
+
+/* Small screens */
+@media (max-width: 480px){
+  :root{ --btn-h:52px }
+  .icon-btn{width:40px; height:40px}
+  .hud{height:96px}
+  .badge{top:6px; right:6px; font-size:13px; padding:3px 7px}
+}

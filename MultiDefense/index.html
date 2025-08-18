@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <title>Multiplication Defense</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="app" aria-live="polite">
+
+    <!-- Start Screen -->
+    <section id="start" class="screen screen--active" role="dialog" aria-modal="true" aria-labelledby="title">
+      <div class="screen__panel">
+        <h1 id="title" class="title">Multiplication Defense</h1>
+        <p class="subtitle">Ekranın sağından gelen çarpma canavarlarını durdur!</p>
+        <div class="start-actions">
+          <button id="btnPlay" class="btn btn--primary">Oyna</button>
+          <button id="btnHow" class="btn">Nasıl Oynanır</button>
+          <button id="btnMuteStart" class="btn" aria-pressed="false">🔊 Ses: Açık</button>
+          <a href="../index.html" class="btn">🏠 Ana Sayfa</a>
+        </div>
+        <details id="howto" class="howto">
+          <summary>Hızlı rehber</summary>
+          <ul>
+            <li>Dört büyük cevaptan doğru olanı dokunarak seç.</li>
+            <li>Seçtiğin sayı, ekrandaki en tehlikeli (sola en yakın) eşleşen düşmanı yok eder.</li>
+            <li>Yanlış cevapta veya düşman kaleye ulaşırsa 1 can kaybedersin.</li>
+            <li>3 doğru üst üste = 5 sn Turbo Ateş (x2 puan, hızlı efekt).</li>
+            <li>Dalgalar ilerledikçe hız/artış ve çarpım aralıkları büyür.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <!-- Game Area -->
+    <main id="game" class="game" aria-label="Oyun Alanı" hidden>
+      <!-- HUD (fixed height) -->
+      <header class="hud" aria-label="Durum Çubuğu">
+        <div class="hud__row">
+          <div class="hearts" id="hearts" title="Canlar" aria-label="Canlar">❤️❤️❤️</div>
+          <div class="stats">
+            <span id="wave" title="Dalga">🌊 1</span>
+            <span id="score" title="Skor">⭐ 0</span>
+            <span id="best" title="En İyi">🏆 0</span>
+            <span id="target" title="Hedef">🎯 0</span>
+          </div>
+          <div class="controls">
+            <button id="btnPause" class="icon-btn" aria-pressed="false" title="Duraklat">⏸️</button>
+            <button id="btnMute" class="icon-btn" aria-pressed="false" title="Ses Aç/Kapat">🔊</button>
+            <a href="../index.html" class="icon-btn" title="Ana Sayfa">🏠</a>
+          </div>
+          <!-- Turbo badge absolutely positioned to avoid layout shifts -->
+          <span id="turboBadge" class="badge" title="Turbo Ateş" aria-label="Turbo" aria-hidden="true">⚡</span>
+        </div>
+      </header>
+
+      <!-- Playfield -->
+      <section class="field" aria-label="Savaş Alanı">
+        <canvas id="field" class="canvas" width="480" height="270" role="img" aria-label="Kale savunması"></canvas>
+      </section>
+
+      <!-- Answers -->
+      <nav id="answers" class="answers" aria-label="Cevaplar">
+        <button class="answer" data-idx="0">0</button>
+        <button class="answer" data-idx="1">0</button>
+        <button class="answer" data-idx="2">0</button>
+        <button class="answer" data-idx="3">0</button>
+      </nav>
+    </main>
+
+    <!-- Pause Overlay -->
+    <section id="pause" class="overlay" role="dialog" aria-modal="true" aria-label="Duraklatıldı" hidden>
+      <div class="overlay__panel">
+        <h2>Duraklatıldı</h2>
+        <div class="start-actions">
+          <button id="btnResume" class="btn btn--primary">Devam</button>
+          <a class="btn" href="../index.html">🏠 Ana Sayfa</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game Over -->
+    <section id="over" class="screen" role="dialog" aria-modal="true" aria-labelledby="overTitle" hidden>
+      <div class="screen__panel">
+        <h2 id="overTitle">Oyun Bitti</h2>
+        <p id="finalScore">Skor: 0</p>
+        <p id="finalWave">Dalga: 1</p>
+        <p id="bestLine">En İyi: 0</p>
+        <div class="start-actions">
+          <button id="btnReplay" class="btn btn--primary">Tekrar Oyna</button>
+          <a class="btn" href="../index.html">🏠 Ana Sayfa</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
