@@ -6,9 +6,8 @@
 <title>Masa Tenisi</title>
 <style>
   html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:Arial,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,"Helvetica Neue",sans-serif;background:#003500;}
-  canvas{display:block;width:100%;height:100%;background:#006400;touch-action:none;pointer-events:none;} /* menüyle asla çakışmasın */
+  canvas{display:block;width:100%;height:100%;background:#006400;touch-action:none;pointer-events:none;}
 
-  /* UI */
   .controls{position:absolute;width:100%;display:flex;justify-content:space-between;padding:20px;z-index:6;pointer-events:auto;}
   .controls button{width:80px;height:80px;border-radius:50%;border:none;font-size:32px;font-weight:700;background:rgba(255,255,255,.85);cursor:pointer}
   #top-controls{top:10px;display:none}
@@ -16,7 +15,6 @@
   #pauseBtn{position:absolute;top:20px;left:20px;width:60px;height:60px;border-radius:50%;border:none;font-size:24px;background:rgba(255,255,255,.85);z-index:7;display:none;cursor:pointer}
   #backBtn{position:absolute;top:20px;right:20px;width:60px;height:60px;border-radius:50%;border:none;font-size:20px;background:rgba(255,255,255,.85);z-index:7;display:none;cursor:pointer}
 
-  /* Overlays */
   #menu,#pauseMenu,#aboutOverlay{
     position:fixed;inset:0;background:rgba(0,0,0,.8);
     display:flex;flex-direction:column;justify-content:center;align-items:center;
@@ -36,6 +34,14 @@
     color:#fff;font-size:24px;text-align:center;width:60px;z-index:4;display:none
   }
   #scoreBoard div{padding:4px 0}
+
+  /* Hız göstergesi */
+  #speedBoard{
+    position:absolute;bottom:10px;right:10px;
+    background:rgba(0,0,0,.35);border:2px solid #fff;padding:10px 12px;border-radius:10px;
+    color:#fff;font-size:16px;text-align:center;min-width:160px;z-index:4;display:none
+  }
+
   #countdown{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;color:#fff;z-index:900;text-shadow:0 8px 24px rgba(0,0,0,.6)}
   .controls button:active,#pauseBtn:active{transform:scale(.95) translateY(-1px)}
   *{-webkit-user-select:none;user-select:none}
@@ -74,6 +80,9 @@
     <div id="scoreP2">0</div>
   </div>
 
+  <!-- Hız göstergesi -->
+  <div id="speedBoard">Hız: 0 px/s<br><small>(Norm: 0)</small></div>
+
   <div id="top-controls" class="controls">
     <button id="p2-left">◀</button>
     <button id="p2-right">▶</button>
@@ -87,13 +96,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Safe query helper
   const $ = (id)=>document.getElementById(id);
 
   const canvas = $('gameCanvas');
   const ctx = canvas.getContext('2d');
 
-  // UI refs
   const menu = $('menu');
   const pauseMenu = $('pauseMenu');
   const pauseBtn = $('pauseBtn');
@@ -102,10 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreP1El = $('scoreP1');
   const scoreP2El = $('scoreP2');
   const scoreBoard = $('scoreBoard');
+  const speedBoard = $('speedBoard');
   const topCtr = $('top-controls');
   const bottomCtr = $('bottom-controls');
 
-  // Buttons (null-safe)
   $('aboutBtn')?.addEventListener('click', ()=>about.classList.add('show'));
   $('closeAboutBtn')?.addEventListener('click', ()=>about.classList.remove('show'));
   $('singleBtn')?.addEventListener('click', ()=>startGame('single'));
@@ -116,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
   pauseBtn?.addEventListener('click', ()=>pauseGame());
   $('backBtn')?.addEventListener('click', ()=>backToMenu());
 
-  // Mobile control press/hold helpers
   function hold(button, on, off){
     if(!button) return;
     const start=e=>{ e.preventDefault(); on(); };
@@ -124,24 +130,28 @@ document.addEventListener('DOMContentLoaded', () => {
     ['pointerdown','touchstart','mousedown'].forEach(ev=>button.addEventListener(ev,start,{passive:false}));
     ['pointerup','pointercancel','touchend','touchcancel','mouseup','mouseleave'].forEach(ev=>button.addEventListener(ev,end,{passive:false}));
   }
+  const input={p1Left:false,p1Right:false,p2Left:false,p2Right:false};
   hold($('p1-left'),  ()=>input.p1Left=true,  ()=>input.p1Left=false);
   hold($('p1-right'), ()=>input.p1Right=true, ()=>input.p1Right=false);
   hold($('p2-left'),  ()=>input.p2Left=true,  ()=>input.p2Left=false);
   hold($('p2-right'), ()=>input.p2Right=true, ()=>input.p2Right=false);
 
-  // Game state
+  // --- Oyun durumu ---
   let W=0,H=0,dpr=Math.max(1,window.devicePixelRatio||1);
-  let mode='single'; // 'single' | 'multi'
+  let mode='single';
   let running=false, paused=false, rafId=0, lastTime=0;
 
-  const input={p1Left:false,p1Right:false,p2Left:false,p2Right:false};
+  // Ekran normalize için referans (PC ~800px min boy)
+  const PC_REF_MIN = 800;
+  let SCALE = 1; // min(W,H)/PC_REF_MIN
+
   const score={p1:0,p2:0};
 
   const p1={x:0,y:0,w:140,h:14,speed:600};
   const p2={x:0,y:0,w:140,h:14,speed:600};
-  const ball={x:0,y:0,r:8,vx:0,vy:0,speedBase:380,speedMax:1200};
+  const ball={x:0,y:0,r:8,vx:0,vy:0,speedBase:380,speedMax:1200,currentSpeedMultiplier:1.0};
 
-  // DPI-aware canvas
+  // DPI-aware canvas + normalize boyut/hız
   function resizeCanvas(){
     dpr=Math.max(1,window.devicePixelRatio||1);
     const rect=canvas.getBoundingClientRect();
@@ -149,15 +159,31 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.height=Math.round(rect.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     W=rect.width; H=rect.height;
-    p1.y=H-30; p2.y=30;
+
+    SCALE = Math.min(W,H) / PC_REF_MIN;
+
+    // Geometri ve hızları ekrana göre ölçekle
+    p1.w = Math.max(80, 140 * SCALE);
+    p1.h = Math.max(10, 14 * SCALE);
+    p2.w = p1.w; p2.h = p1.h;
+    ball.r = Math.max(5, 8 * SCALE);
+
+    p1.speed = 600 * SCALE;
+    p2.speed = 600 * SCALE;
+    ball.speedBase = 380 * SCALE;     // PC'de 380 px/s eşleniği
+    ball.speedMax  = 1200 * SCALE;    // PC'de 1200 px/s eşleniği
+
+    p1.y=H-30*SCALE; p2.y=30*SCALE;
     p1.x=clamp(p1.x||W/2,p1.w/2,W-p1.w/2);
     p2.x=clamp(p2.x||W/2,p2.w/2,W-p2.w/2);
+
     drawTable();
+    updateSpeedUI(); // metin güncellensin
   }
   window.addEventListener('resize', resizeCanvas, {passive:true});
   resizeCanvas();
 
-  // Keyboard
+  // Klavye
   document.addEventListener('keydown', (e)=>{
     switch(e.code){
       case 'ArrowLeft': input.p1Left=true; e.preventDefault(); break;
@@ -187,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pauseBtn.style.display='block';
     $('backBtn').style.display='block';
     scoreBoard.style.display='block';
+    speedBoard.style.display='block';
     bottomCtr.style.display='flex';
     topCtr.style.display=(mode==='multi'?'flex':'none');
 
@@ -202,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pauseBtn.style.display='none';
     $('backBtn').style.display='none';
     scoreBoard.style.display='none';
+    speedBoard.style.display='none';
     topCtr.style.display='none';
     bottomCtr.style.display='none';
     drawTable();
@@ -221,12 +249,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function resetScores(){ score.p1=0; score.p2=0; updateScoreUI(); }
+  function resetScores(){ 
+    score.p1=0; score.p2=0; 
+    ball.currentSpeedMultiplier=1.0;
+    p1.speed=600*SCALE; p2.speed=600*SCALE;
+    updateScoreUI(); 
+    updateSpeedUI();
+  }
   function updateScoreUI(){ scoreP1El.textContent=score.p1; scoreP2El.textContent=score.p2; }
-  function centerPaddles(){ p1.x=W/2; p1.y=H-30; p2.x=W/2; p2.y=30; }
+  function centerPaddles(){ p1.x=W/2; p1.y=H-30*SCALE; p2.x=W/2; p2.y=30*SCALE; }
 
   function serveWithCountdown(loser=null){
     running=false; ball.x=W/2; ball.y=H/2; ball.vx=0; ball.vy=0;
+    updateSpeedUI();
     startCountdown(3, ()=>{
       const angle=randRange(-0.35,0.35);
       const dir=(loser==='p1')?1:(loser==='p2')?-1:(Math.random()<0.5?-1:1);
@@ -267,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const p2dir=(input.p2Right?1:0)-(input.p2Left?1:0);
       p2.x=clamp(p2.x+p2dir*p2.speed*dt, p2.w/2, W-p2.w/2);
     }else{
-      const target=ball.x, diff=target-p2.x, aiSpeed=520;
+      const target=ball.x, diff=target-p2.x, aiSpeed=520*SCALE;
       p2.x=clamp(p2.x+clamp(diff,-aiSpeed*dt,aiSpeed*dt), p2.w/2, W-p2.w/2);
     }
 
@@ -287,8 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Scoring
-    if(ball.y-ball.r>H){ score.p2++; updateScoreUI(); serveWithCountdown('p1'); }
-    else if(ball.y+ball.r<0){ score.p1++; updateScoreUI(); serveWithCountdown('p2'); }
+    if(ball.y-ball.r>H){ score.p2++; updateScoreUI(); increaseGameSpeed(); serveWithCountdown('p1'); }
+    else if(ball.y+ball.r<0){ score.p1++; updateScoreUI(); increaseGameSpeed(); serveWithCountdown('p2'); }
   }
 
   function collideWithPaddle(p,dirY){
@@ -296,24 +331,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const rel=clamp((ball.x-p.x)/(p.w/2),-1,1);
     const maxAngle=Math.PI*0.55/2; // ~50°
     const angle=rel*maxAngle;
-    const speed=clamp(Math.hypot(ball.vx,ball.vy)*1.05,ball.speedBase,ball.speedMax);
+    const speed=clamp(Math.hypot(ball.vx,ball.vy)*1.08*ball.currentSpeedMultiplier,ball.speedBase,ball.speedMax);
     ball.vx=Math.sin(angle)*speed;
     ball.vy=Math.cos(angle)*speed*-dirY;
-    if(Math.abs(ball.vy)<120) ball.vy=120*-dirY;
+    if(Math.abs(ball.vy)<120*SCALE) ball.vy=120*SCALE*-dirY;
+  }
+
+  function increaseGameSpeed(){
+    // Her skorda hızı %3 artır, maksimum 2.5x hız
+    ball.currentSpeedMultiplier = Math.min(2.5, ball.currentSpeedMultiplier * 1.03);
+    // Paddle hızını da artır
+    p1.speed = Math.min(900*SCALE, 600*SCALE * ball.currentSpeedMultiplier);
+    p2.speed = Math.min(900*SCALE, 600*SCALE * ball.currentSpeedMultiplier);
+  }
+
+  // --- Renk: normalize edilmiş hıza göre (#006400 → #FF0000) ---
+  function getBackgroundColor(){
+    // Gerçek (CSS px/s) hız
+    const speedCss = Math.hypot(ball.vx, ball.vy);
+
+    // PC referansına normalize (SCALE = min(W,H)/800)
+    const speedNorm = speedCss / SCALE; // "PC'deki px/s" eşleniği
+
+    const V0 = 380;   // bu ve altı sabit koyu yeşil
+    const V1 = 1200;  // bu ve üstü kırmızı
+
+    if (speedNorm <= V0) return 'rgb(0,100,0)'; // #006400
+
+    const t = Math.min(1, (speedNorm - V0) / (V1 - V0)); // 0..1
+    const r = Math.round(0   + (255 - 0)   * t);
+    const g = Math.round(100 + (0   - 100) * t);
+    return `rgb(${r},${g},0)`;
   }
 
   function drawTable(){
     ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#006400'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=getBackgroundColor(); ctx.fillRect(0,0,W,H);
     ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=2; ctx.setLineDash([10,10]);
     ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke(); ctx.setLineDash([]);
   }
+
   function draw(){
     drawTable();
     ctx.fillStyle='#fff';
     drawRectCentered(p1.x,p1.y,p1.w,p1.h);
     drawRectCentered(p2.x,p2.y,p2.w,p2.h);
     ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+
+    updateSpeedUI();
+  }
+
+  // Hız göstergesi
+  function updateSpeedUI(){
+    if(!speedBoard) return;
+    const speedCss = Math.hypot(ball.vx, ball.vy);     // px/s (ekrana göre)
+    const speedNorm = speedCss / SCALE;                // PC normalize px/s
+    speedBoard.innerHTML = `Hız: ${Math.round(speedCss)} px/s<br><small>(Norm: ${Math.round(speedNorm)})</small>`;
   }
 
   // Utils
@@ -321,10 +394,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function randRange(a,b){ return a+Math.random()*(b-a); }
   function drawRectCentered(x,y,w,h){ ctx.fillRect(x-w/2,y-h/2,w,h); }
 
-  // İlk çizim (arka plan)
+  // Başlangıç
   drawTable();
 
-  // Basit global hata yakalayıcı (butonlar bağlanmazsa gör)
   window.addEventListener('error', (e)=>{
     alert('Hata: '+(e?.message||'bilinmiyor'));
   });
