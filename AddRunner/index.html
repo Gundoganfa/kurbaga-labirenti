@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <title>Math Dash – Add & Run</title>
+  <!-- Offline-first, no external assets/frameworks -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- App Wrapper controls orientation layouts via CSS -->
+  <div id="app" class="app" aria-live="polite">
+
+    <!-- Start Screen -->
+    <section id="startScreen" class="screen screen--active" role="dialog" aria-modal="true" aria-labelledby="title">
+      <div class="screen__panel">
+        <h1 id="title" class="title">Math Dash – Add & Run</h1>
+        <p class="subtitle">Tap the correct answer to speed up and collect more stars!</p>
+        <div class="start-actions">
+          <button id="btnPlay" class="btn btn--primary">Play</button>
+          <button id="btnHow" class="btn">How to Play</button>
+          <button id="btnMuteStart" class="btn" aria-pressed="false">🔊 Sound: On</button>
+        </div>
+        <details class="howto" id="howtoDetails">
+          <summary>Quick guide</summary>
+          <ul>
+            <li>Answer correctly to boost speed and increase your streak.</li>
+            <li>3 correct in a row triggers Turbo for 5s: faster and x2 star points.</li>
+            <li>Wrong answers cost a heart. Lose 3 hearts and it’s game over.</li>
+            <li>Supports portrait and landscape. No keyboard needed.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <!-- Game HUD + Layout Container -->
+    <main id="game" class="game" aria-label="Game area" hidden>
+      <!-- Problem + Hearts (position varies with CSS layout) -->
+      <header class="hud" aria-label="Status">
+        <div class="problem" id="problemText" aria-live="polite">1 + 1 = ?</div>
+        <div class="hud__row">
+          <div class="hearts" id="hearts" aria-label="Lives" title="Lives">❤️❤️❤️</div>
+          <div class="stats">
+            <span id="timer" title="Time left">⏱️ 2:00</span>
+            <span id="score" title="Score">⭐ 0</span>
+            <span id="speed" title="Speed">🏃 0</span>
+            <span id="streak" title="Streak">🔥 0</span>
+            <span id="turboBadge" class="badge" hidden>Turbo 5s</span>
+          </div>
+          <div class="controls">
+            <button id="btnPause" class="icon-btn" aria-pressed="false" title="Pause">⏸️</button>
+            <button id="btnMute" class="icon-btn" aria-pressed="false" title="Mute/Unmute">🔊</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scene Area (Canvas) -->
+      <section class="scene-wrap" aria-label="Runner scene">
+        <canvas id="scene" class="scene" width="480" height="270" role="img" aria-label="Runner collecting stars"></canvas>
+      </section>
+
+      <!-- Answers Panel (portrait: bottom grid; landscape: right column) -->
+      <nav class="answers" id="answers" aria-label="Answer choices">
+        <button class="answer" data-index="0">0</button>
+        <button class="answer" data-index="1">0</button>
+        <button class="answer" data-index="2">0</button>
+        <button class="answer" data-index="3">0</button>
+      </nav>
+    </main>
+
+    <!-- Pause Overlay -->
+    <section id="pauseOverlay" class="overlay" role="dialog" aria-modal="true" aria-label="Paused" hidden>
+      <div class="overlay__panel">
+        <h2>Paused</h2>
+        <p>Take a breather.</p>
+        <button id="btnResume" class="btn btn--primary">Resume</button>
+      </div>
+    </section>
+
+    <!-- Game Over Screen -->
+    <section id="gameOver" class="screen" role="dialog" aria-modal="true" aria-labelledby="goTitle" hidden>
+      <div class="screen__panel">
+        <h2 id="goTitle">Game Over</h2>
+        <p id="finalScore">Score: 0</p>
+        <p id="bestScore">Best: 0</p>
+        <div class="start-actions">
+          <button id="btnReplay" class="btn btn--primary">Play Again</button>
+          <button id="btnHome" class="btn">Home</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
