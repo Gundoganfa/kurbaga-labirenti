@@ -21,6 +21,8 @@
           <button id="btnPlay" class="btn btn--primary">Play</button>
           <button id="btnHow" class="btn">How to Play</button>
           <button id="btnMuteStart" class="btn" aria-pressed="false">🔊 Sound: On</button>
+          <button id="btnFullscreenStart" class="btn" type="button">⤢ Tam Ekran</button>
+          <a href="../index.html" class="btn">🏠 Ana Sayfa</a>
         </div>
         <details class="howto" id="howtoDetails">
           <summary>Quick guide</summary>
@@ -51,6 +53,8 @@
           <div class="controls">
             <button id="btnPause" class="icon-btn" aria-pressed="false" title="Pause">⏸️</button>
             <button id="btnMute" class="icon-btn" aria-pressed="false" title="Mute/Unmute">🔊</button>
+            <button id="btnFullscreen" class="icon-btn" type="button" title="Tam Ekran Aç/Kapat">⤢</button>
+            <a href="../index.html" class="icon-btn" title="Ana Sayfa">🏠</a>
           </div>
         </div>
       </header>
@@ -74,7 +78,10 @@
       <div class="overlay__panel">
         <h2>Paused</h2>
         <p>Take a breather.</p>
-        <button id="btnResume" class="btn btn--primary">Resume</button>
+        <div class="start-actions">
+          <button id="btnResume" class="btn btn--primary">Resume</button>
+          <a href="../index.html" class="btn">🏠 Ana Sayfa</a>
+        </div>
       </div>
     </section>
 
@@ -86,7 +93,7 @@
         <p id="bestScore">Best: 0</p>
         <div class="start-actions">
           <button id="btnReplay" class="btn btn--primary">Play Again</button>
-          <button id="btnHome" class="btn">Home</button>
+          <a href="../index.html" class="btn">🏠 Ana Sayfa</a>
         </div>
       </div>
     </section>
@@ -94,5 +101,33 @@
   </div>
 
   <script src="game.js"></script>
+  <script>
+    (function(){
+      function isFS(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+      function enterFS(){
+        const el = document.documentElement;
+        if(el.requestFullscreen) return el.requestFullscreen();
+        if(el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+      }
+      function exitFS(){
+        if(document.exitFullscreen) return document.exitFullscreen();
+        if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
+      }
+      function toggleFS(){ isFS() ? exitFS() : enterFS(); }
+      function bind(id, fn){ const el = document.getElementById(id); if(el) el.addEventListener('click', fn); }
+      bind('btnFullscreenStart', toggleFS);
+      bind('btnFullscreen', toggleFS);
+      // Update icons/titles when FS changes
+      function sync(){
+        const on = isFS();
+        const btn = document.getElementById('btnFullscreen');
+        const btnS = document.getElementById('btnFullscreenStart');
+        if(btn){ btn.textContent = on ? '⤢' : '⤢'; btn.title = on ? 'Tam Ekrandan Çık' : 'Tam Ekran Aç'; }
+        if(btnS){ btnS.textContent = on ? '⤢ Tam Ekrandan Çık' : '⤢ Tam Ekran'; }
+      }
+      document.addEventListener('fullscreenchange', sync);
+      document.addEventListener('webkitfullscreenchange', sync);
+    })();
+  </script>
 </body>
 </html>
