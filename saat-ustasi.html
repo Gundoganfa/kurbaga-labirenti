@@ -4,6 +4,13 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Saat Ustası 🕒</title>
+	
+	<!-- Vercel Analytics -->
+	<script>
+		window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+	</script>
+	<script defer src="/_vercel/insights/script.js"></script>
+	
 	<style>
 		* { box-sizing: border-box; margin: 0; padding: 0; }
 		body {
@@ -248,10 +255,32 @@
 			if (isCorrect()){
 				setStatus('success','Harika! Doğru saat!');
 				game.streak += 1; game.score += 1; updateBadges(); confetti();
+				
+				// Vercel Analytics event
+				if (window.va) {
+					va('event', 'correct_answer', { 
+						game: 'saat-ustasi',
+						current_score: game.score,
+						streak: game.streak,
+						difficulty: $('mode').value
+					});
+				}
+				
 				await delay(600); nextRound();
 			} else {
 				setStatus('fail','Olmadı! Akrep ve yelkovanı tekrar dene.');
 				game.streak = 0; game.lives = Math.max(0, game.lives-1); updateBadges();
+				
+				// Vercel Analytics event
+				if (window.va) {
+					va('event', 'wrong_answer', { 
+						game: 'saat-ustasi',
+						current_score: game.score,
+						lives_remaining: game.lives,
+						difficulty: $('mode').value
+					});
+				}
+				
 				if (game.lives===0){ setStatus('fail','Canlar bitti. Yeni tur ile tekrar deneyelim!'); return; }
 			}
 		}
@@ -263,12 +292,36 @@
 		}
 
 		function nextRound(){
-			if (game.round>=game.maxRounds){ setStatus('success',`Tebrikler! Tur bitti 🎉 — Puan: ${game.score}`); return; }
+			if (game.round>=game.maxRounds){ 
+				setStatus('success',`Tebrikler! Tur bitti 🎉 — Puan: ${game.score}`);
+				
+				// Vercel Analytics event
+				if (window.va) {
+					va('event', 'game_completed', { 
+						game: 'saat-ustasi',
+						score: game.score,
+						difficulty: $('mode').value,
+						lives_remaining: game.lives
+					});
+				}
+				return; 
+			}
 			game.round += 1; updateBadges();
 			generateTarget(); setStatus('running','Yeni hedef ayarlandı.');
 		}
 
-		function newRun(){ resetGame(); nextRound(); }
+		function newRun(){ 
+			resetGame(); 
+			nextRound(); 
+			
+			// Vercel Analytics event
+			if (window.va) {
+				va('event', 'game_started', { 
+					game: 'saat-ustasi',
+					difficulty: $('mode').value 
+				});
+			}
+		}
 
 		// === Drag & Drop (Pointer) ===
 		let dragging = null; // 'hour' | 'minute' | null

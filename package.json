@@ -1,0 +1,23 @@
+{
+  "name": "emirsgame",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gundoganfa/kurbaga-labirenti.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gundoganfa/kurbaga-labirenti/issues"
+  },
+  "homepage": "https://github.com/Gundoganfa/kurbaga-labirenti#readme",
+  "dependencies": {
+    "@vercel/analytics": "^1.5.0"
+  }
+}
