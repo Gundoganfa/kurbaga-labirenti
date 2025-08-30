@@ -123,6 +123,52 @@
 		.status.success { background: #d1fae5; color: #065f46; }
 		.status.fail { background: #fee2e2; color: #7f1d1d; }
 
+		/* Live Scoreboard */
+		.live-scoreboard {
+			background: linear-gradient(135deg, #fef3c7, #fde68a);
+			border: 2px solid #f59e0b;
+			border-radius: 12px;
+			padding: 16px;
+			margin: 16px 0;
+			box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+		}
+		.live-scoreboard h3 {
+			margin: 0 0 12px 0;
+			color: #92400e;
+			text-align: center;
+			font-size: 1.1rem;
+		}
+		.live-score-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+		.live-score-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			background: rgba(255, 255, 255, 0.8);
+			padding: 8px 12px;
+			border-radius: 8px;
+			border: 1px solid rgba(245, 158, 11, 0.3);
+		}
+		.live-rank {
+			font-weight: 800;
+			color: #92400e;
+			min-width: 24px;
+		}
+		.live-player-name {
+			flex: 1;
+			margin-left: 8px;
+			font-weight: 600;
+			color: #1f2937;
+		}
+		.live-score-value {
+			font-weight: 800;
+			color: #dc2626;
+			font-size: 1.1rem;
+		}
+
 		.footer { text-align: center; color: #334155; margin-top: 12px; }
 		.footer a { color: #1e3a8a; font-weight: 800; text-decoration: none; }
 		
@@ -357,6 +403,16 @@
 				<div class="answers" id="answers" role="group" aria-label="Cevap seçenekleri"></div>
 				<div id="status" class="status ready">🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.</div>
 				<div class="confetti" id="confetti"></div>
+			</div>
+		</div>
+
+		<!-- Live Top 5 Scoreboard -->
+		<div class="live-scoreboard">
+			<h3>🏆 En İyi 5 Skor</h3>
+			<div id="live-score-list" class="live-score-list">
+				<div style="text-align: center; padding: 20px; color: #6b7280;">
+					Yükleniyor...
+				</div>
 			</div>
 		</div>
 
@@ -882,7 +938,7 @@
 			scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Yükleniyor...</div>';
 			
 			try {
-				const scores = await window.Scoreboard.getTopScores(10);
+				const scores = await window.Scoreboard.getTopScores(20);
 				
 				if (scores.length === 0) {
 					scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Henüz skor yok. İlk skoru sen yap!</div>';
@@ -914,6 +970,36 @@
 				
 			} catch (error) {
 				scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Skorlar yüklenirken hata oluştu.</div>';
+			}
+		}
+		
+		// Live Top 5 Scoreboard 
+		async function loadLiveScoreboard() {
+			const liveScoreList = $('live-score-list');
+			liveScoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280; font-size: 0.9rem;">Yükleniyor...</div>';
+			
+			try {
+				const scores = await window.Scoreboard.getTopScores(5);
+				
+				if (scores.length === 0) {
+					liveScoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280; font-size: 0.9rem;">Henüz skor yok. İlk skoru sen yap! 🎯</div>';
+					return;
+				}
+				
+				liveScoreList.innerHTML = scores.map((score, index) => {
+					const rank = index + 1;
+					return `
+						<div class="live-score-item">
+							<span class="live-rank">#${rank}</span>
+							<span class="live-player-name">${score.player_name}</span>
+							<span class="live-score-value">${score.score}</span>
+						</div>
+					`;
+				}).join('');
+				
+			} catch (error) {
+				console.error('Live scoreboard yüklenirken hata:', error);
+				liveScoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444; font-size: 0.9rem;">Yükleme hatası</div>';
 			}
 		}
 		
@@ -965,6 +1051,9 @@
 				pendingScore = null;
 				console.log('✅ saveScore: Skor başarıyla kaydedildi!');
 				
+				// Live scoreboard'u güncelle
+				loadLiveScoreboard();
+				
 			} catch (error) {
 				console.error('❌ saveScore: Skor kaydetme hatası:', error);
 				alert('Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.');
@@ -996,6 +1085,10 @@
 			$('scoreboard-btn').addEventListener('click', openScoreboard);
 			updateBadges();
 			setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
+			
+			// Live scoreboard'u yükle
+			loadLiveScoreboard();
+			
 			// Sayfa yüklenince otomatik başla
 			newRun();
 		});
