@@ -112,6 +112,20 @@
 
 		.footer { text-align: center; color: #334155; margin-top: 12px; }
 		.footer a { color: #1e3a8a; font-weight: 800; text-decoration: none; }
+		
+		/* Ses kontrol butonu */
+		.sound-btn {
+			background: linear-gradient(180deg, #6366f1, #4f46e5);
+			color: #fff;
+			border: 1px solid #4f46e5;
+			padding: 8px 12px;
+			border-radius: 8px;
+			cursor: pointer;
+			font-size: 1.2rem;
+			transition: transform .1s ease, box-shadow .2s ease;
+		}
+		.sound-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+		.sound-btn.muted { background: linear-gradient(180deg, #6b7280, #4b5563); border-color: #4b5563; }
 
 		/* Mini konfeti noktaları */
 		.confetti { pointer-events: none; position: absolute; inset: 0; overflow: hidden; }
@@ -167,6 +181,7 @@
 				</select>
 				<button id="new-btn" class="btn-primary">🆕 Yeni Tur</button>
 				<button id="reset-btn" class="btn-warning">↩️ Sıfırla</button>
+				<button id="sound-btn" class="sound-btn" aria-label="Ses aç/kapat">🔊</button>
 				<a class="btn-danger" href="index.html" aria-label="Ana sayfa">🏠 Ana Sayfa</a>
 			</div>
 		</div>
@@ -191,6 +206,69 @@
 		const delay = (ms) => new Promise(r => setTimeout(r, ms));
 		function rand(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
 		function shuffle(arr){ for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+
+		// Ses sistemi
+		let audioContext = null;
+		let soundEnabled = true;
+		
+		function initAudio() {
+			if (!audioContext) {
+				audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			}
+		}
+		
+		function playBeep(frequency = 800, duration = 100) {
+			if (!soundEnabled || !audioContext) return;
+			
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
+			
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext.destination);
+			
+			oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+			oscillator.type = 'sine';
+			
+			gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+			
+			oscillator.start(audioContext.currentTime);
+			oscillator.stop(audioContext.currentTime + duration / 1000);
+		}
+		
+		function playPop() {
+			if (!soundEnabled || !audioContext) return;
+			
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
+			
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext.destination);
+			
+			oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+			oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+			oscillator.type = 'sine';
+			
+			gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+			
+			oscillator.start(audioContext.currentTime);
+			oscillator.stop(audioContext.currentTime + 0.1);
+		}
+		
+		function toggleSound() {
+			soundEnabled = !soundEnabled;
+			const btn = $('sound-btn');
+			if (soundEnabled) {
+				btn.textContent = '🔊';
+				btn.classList.remove('muted');
+				btn.setAttribute('aria-label', 'Sesi kapat');
+			} else {
+				btn.textContent = '🔇';
+				btn.classList.add('muted');
+				btn.setAttribute('aria-label', 'Sesi aç');
+			}
+		}
 
 		const game = {
 			round: 0,
@@ -273,6 +351,12 @@
 			timerId = setInterval(()=>{
 				timeLeftMs = Math.max(0, timeLeftMs - 100);
 				updateTimeBadge();
+				
+				// Her saniyede bir beep sesi çal
+				if (timeLeftMs > 0 && timeLeftMs % 1000 < 100) {
+					playBeep(600, 50); // Düşük frekans, kısa süre
+				}
+				
 				if (timeLeftMs <= 0){ stopTimer(); if (awaitingAnswer) onTimeout(); }
 			}, 100);
 		}
@@ -350,6 +434,9 @@
 			const nodes = Array.from(document.querySelectorAll('.answer'));
 			nodes.forEach(n => n.disabled = true);
 			awaitingAnswer = false; stopTimer();
+			
+			// Cevap seçildiğinde pop sesi çal
+			playPop();
 			if (val === q.correct){
 				btn.classList.add('correct');
 				game.streak += 1; game.bestStreak = Math.max(game.bestStreak, game.streak);
@@ -423,8 +510,12 @@
 		}
 
 		document.addEventListener('DOMContentLoaded', ()=>{
+			// Ses sistemini başlat
+			initAudio();
+			
 			$('new-btn').addEventListener('click', newRun);
 			$('reset-btn').addEventListener('click', resetGame);
+			$('sound-btn').addEventListener('click', toggleSound);
 			updateBadges();
 			setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
 			// Sayfa yüklenince otomatik başla
