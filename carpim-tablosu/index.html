@@ -1047,11 +1047,10 @@
 				
 				// Supabase insert başarılıysa result null olabilir, o yüzden exception yoksa başarılı kabul et
 				closeNameModal();
-				alert('Skorun başarıyla kaydedildi! 🎉');
 				pendingScore = null;
 				console.log('✅ saveScore: Skor başarıyla kaydedildi!');
 				
-				// Live scoreboard'u güncelle
+				// Live scoreboard'u güncelle (kullanıcı burada skorunun kaydedildiğini görecek)
 				loadLiveScoreboard();
 				
 			} catch (error) {
