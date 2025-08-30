@@ -3,7 +3,41 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	    <title>Çarpım Kahramanı 🔢</title>
+	    	<title>Çarpım Kahramanı 🔢 - Emir'in Oyun Dünyası</title>
+	
+	<!-- SEO Meta Tags -->
+	<meta name="description" content="Çarpım Kahramanı oyunu ile çocuklar çarpım tablosunu eğlenceli bir şekilde öğrenir. 2'lerden 10'lara kadar tüm tablolar, çoktan seçmeli sorular!">
+	<meta name="keywords" content="çarpım tablosu, matematik oyunu, çocuk oyunları, eğitici oyunlar, çarpma öğrenme">
+	<meta name="author" content="Emir">
+	<meta name="robots" content="index, follow">
+	
+	<!-- Canonical URL -->
+	<link rel="canonical" href="https://kurbaga-labirenti.vercel.app/carpim-tablosu.html">
+	
+	<!-- Open Graph Meta Tags -->
+	<meta property="og:title" content="Çarpım Kahramanı 🔢 - Emir'in Oyun Dünyası">
+	<meta property="og:description" content="Çarpım tablosunu öğrenmek hiç bu kadar eğlenceli olmamıştı!">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://kurbaga-labirenti.vercel.app/carpim-tablosu.html">
+	
+	<!-- Structured Data (JSON-LD) -->
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "Game",
+		"name": "Çarpım Kahramanı",
+		"description": "Çocuklar için çarpım tablosu öğrenme oyunu",
+		"url": "https://kurbaga-labirenti.vercel.app/carpim-tablosu.html",
+		"genre": "Educational",
+		"audience": {
+			"@type": "Audience",
+			"audienceType": "Children"
+		},
+		"applicationCategory": "EducationalApplication",
+		"educationalUse": "Mathematics",
+		"learningResourceType": "Interactive Resource"
+	}
+	</script>
     
     <!-- Vercel Analytics -->
     <script>
@@ -258,6 +292,18 @@
 			if (game.round >= game.maxRounds){
 				setStatus('success', `Tebrikler! Tur bitti 🎉 — Puan: ${game.score}, Rekor Seri: ${game.bestStreak}`);
 				confettiBurst();
+				
+				// Vercel Analytics event
+				if (window.va) {
+					va('event', 'game_completed', { 
+						game: 'carpim-tablosu',
+						score: game.score,
+						best_streak: game.bestStreak,
+						mode: $('mode').value,
+						table: $('table').value,
+						lives_remaining: game.lives
+					});
+				}
 				return;
 			}
 			game.round += 1;
@@ -296,6 +342,19 @@
 				game.score += bonus;
 				updateBadges();
 				confettiBurst();
+				
+				// Vercel Analytics event
+				if (window.va) {
+					va('event', 'correct_answer', { 
+						game: 'carpim-tablosu',
+						current_score: game.score,
+						streak: game.streak,
+						bonus: bonus,
+						mode: $('mode').value,
+						table: $('table').value
+					});
+				}
+				
 				await delay(450);
 				nextRound();
 			} else {
@@ -304,6 +363,18 @@
 				game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
 				// doğru cevabı vurgula
 				nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
+				
+				// Vercel Analytics event
+				if (window.va) {
+					va('event', 'wrong_answer', { 
+						game: 'carpim-tablosu',
+						current_score: game.score,
+						lives_remaining: game.lives,
+						mode: $('mode').value,
+						table: $('table').value
+					});
+				}
+				
 				if (game.lives === 0){ setStatus('fail', 'Üzgünüm, canların bitti 😢 — Yeni tur ile tekrar dene!'); return; }
 				await delay(650);
 				nextRound();
@@ -320,7 +391,19 @@
 			updateBadges();
 		}
 
-		function newRun(){ resetGame(); nextRound(); }
+		function newRun(){ 
+			resetGame(); 
+			nextRound(); 
+			
+			// Vercel Analytics event
+			if (window.va) {
+				va('event', 'game_started', { 
+					game: 'carpim-tablosu',
+					mode: $('mode').value,
+					table: $('table').value
+				});
+			}
+		}
 
 		document.addEventListener('DOMContentLoaded', ()=>{
 			$('new-btn').addEventListener('click', newRun);
