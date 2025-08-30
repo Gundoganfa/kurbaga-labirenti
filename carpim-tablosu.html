@@ -256,6 +256,80 @@
 			oscillator.stop(audioContext.currentTime + 0.1);
 		}
 		
+		function playError() {
+			if (!soundEnabled || !audioContext) return;
+			
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
+			
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext.destination);
+			
+			// Hata sesi: düşük frekans, kısa
+			oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+			oscillator.type = 'sawtooth';
+			
+			gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+			
+			oscillator.start(audioContext.currentTime);
+			oscillator.stop(audioContext.currentTime + 0.2);
+		}
+		
+		function playGameOver() {
+			if (!soundEnabled || !audioContext) return;
+			
+			// "Dııdııdııt" sesi - üzgün melodi
+			const notes = [400, 350, 300, 250];
+			const noteDuration = 0.3;
+			
+			notes.forEach((freq, index) => {
+				setTimeout(() => {
+					const oscillator = audioContext.createOscillator();
+					const gainNode = audioContext.createGain();
+					
+					oscillator.connect(gainNode);
+					gainNode.connect(audioContext.destination);
+					
+					oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+					oscillator.type = 'triangle';
+					
+					gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+					gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
+					
+					oscillator.start(audioContext.currentTime);
+					oscillator.stop(audioContext.currentTime + noteDuration);
+				}, index * noteDuration * 1000);
+			});
+		}
+		
+		function playSuccess() {
+			if (!soundEnabled || !audioContext) return;
+			
+			// Başarı sesi - neşeli melodi
+			const notes = [523, 659, 784, 1047]; // C, E, G, C (yüksek)
+			const noteDuration = 0.2;
+			
+			notes.forEach((freq, index) => {
+				setTimeout(() => {
+					const oscillator = audioContext.createOscillator();
+					const gainNode = audioContext.createGain();
+					
+					oscillator.connect(gainNode);
+					gainNode.connect(audioContext.destination);
+					
+					oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+					oscillator.type = 'sine';
+					
+					gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
+					gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
+					
+					oscillator.start(audioContext.currentTime);
+					oscillator.stop(audioContext.currentTime + noteDuration);
+				}, index * noteDuration * 1000);
+			});
+		}
+		
 		function toggleSound() {
 			soundEnabled = !soundEnabled;
 			const btn = $('sound-btn');
@@ -390,6 +464,7 @@
 			if (game.round >= game.maxRounds){
 				setStatus('success', `Tebrikler! 100 soru tamamlandı! 🎉 — Puan: ${game.score}, Doğru: ${game.correctAnswers}, Rekor Seri: ${game.bestStreak}`);
 				confettiBurst();
+				playSuccess(); // Başarı sesi çal
 				
 				// Vercel Analytics event
 				if (window.va) {
@@ -465,6 +540,10 @@
 				btn.classList.add('wrong');
 				btn.classList.add('shake');
 				game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
+				
+				// Yanlış cevap sesi çal
+				playError();
+				
 				// doğru cevabı vurgula
 				nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
 				
@@ -479,7 +558,11 @@
 					});
 				}
 				
-				if (game.lives === 0){ setStatus('fail', 'Üzgünüm, canların bitti 😢 — Yeni tur ile tekrar dene!'); return; }
+				if (game.lives === 0){ 
+					setStatus('fail', 'Üzgünüm, canların bitti 😢 — Yeni tur ile tekrar dene!'); 
+					playGameOver(); // Üzgün ses çal
+					return; 
+				}
 				await delay(650);
 				nextRound();
 			}
