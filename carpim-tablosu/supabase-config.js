@@ -73,7 +73,8 @@ const Scoreboard = {
             }
             
             console.log('Skor başarıyla kaydedildi:', data);
-            return data;
+            // Supabase insert başarılıysa true döndür (data null olabilir)
+            return true;
         } catch (error) {
             console.error('Skor eklenirken hata:', error);
             console.error('Hata detayları:', {

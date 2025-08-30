@@ -943,6 +943,10 @@
 			}
 			
 			try {
+				console.log('🎯 saveScore: Skor kaydetme başlatılıyor...');
+				console.log('Player name:', playerName);
+				console.log('Pending score:', pendingScore);
+				
 				const result = await window.Scoreboard.addScore(
 					playerName,
 					pendingScore.score,
@@ -953,15 +957,16 @@
 					pendingScore.table
 				);
 				
-				if (result) {
-					closeNameModal();
-					alert('Skorun başarıyla kaydedildi! 🎉');
-					pendingScore = null;
-				} else {
-					alert('Skor kaydedilemedi. Lütfen daha sonra tekrar deneyin.');
-				}
+				console.log('🎯 saveScore: Gelen result:', result);
+				
+				// Supabase insert başarılıysa result null olabilir, o yüzden exception yoksa başarılı kabul et
+				closeNameModal();
+				alert('Skorun başarıyla kaydedildi! 🎉');
+				pendingScore = null;
+				console.log('✅ saveScore: Skor başarıyla kaydedildi!');
+				
 			} catch (error) {
-				console.error('Skor kaydetme hatası:', error);
+				console.error('❌ saveScore: Skor kaydetme hatası:', error);
 				alert('Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.');
 			}
 		}
