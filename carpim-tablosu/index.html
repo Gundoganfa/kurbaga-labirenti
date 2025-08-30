@@ -12,13 +12,13 @@
 	<meta name="robots" content="index, follow">
 	
 	<!-- Canonical URL -->
-	<link rel="canonical" href="https://kurbaga-labirenti.vercel.app/carpim-tablosu.html">
+	<link rel="canonical" href="https://kurbaga-labirenti.vercel.app/carpim-tablosu/">
 	
 	<!-- Open Graph Meta Tags -->
 	<meta property="og:title" content="Çarpım Kahramanı 🔢 - Emir'in Oyun Dünyası">
 	<meta property="og:description" content="Çarpım tablosunu öğrenmek hiç bu kadar eğlenceli olmamıştı!">
 	<meta property="og:type" content="website">
-	<meta property="og:url" content="https://kurbaga-labirenti.vercel.app/carpim-tablosu.html">
+	<meta property="og:url" content="https://kurbaga-labirenti.vercel.app/carpim-tablosu/">
 	
 	<!-- Structured Data (JSON-LD) -->
 	<script type="application/ld+json">
@@ -27,7 +27,7 @@
 		"@type": "Game",
 		"name": "Çarpım Kahramanı",
 		"description": "Çocuklar için çarpım tablosu öğrenme oyunu",
-		"url": "https://kurbaga-labirenti.vercel.app/carpim-tablosu.html",
+		"url": "https://kurbaga-labirenti.vercel.app/carpim-tablosu/",
 		"genre": "Educational",
 		"audience": {
 			"@type": "Audience",
@@ -39,11 +39,15 @@
 	}
 	</script>
     
-    <!-- Vercel Analytics -->
-    <script>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
+         <!-- Vercel Analytics -->
+     <script>
+         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+     </script>
+     <script defer src="/_vercel/insights/script.js"></script>
+     
+     <!-- Supabase -->
+     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+     <script src="supabase-config.js"></script>
     
     <style>
 		* { box-sizing: border-box; margin: 0; padding: 0; }
@@ -142,6 +146,154 @@
 		@media (max-width: 768px) {
 			body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
 		}
+		
+		/* Skor tablosu modal */
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 1000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0,0,0,0.5);
+			backdrop-filter: blur(4px);
+		}
+		
+		.modal-content {
+			background: #ffffffee;
+			margin: 5% auto;
+			padding: 24px;
+			border-radius: 16px;
+			width: 90%;
+			max-width: 600px;
+			box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+			border: 1px solid #e2e8f0;
+			position: relative;
+		}
+		
+		.close {
+			position: absolute;
+			right: 16px;
+			top: 16px;
+			font-size: 24px;
+			font-weight: bold;
+			cursor: pointer;
+			color: #6b7280;
+			transition: color 0.2s;
+		}
+		
+		.close:hover {
+			color: #ef4444;
+		}
+		
+		.scoreboard {
+			margin-top: 16px;
+		}
+		
+		.scoreboard h3 {
+			text-align: center;
+			color: #1f2937;
+			margin-bottom: 16px;
+			font-size: 1.4rem;
+		}
+		
+		.score-list {
+			max-height: 300px;
+			overflow-y: auto;
+			border: 1px solid #e2e8f0;
+			border-radius: 8px;
+		}
+		
+		.score-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 12px 16px;
+			border-bottom: 1px solid #f1f5f9;
+			transition: background-color 0.2s;
+		}
+		
+		.score-item:hover {
+			background-color: #f8fafc;
+		}
+		
+		.score-item:last-child {
+			border-bottom: none;
+		}
+		
+		.player-info {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+		
+		.player-name {
+			font-weight: 800;
+			color: #1f2937;
+		}
+		
+		.player-details {
+			font-size: 0.85rem;
+			color: #6b7280;
+		}
+		
+		.score-info {
+			text-align: right;
+		}
+		
+		.score-value {
+			font-size: 1.2rem;
+			font-weight: 900;
+			color: #10b981;
+		}
+		
+		.score-date {
+			font-size: 0.8rem;
+			color: #9ca3af;
+		}
+		
+		.rank-badge {
+			background: linear-gradient(45deg, #f59e0b, #f97316);
+			color: white;
+			padding: 4px 8px;
+			border-radius: 12px;
+			font-size: 0.8rem;
+			font-weight: 800;
+			margin-right: 12px;
+		}
+		
+		.rank-1 { background: linear-gradient(45deg, #fbbf24, #f59e0b); }
+		.rank-2 { background: linear-gradient(45deg, #9ca3af, #6b7280); }
+		.rank-3 { background: linear-gradient(45deg, #d97706, #b45309); }
+		
+		/* Oyuncu adı giriş modal */
+		.name-input {
+			width: 100%;
+			padding: 12px;
+			border: 2px solid #e2e8f0;
+			border-radius: 8px;
+			font-size: 1rem;
+			margin-bottom: 16px;
+			transition: border-color 0.2s;
+		}
+		
+		.name-input:focus {
+			outline: none;
+			border-color: #6366f1;
+		}
+		
+		.modal-buttons {
+			display: flex;
+			gap: 12px;
+			justify-content: flex-end;
+		}
+		
+		.btn-secondary {
+			background: linear-gradient(180deg, #6b7280, #4b5563);
+			color: #fff;
+			border: 1px solid #4b5563;
+		}
 	</style>
 </head>
 <body>
@@ -182,7 +334,8 @@
 				<button id="new-btn" class="btn-primary">🆕 Yeni Tur</button>
 				<button id="reset-btn" class="btn-warning">↩️ Sıfırla</button>
 				<button id="sound-btn" class="sound-btn" aria-label="Ses aç/kapat">🔊</button>
-				<a class="btn-danger" href="index.html" aria-label="Ana sayfa">🏠 Ana Sayfa</a>
+				<button id="scoreboard-btn" class="btn-secondary" aria-label="Skor tablosu">🏆 Skor Tablosu</button>
+				<a class="btn-danger" href="../index.html" aria-label="Ana sayfa">🏠 Ana Sayfa</a>
 			</div>
 		</div>
 
@@ -199,6 +352,36 @@
 		</div>
 
 		<div class="footer">İpucu: 50 doğru sonrası 2 haneli sayılar gelir! Serini koru, puanın katlansın! 🎉</div>
+	</div>
+
+	<!-- Skor Tablosu Modal -->
+	<div id="scoreboard-modal" class="modal">
+		<div class="modal-content">
+			<span class="close" onclick="closeScoreboard()">&times;</span>
+			<h3>🏆 Skor Tablosu</h3>
+			<div class="scoreboard">
+				<div id="score-list" class="score-list">
+					<div style="text-align: center; padding: 20px; color: #6b7280;">
+						Yükleniyor...
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Oyuncu Adı Giriş Modal -->
+	<div id="name-modal" class="modal">
+		<div class="modal-content">
+			<h3>🎯 Skorunu Kaydet</h3>
+			<p style="margin-bottom: 16px; color: #6b7280;">
+				Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?
+			</p>
+			<input type="text" id="player-name-input" class="name-input" placeholder="Adını gir..." maxlength="20">
+			<div class="modal-buttons">
+				<button class="btn-secondary" onclick="closeNameModal()">İptal</button>
+				<button class="btn-primary" onclick="saveScore()">Kaydet</button>
+			</div>
+		</div>
 	</div>
 
 	<script>
@@ -344,6 +527,10 @@
 			}
 		}
 
+		// Skor tablosu değişkenleri
+		let gameStartTime = null;
+		let pendingScore = null;
+		
 		const game = {
 			round: 0,
 			maxRounds: 100, // Maksimum 100 soru
@@ -462,14 +649,31 @@
 
 		function nextRound(){
 			if (game.round >= game.maxRounds){
+				const gameDuration = Date.now() - gameStartTime;
+				
 				setStatus('success', `Tebrikler! 100 soru tamamlandı! 🎉 — Puan: ${game.score}, Doğru: ${game.correctAnswers}, Rekor Seri: ${game.bestStreak}`);
 				confettiBurst();
 				playSuccess(); // Başarı sesi çal
 				
+				// Skor kaydetme önerisi
+				pendingScore = {
+					score: game.score,
+					duration: gameDuration,
+					correctAnswers: game.correctAnswers,
+					bestStreak: game.bestStreak,
+					mode: $('mode').value,
+					table: $('table').value
+				};
+				
+				// 2 saniye sonra skor kaydetme modalını aç
+				setTimeout(() => {
+					openNameModal();
+				}, 2000);
+				
 				// Vercel Analytics event
 				if (window.va) {
 					va('event', 'game_completed', { 
-						game: 'carpim-tablosu',
+						game: 'carpim-tablosu-game',
 						score: game.score,
 						correct_answers: game.correctAnswers,
 						best_streak: game.bestStreak,
@@ -524,7 +728,7 @@
 				// Vercel Analytics event
 				if (window.va) {
 					va('event', 'correct_answer', { 
-						game: 'carpim-tablosu',
+						game: 'carpim-tablosu-game',
 						current_score: game.score,
 						correct_answers: game.correctAnswers,
 						streak: game.streak,
@@ -550,7 +754,7 @@
 				// Vercel Analytics event
 				if (window.va) {
 					va('event', 'wrong_answer', { 
-						game: 'carpim-tablosu',
+						game: 'carpim-tablosu-game',
 						current_score: game.score,
 						lives_remaining: game.lives,
 						mode: $('mode').value,
@@ -578,14 +782,124 @@
 			updateBadges();
 		}
 
+		// Skor tablosu fonksiyonları
+		function openScoreboard() {
+			$('scoreboard-modal').style.display = 'block';
+			loadScoreboard();
+		}
+		
+		function closeScoreboard() {
+			$('scoreboard-modal').style.display = 'none';
+		}
+		
+		function openNameModal() {
+			$('name-modal').style.display = 'block';
+			$('player-name-input').focus();
+		}
+		
+		function closeNameModal() {
+			$('name-modal').style.display = 'none';
+			$('player-name-input').value = '';
+		}
+		
+		async function loadScoreboard() {
+			const scoreList = $('score-list');
+			scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Yükleniyor...</div>';
+			
+			try {
+				const scores = await window.Scoreboard.getTopScores(10);
+				
+				if (scores.length === 0) {
+					scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Henüz skor yok. İlk skoru sen yap!</div>';
+					return;
+				}
+				
+				scoreList.innerHTML = scores.map((score, index) => {
+					const rank = index + 1;
+					const rankClass = rank <= 3 ? `rank-${rank}` : '';
+					const duration = Math.round(score.duration / 1000);
+					const date = new Date(score.created_at).toLocaleDateString('tr-TR');
+					
+					return `
+						<div class="score-item">
+							<div class="player-info">
+								<span class="rank-badge ${rankClass}">#${rank}</span>
+								<span class="player-name">${score.player_name}</span>
+								<span class="player-details">
+									${score.correct_answers} doğru • ${score.best_streak} seri • ${duration}s • ${score.mode === 'know' ? 'Hızlı' : 'Öğrenme'}
+								</span>
+							</div>
+							<div class="score-info">
+								<div class="score-value">${score.score}</div>
+								<div class="score-date">${date}</div>
+							</div>
+						</div>
+					`;
+				}).join('');
+				
+			} catch (error) {
+				scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Skorlar yüklenirken hata oluştu.</div>';
+			}
+		}
+		
+		async function saveScore() {
+			const playerName = $('player-name-input').value.trim();
+			
+			// Oyuncu adı doğrulama
+			if (!playerName) {
+				alert('Lütfen bir isim gir!');
+				return;
+			}
+			
+			if (playerName.length < 2 || playerName.length > 20) {
+				alert('İsim 2-20 karakter arasında olmalı!');
+				return;
+			}
+			
+			// Sadece harf, rakam ve boşluk kabul et
+			if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]+$/.test(playerName)) {
+				alert('İsim sadece harf, rakam ve boşluk içerebilir!');
+				return;
+			}
+			
+			if (!pendingScore) {
+				alert('Kaydedilecek skor bulunamadı!');
+				return;
+			}
+			
+			try {
+				const result = await window.Scoreboard.addScore(
+					playerName,
+					pendingScore.score,
+					pendingScore.duration,
+					pendingScore.correctAnswers,
+					pendingScore.bestStreak,
+					pendingScore.mode,
+					pendingScore.table
+				);
+				
+				if (result) {
+					closeNameModal();
+					alert('Skorun başarıyla kaydedildi! 🎉');
+					pendingScore = null;
+				} else {
+					alert('Skor kaydedilemedi. Lütfen daha sonra tekrar deneyin.');
+				}
+			} catch (error) {
+				console.error('Skor kaydetme hatası:', error);
+				alert('Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.');
+			}
+		}
+		
 		function newRun(){ 
 			resetGame(); 
+			gameStartTime = Date.now(); // Oyun başlangıç zamanını kaydet
 			nextRound(); 
 			
 			// Vercel Analytics event
 			if (window.va) {
 				va('event', 'game_started', { 
-					game: 'carpim-tablosu',
+					game: 'carpim-tablosu-game',
 					mode: $('mode').value,
 					table: $('table').value
 				});
@@ -599,6 +913,7 @@
 			$('new-btn').addEventListener('click', newRun);
 			$('reset-btn').addEventListener('click', resetGame);
 			$('sound-btn').addEventListener('click', toggleSound);
+			$('scoreboard-btn').addEventListener('click', openScoreboard);
 			updateBadges();
 			setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
 			// Sayfa yüklenince otomatik başla
@@ -611,6 +926,20 @@
 				const idx = parseInt(e.key, 10) - 1;
 				const nodes = Array.from(document.querySelectorAll('.answer'));
 				if (nodes[idx]) { nodes[idx].click(); e.preventDefault(); }
+			}
+		});
+		
+		// Modal dışına tıklayınca kapat
+		window.addEventListener('click', (e) => {
+			if (e.target.classList.contains('modal')) {
+				e.target.style.display = 'none';
+			}
+		});
+		
+		// Enter tuşu ile skor kaydet
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' && $('name-modal').style.display === 'block') {
+				saveScore();
 			}
 		});
 	</script>
