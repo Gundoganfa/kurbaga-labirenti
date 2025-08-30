@@ -382,7 +382,7 @@
 	<div id="name-modal" class="modal">
 		<div class="modal-content">
 			<h3>🎯 Skorunu Kaydet</h3>
-			<p style="margin-bottom: 16px; color: #6b7280;">
+			<p id="name-modal-message" style="margin-bottom: 16px; color: #6b7280;">
 				Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?
 			</p>
 			<input type="text" id="player-name-input" class="name-input" placeholder="Adını gir..." maxlength="20">
@@ -651,7 +651,28 @@
 			// doğru cevabı vurgula
 			nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
 			game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
-			if (game.lives === 0){ return; }
+			if (game.lives === 0){ 
+				const gameDuration = Date.now() - gameStartTime;
+				
+				// Eğer oyuncu en az 5 puan aldıysa skor kaydetme önerisi yap
+				if (game.score >= 5) {
+					pendingScore = {
+						score: game.score,
+						duration: gameDuration,
+						correctAnswers: game.correctAnswers,
+						bestStreak: game.bestStreak,
+						mode: $('mode').value,
+						table: $('table').value
+					};
+					
+					// 2 saniye sonra skor kaydetme modalını aç
+					setTimeout(() => {
+						openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
+					}, 2000);
+				}
+				
+				return; 
+			}
 			await delay(700);
 			nextRound();
 		}
@@ -676,7 +697,7 @@
 				
 				// 2 saniye sonra skor kaydetme modalını aç
 				setTimeout(() => {
-					openNameModal();
+					openNameModal(`Tebrikler! 100 soruyu ${game.score} puanla tamamladın! 🎉 Skorunu kaydet ve diğer oyuncularla yarış!`);
 				}, 2000);
 				
 				// Vercel Analytics event
@@ -772,8 +793,27 @@
 				}
 				
 				if (game.lives === 0){ 
+					const gameDuration = Date.now() - gameStartTime;
 					setStatus('fail', 'Üzgünüm, canların bitti 😢 — Yeni tur ile tekrar dene!'); 
 					playGameOver(); // Üzgün ses çal
+					
+					// Eğer oyuncu en az 5 puan aldıysa skor kaydetme önerisi yap
+					if (game.score >= 5) {
+						pendingScore = {
+							score: game.score,
+							duration: gameDuration,
+							correctAnswers: game.correctAnswers,
+							bestStreak: game.bestStreak,
+							mode: $('mode').value,
+							table: $('table').value
+						};
+						
+						// 2 saniye sonra skor kaydetme modalını aç
+						setTimeout(() => {
+							openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
+						}, 2000);
+					}
+					
 					return; 
 				}
 				await delay(650);
@@ -801,7 +841,14 @@
 			$('scoreboard-modal').style.display = 'none';
 		}
 		
-		function openNameModal() {
+		function openNameModal(message = null) {
+			// Mesajı güncelle
+			if (message) {
+				$('name-modal-message').textContent = message;
+			} else {
+				$('name-modal-message').textContent = 'Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?';
+			}
+			
 			$('name-modal').style.display = 'block';
 			$('player-name-input').focus();
 		}
