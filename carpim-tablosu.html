@@ -142,6 +142,7 @@
 				<span id="score-badge" class="badge">Puan: 0</span>
 				<span id="streak-badge" class="badge">Seri: 0🔥</span>
 				<span id="best-badge" class="badge">Rekor Seri: 0</span>
+				<span id="round-badge" class="badge">Soru: 0/100</span>
 				<span id="lives-badge" class="badge">❤️❤️❤️</span>
 				<span id="time-badge" class="badge">Süre: 0.0s</span>
 			</div>
@@ -182,7 +183,7 @@
 			</div>
 		</div>
 
-		<div class="footer">İpucu: Serini koru, puanın katlansın! 🎉</div>
+		<div class="footer">İpucu: 50 doğru sonrası 2 haneli sayılar gelir! Serini koru, puanın katlansın! 🎉</div>
 	</div>
 
 	<script>
@@ -193,11 +194,12 @@
 
 		const game = {
 			round: 0,
-			maxRounds: 10,
+			maxRounds: 100, // Maksimum 100 soru
 			score: 0,
 			streak: 0,
 			bestStreak: 0,
 			lives: 3,
+			correctAnswers: 0, // Doğru cevap sayısı
 			current: null, // {a,b,correct,options:[...]}
 		};
 
@@ -206,13 +208,21 @@
 			$('streak-badge').textContent = `Seri: ${game.streak}🔥`;
 			$('best-badge').textContent = `Rekor Seri: ${game.bestStreak}`;
 			$('lives-badge').textContent = '❤️'.repeat(game.lives) + '🤍'.repeat(Math.max(0, 3 - game.lives));
+			$('round-badge').textContent = `Soru: ${game.round}/${game.maxRounds}`;
 		}
 
 		function setStatus(kind, text){ const s=$('status'); s.className = `status ${kind}`; s.textContent = text; }
 
 		function pickA(){
 			const t = $('table').value;
-			if (t === 'mix') return rand(2, 10);
+			let maxNum = 10;
+			
+			// 50 doğru cevap sonrası 2 haneli sayılar
+			if (game.correctAnswers >= 50) {
+				maxNum = 99; // 2 haneli sayılar
+			}
+			
+			if (t === 'mix') return rand(2, maxNum);
 			return parseInt(t, 10);
 		}
 
@@ -221,11 +231,15 @@
 			const b = rand(2, 10);
 			const correct = a * b;
 			const options = new Set([correct]);
+			
+			// Yanlış seçenekler için maksimum değer
+			const maxValue = Math.max(10 * 10, correct + 50); // Daha geniş aralık
+			
 			while (options.size < 4){
 				// yakındaki sayılardan ve karışık sapmalardan üret
 				const delta = [ -10,-9,-7,-5,-3,-2,-1,1,2,3,5,7,9,10 ][rand(0,13)];
 				const guess = Math.max(0, correct + delta * (rand(0,1)?1:-1));
-				if (guess !== correct && guess <= 10*10) options.add(guess);
+				if (guess !== correct && guess <= maxValue) options.add(guess);
 			}
 			const picked = shuffle(Array.from(options));
 			return { a, b, correct, options: picked };
@@ -234,7 +248,7 @@
 		function renderQuestion(){
 			const q = game.current;
 			$('q-text').textContent = `${q.a} × ${q.b} = ?`;
-			$('round').textContent = `Tur: ${game.round} / ${game.maxRounds}`;
+			$('round').textContent = `Soru: ${game.round} / ${game.maxRounds}`;
 			const answers = $('answers');
 			answers.innerHTML = '';
 			q.options.forEach((val, idx) => {
@@ -290,7 +304,7 @@
 
 		function nextRound(){
 			if (game.round >= game.maxRounds){
-				setStatus('success', `Tebrikler! Tur bitti 🎉 — Puan: ${game.score}, Rekor Seri: ${game.bestStreak}`);
+				setStatus('success', `Tebrikler! 100 soru tamamlandı! 🎉 — Puan: ${game.score}, Doğru: ${game.correctAnswers}, Rekor Seri: ${game.bestStreak}`);
 				confettiBurst();
 				
 				// Vercel Analytics event
@@ -298,6 +312,7 @@
 					va('event', 'game_completed', { 
 						game: 'carpim-tablosu',
 						score: game.score,
+						correct_answers: game.correctAnswers,
 						best_streak: game.bestStreak,
 						mode: $('mode').value,
 						table: $('table').value,
@@ -338,6 +353,7 @@
 			if (val === q.correct){
 				btn.classList.add('correct');
 				game.streak += 1; game.bestStreak = Math.max(game.bestStreak, game.streak);
+				game.correctAnswers += 1; // Doğru cevap sayısını artır
 				const bonus = 1 + Math.floor(Math.max(0, game.streak - 1) / 3); // her 3 seride +1 bonus
 				game.score += bonus;
 				updateBadges();
@@ -348,6 +364,7 @@
 					va('event', 'correct_answer', { 
 						game: 'carpim-tablosu',
 						current_score: game.score,
+						correct_answers: game.correctAnswers,
 						streak: game.streak,
 						bonus: bonus,
 						mode: $('mode').value,
@@ -382,10 +399,10 @@
 		}
 
 		function resetGame(){
-			game.round = 0; game.score = 0; game.streak = 0; game.bestStreak = 0; game.lives = 3; game.current = null;
+			game.round = 0; game.score = 0; game.streak = 0; game.bestStreak = 0; game.lives = 3; game.correctAnswers = 0; game.current = null;
 			$('answers').innerHTML = '';
 			$('q-text').textContent = 'Hazır mısın?';
-			$('round').textContent = 'Tur: 0 / 10';
+			$('round').textContent = 'Soru: 0 / 100';
 			setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
 			stopTimer(); timeLeftMs = 0; updateTimeBadge();
 			updateBadges();
