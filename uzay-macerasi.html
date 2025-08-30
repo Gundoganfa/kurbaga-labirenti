@@ -5,11 +5,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	    <title>Uzay Macerası 🚀</title>
     
-    <!-- Vercel Analytics -->
+    <!-- Vercel Analytics - Sadece production'da yükle -->
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+        // Sadece production'da analytics yükle
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = '/_vercel/insights/script.js';
+            document.head.appendChild(script);
+        }
     </script>
-    <script defer src="/_vercel/insights/script.js"></script>
     
     <style>
 		/* Uzay Macerası - Tek dosyalık oyun (HTML+CSS+JS) */
@@ -387,10 +393,15 @@
 		}
 
 		function disableControls(disabled) {
-			document.getElementById('run-btn').disabled = disabled;
-			document.getElementById('reset-btn').disabled = disabled;
-			document.getElementById('commands').disabled = disabled;
-			document.getElementById('speed').disabled = disabled;
+			const runBtn = document.getElementById('run-btn');
+			const resetBtn = document.getElementById('reset-btn');
+			const commands = document.getElementById('commands');
+			const speed = document.getElementById('speed');
+			
+			if (runBtn) runBtn.disabled = disabled;
+			if (resetBtn) resetBtn.disabled = disabled;
+			if (commands) commands.disabled = disabled;
+			if (speed) speed.disabled = disabled;
 		}
 
 		function resetGame(resetSpace = true) {

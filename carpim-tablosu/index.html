@@ -39,11 +39,17 @@
 	}
 	</script>
     
-         <!-- Vercel Analytics -->
+                              <!-- Vercel Analytics - Sadece production'da yükle -->
      <script>
          window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+         // Sadece production'da analytics yükle
+         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+             const script = document.createElement('script');
+             script.defer = true;
+             script.src = 'https://kurbaga-labirenti.vercel.app/_vercel/insights/script.js';
+             document.head.appendChild(script);
+         }
      </script>
-     <script defer src="/_vercel/insights/script.js"></script>
      
      <!-- Supabase -->
      <script src="https://unpkg.com/@supabase/supabase-js@2"></script>

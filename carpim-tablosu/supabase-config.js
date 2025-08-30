@@ -1,9 +1,15 @@
 // Supabase konfigürasyonu
 const SUPABASE_URL = 'https://tdbdohmeunhfldfqztdk.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_YbCLsKr4OMkvTyErSE6j1A_cdYlF2Bn';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkYmRvaG1ldW5oZmxkZnF6dGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzE5NzAsImV4cCI6MjA1MDU0Nzk3MH0.YbCLsKr4OMkvTyErSE6j1A_cdYlF2Bn';
 
 // Supabase client oluştur
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase;
+try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase client başarıyla oluşturuldu');
+} catch (error) {
+    console.error('Supabase client oluşturulamadı:', error);
+}
 
 // Rate limiting için basit sistem
 const rateLimiter = {
@@ -25,6 +31,13 @@ const Scoreboard = {
     // Yeni skor ekle
     async addScore(playerName, score, duration, correctAnswers, bestStreak, mode, table) {
         try {
+            console.log('Skor kaydetme başlatılıyor:', { playerName, score, duration, correctAnswers, bestStreak, mode, table });
+            
+            if (!supabase) {
+                console.error('Supabase client mevcut değil');
+                return null;
+            }
+            
             // Rate limiting kontrolü
             if (!rateLimiter.canSave()) {
                 console.error('Çok hızlı skor kaydetme denemesi');
@@ -37,25 +50,38 @@ const Scoreboard = {
                 return null;
             }
             
+            const scoreData = {
+                player_name: playerName,
+                score: score,
+                duration: duration,
+                correct_answers: correctAnswers,
+                best_streak: bestStreak,
+                mode: mode,
+                table_type: table,
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('Gönderilecek veri:', scoreData);
+            
             const { data, error } = await supabase
                 .from('scores')
-                .insert([
-                    {
-                        player_name: playerName,
-                        score: score,
-                        duration: duration,
-                        correct_answers: correctAnswers,
-                        best_streak: bestStreak,
-                        mode: mode,
-                        table_type: table,
-                        created_at: new Date().toISOString()
-                    }
-                ]);
+                .insert([scoreData]);
             
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase hatası:', error);
+                throw error;
+            }
+            
+            console.log('Skor başarıyla kaydedildi:', data);
             return data;
         } catch (error) {
             console.error('Skor eklenirken hata:', error);
+            console.error('Hata detayları:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
             return null;
         }
     },
@@ -78,16 +104,34 @@ const Scoreboard = {
     // En yüksek skorları getir (top 10)
     async getTopScores(limit = 10) {
         try {
+            console.log('Skor tablosu getiriliyor, limit:', limit);
+            
+            if (!supabase) {
+                console.error('Supabase client mevcut değil');
+                return [];
+            }
+            
             const { data, error } = await supabase
                 .from('scores')
                 .select('*')
                 .order('score', { ascending: false })
                 .limit(limit);
             
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase skor getirme hatası:', error);
+                throw error;
+            }
+            
+            console.log('Skor tablosu başarıyla getirildi:', data);
             return data;
         } catch (error) {
             console.error('Skorlar getirilirken hata:', error);
+            console.error('Hata detayları:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
             return [];
         }
     },
@@ -111,5 +155,48 @@ const Scoreboard = {
     }
 };
 
+// Supabase bağlantı test fonksiyonu
+const testSupabaseConnection = async () => {
+    try {
+        console.log('Supabase bağlantısı test ediliyor...');
+        console.log('URL:', SUPABASE_URL);
+        console.log('Key:', SUPABASE_ANON_KEY.substring(0, 20) + '...');
+        
+        if (!supabase) {
+            console.error('Supabase client henüz oluşturulmamış');
+            return false;
+        }
+        
+        // Basit bir sorgu ile bağlantıyı test et
+        const { data, error } = await supabase
+            .from('scores')
+            .select('*')
+            .limit(1);
+        
+        if (error) {
+            console.error('Supabase bağlantı hatası:', error);
+            console.error('Hata detayları:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
+            return false;
+        }
+        
+        console.log('Supabase bağlantısı başarılı!');
+        return true;
+    } catch (error) {
+        console.error('Supabase bağlantı testi başarısız:', error);
+        return false;
+    }
+};
+
+// Sayfa yüklendiğinde bağlantıyı test et
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(testSupabaseConnection, 1000);
+});
+
 // Global olarak erişilebilir yap
 window.Scoreboard = Scoreboard;
+window.testSupabaseConnection = testSupabaseConnection;
