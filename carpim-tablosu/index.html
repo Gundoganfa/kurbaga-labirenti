@@ -652,10 +652,12 @@
 			nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
 			game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
 			if (game.lives === 0){ 
+				console.log('💀 TIMEOUT: Canlar bitti! Lives:', game.lives, 'Score:', game.score);
 				const gameDuration = Date.now() - gameStartTime;
 				
 				// Eğer oyuncu en az 5 puan aldıysa skor kaydetme önerisi yap
 				if (game.score >= 5) {
+					console.log('✅ TIMEOUT: Score >= 5, modal açılacak');
 					pendingScore = {
 						score: game.score,
 						duration: gameDuration,
@@ -667,6 +669,8 @@
 					
 					// 2 saniye sonra skor kaydetme modalını aç
 					setTimeout(() => {
+						console.log('💀 CANLAR BİTTİ (TIMEOUT) - Modal açılıyor...');
+						console.log('Pendding score:', pendingScore);
 						openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
 					}, 2000);
 				}
@@ -697,6 +701,8 @@
 				
 				// 2 saniye sonra skor kaydetme modalını aç
 				setTimeout(() => {
+					console.log('🎉 100 SORU TAMAMLANDI - Modal açılıyor...');
+					console.log('Pendding score:', pendingScore);
 					openNameModal(`Tebrikler! 100 soruyu ${game.score} puanla tamamladın! 🎉 Skorunu kaydet ve diğer oyuncularla yarış!`);
 				}, 2000);
 				
@@ -793,12 +799,14 @@
 				}
 				
 				if (game.lives === 0){ 
+					console.log('💀 WRONG ANSWER: Canlar bitti! Lives:', game.lives, 'Score:', game.score);
 					const gameDuration = Date.now() - gameStartTime;
 					setStatus('fail', 'Üzgünüm, canların bitti 😢 — Yeni tur ile tekrar dene!'); 
 					playGameOver(); // Üzgün ses çal
 					
 					// Eğer oyuncu en az 5 puan aldıysa skor kaydetme önerisi yap
 					if (game.score >= 5) {
+						console.log('✅ WRONG ANSWER: Score >= 5, modal açılacak');
 						pendingScore = {
 							score: game.score,
 							duration: gameDuration,
@@ -810,6 +818,8 @@
 						
 						// 2 saniye sonra skor kaydetme modalını aç
 						setTimeout(() => {
+							console.log('💀 CANLAR BİTTİ (WRONG ANSWER) - Modal açılıyor...');
+							console.log('Pendding score:', pendingScore);
 							openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
 						}, 2000);
 					}
@@ -842,6 +852,10 @@
 		}
 		
 		function openNameModal(message = null) {
+			console.log('📝 openNameModal çağrıldı!');
+			console.log('Mesaj:', message);
+			console.log('Modal element:', $('name-modal'));
+			
 			// Mesajı güncelle
 			if (message) {
 				$('name-modal-message').textContent = message;
@@ -849,8 +863,13 @@
 				$('name-modal-message').textContent = 'Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?';
 			}
 			
+			console.log('Modal mesajı ayarlandı:', $('name-modal-message').textContent);
+			
 			$('name-modal').style.display = 'block';
+			console.log('Modal display set to block');
+			
 			$('player-name-input').focus();
+			console.log('Input focus edildi');
 		}
 		
 		function closeNameModal() {
