@@ -1,1121 +1,714 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	    		<title>Çarpım Kahramanı 🔢 - Emir'in Oyun Dünyası</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Çarpım Kahramanı 🔢 - Emir'in Oyun Dünyası</title>
 
-	<!-- Favicon -->
-	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>">
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>">
 
-	<!-- SEO Meta Tags -->
-	<meta name="description" content="Çarpım Kahramanı oyunu ile çocuklar çarpım tablosunu eğlenceli bir şekilde öğrenir. 2'lerden 10'lara kadar tüm tablolar, çoktan seçmeli sorular!">
-	<meta name="keywords" content="çarpım tablosu, matematik oyunu, çocuk oyunları, eğitici oyunlar, çarpma öğrenme">
-	<meta name="author" content="Emir">
-	<meta name="robots" content="index, follow">
-	
-	<!-- Canonical URL -->
-	<link rel="canonical" href="https://kurbaga-labirenti.vercel.app/carpim-tablosu/">
-	
-	<!-- Open Graph Meta Tags -->
-	<meta property="og:title" content="Çarpım Kahramanı 🔢 - Emir'in Oyun Dünyası">
-	<meta property="og:description" content="Çarpım tablosunu öğrenmek hiç bu kadar eğlenceli olmamıştı!">
-	<meta property="og:type" content="website">
-	<meta property="og:url" content="https://kurbaga-labirenti.vercel.app/carpim-tablosu/">
-	
-	<!-- Structured Data (JSON-LD) -->
-	<script type="application/ld+json">
-	{
-		"@context": "https://schema.org",
-		"@type": "Game",
-		"name": "Çarpım Kahramanı",
-		"description": "Çocuklar için çarpım tablosu öğrenme oyunu",
-		"url": "https://kurbaga-labirenti.vercel.app/carpim-tablosu/",
-		"genre": "Educational",
-		"audience": {
-			"@type": "Audience",
-			"audienceType": "Children"
-		},
-		"applicationCategory": "EducationalApplication",
-		"educationalUse": "Mathematics",
-		"learningResourceType": "Interactive Resource"
-	}
-	</script>
-    
-                              <!-- Vercel Analytics - Sadece production'da yükle -->
-     <script>
-         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-         // Sadece production'da analytics yükle
-         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-             const script = document.createElement('script');
-             script.defer = true;
-             script.src = '/_vercel/insights/script.js';
-             document.head.appendChild(script);
-         }
-     </script>
-     
-     <!-- Supabase -->
-     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-     <script src="supabase-config.js"></script>
-    
-    <style>
-		* { box-sizing: border-box; margin: 0; padding: 0; }
-		body {
-			font-family: 'Trebuchet MS', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-			min-height: 100vh;
-			background: linear-gradient(135deg, #f59e0b 0%, #f43f5e 40%, #8b5cf6 100%);
-			background-attachment: fixed;
-			color: #0f172a;
-			padding: 20px;
-		}
+  <!-- SEO -->
+  <meta name="description" content="Çarpım Kahramanı oyunu ile çocuklar çarpım tablosunu eğlenceli bir şekilde öğrenir. 2'lerden 10'lara kadar tüm tablolar, çoktan seçmeli sorular!">
+  <meta name="keywords" content="çarpım tablosu, matematik oyunu, çocuk oyunları, eğitici oyunlar, çarpma öğrenme">
+  <meta name="author" content="Emir">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://kurbaga-labirenti.vercel.app/carpim-tablosu/">
 
-		.container {
-			max-width: 1000px;
-			margin: 0 auto;
-			background: #ffffffee;
-			border-radius: 16px;
-			box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-			border: 1px solid #e2e8f0;
-			padding: 22px;
-		}
+  <!-- Open Graph -->
+  <meta property="og:title" content="Çarpım Kahramanı 🔢 - Emir'in Oyun Dünyası">
+  <meta property="og:description" content="Çarpım tablosunu öğrenmek hiç bu kadar eğlenceli olmamıştı!">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kurbaga-labirenti.vercel.app/carpim-tablosu/">
 
-		.header { text-align: center; margin-bottom: 12px; }
-		.header h1 { font-size: 2.2rem; color: #1f2937; text-shadow: 0 1px 0 #fff; margin-bottom: 6px; }
-		.subtitle { color: #475569; }
+  <!-- Vercel Analytics (prod’da yükle) -->
+  <script>
+    window.va = window.va || function(){ (window.vaq = window.vaq || []).push(arguments); };
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      const s = document.createElement('script');
+      s.defer = true;
+      s.src = '/_vercel/insights/script.js';
+      document.head.appendChild(s);
+    }
+  </script>
 
-		.topbar { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 12px 0; }
-		.badges { display: flex; gap: 8px; flex-wrap: wrap; }
-		.badge { background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; padding: 8px 12px; border-radius: 999px; font-weight: 800; }
-		#time-badge { background: linear-gradient(45deg, #f43f5e, #f59e0b); color: #ffffff; border-color: rgba(0,0,0,0.08); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.25), 0 0 18px rgba(249,115,22,0.35); animation: pulse 1.4s infinite; }
-		.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-		select, button { padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a; }
-		button { font-weight: 800; cursor: pointer; transition: transform .1s ease, box-shadow .2s ease; }
-		button:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,0.08); }
-		.btn-primary { background: linear-gradient(180deg, #34d399, #10b981); color: #fff; border: 1px solid #10b981; }
-		.btn-warning { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #fff; border: 1px solid #f59e0b; }
-		.btn-danger { background: linear-gradient(180deg, #f87171, #ef4444); color: #fff; border: 1px solid #ef4444; }
+  <!-- Supabase (opsiyonel skor servisi) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 
-		.arena { display: grid; grid-template-columns: 1fr; gap: 12px; }
-		.board { display: grid; gap: 12px; grid-template-columns: 1fr; align-items: center; justify-items: center; }
-		.question {
-			background: linear-gradient(135deg, #a7f3d0, #6ee7b7);
-			border: 2px solid #10b981; color: #064e3b; border-radius: 16px; padding: 16px; width: 100%; text-align: center;
-			box-shadow: inset 0 0 18px rgba(16,185,129,0.15);
-		}
-		.q-text { font-size: 2.6rem; font-weight: 900; letter-spacing: 1px; }
-		.round { margin-top: 6px; font-weight: 800; color: #065f46; }
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Trebuchet MS', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f59e0b 0%, #f43f5e 40%, #8b5cf6 100%);
+      background-attachment: fixed;
+      color: #0f172a;
+      padding: 20px;
+    }
 
-		.answers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
-		.answer {
-			padding: 16px; border-radius: 14px; border: 2px solid #e2e8f0; background: #fff; font-size: 1.4rem; font-weight: 900;
-			cursor: pointer; text-align: center; user-select: none; outline: none; position: relative;
-			transition: transform .1s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
-		}
-		.answer:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
-		.answer.correct { background: linear-gradient(180deg, #d1fae5, #a7f3d0); border-color: #10b981; }
-		.answer.wrong { background: linear-gradient(180deg, #fee2e2, #fecaca); border-color: #ef4444; }
-		.shake { animation: shake .25s ease-in-out; }
-		@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #ffffffee;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      border: 1px solid #e2e8f0;
+      padding: 22px;
+    }
 
-		.status { text-align: center; font-weight: 800; padding: 10px; border-radius: 10px; }
-		.status.ready { background: #e0f2fe; color: #075985; }
-		.status.running { background: #fef9c3; color: #854d0e; }
-		.status.success { background: #d1fae5; color: #065f46; }
-		.status.fail { background: #fee2e2; color: #7f1d1d; }
+    .header { text-align: center; margin-bottom: 12px; }
+    .header h1 { font-size: 2.2rem; color: #1f2937; text-shadow: 0 1px 0 #fff; margin-bottom: 6px; }
+    .subtitle { color: #475569; }
 
-		/* Live Scoreboard */
-		.live-scoreboard {
-			background: linear-gradient(135deg, #fef3c7, #fde68a);
-			border: 2px solid #f59e0b;
-			border-radius: 12px;
-			padding: 16px;
-			margin: 16px 0;
-			box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
-		}
-		.live-scoreboard h3 {
-			margin: 0 0 12px 0;
-			color: #92400e;
-			text-align: center;
-			font-size: 1.1rem;
-		}
-		.live-score-list {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-		}
-		.live-score-item {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			background: rgba(255, 255, 255, 0.8);
-			padding: 8px 12px;
-			border-radius: 8px;
-			border: 1px solid rgba(245, 158, 11, 0.3);
-		}
-		.live-rank {
-			font-weight: 800;
-			color: #92400e;
-			min-width: 24px;
-		}
-		.live-player-name {
-			flex: 1;
-			margin-left: 8px;
-			font-weight: 600;
-			color: #1f2937;
-		}
-		.live-score-value {
-			font-weight: 800;
-			color: #dc2626;
-			font-size: 1.1rem;
-		}
+    .topbar { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; padding: 8px 12px; border-radius: 999px; font-weight: 800; }
+    #time-badge {
+      background: linear-gradient(45deg, #f43f5e, #f59e0b);
+      color: #ffffff; border-color: rgba(0,0,0,0.08);
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,0.25), 0 0 18px rgba(249,115,22,0.35);
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
 
-		.footer { text-align: center; color: #334155; margin-top: 12px; }
-		.footer a { color: #1e3a8a; font-weight: 800; text-decoration: none; }
-		
-		/* Ses kontrol butonu */
-		.sound-btn {
-			background: linear-gradient(180deg, #6366f1, #4f46e5);
-			color: #fff;
-			border: 1px solid #4f46e5;
-			padding: 8px 12px;
-			border-radius: 8px;
-			cursor: pointer;
-			font-size: 1.2rem;
-			transition: transform .1s ease, box-shadow .2s ease;
-		}
-		.sound-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
-		.sound-btn.muted { background: linear-gradient(180deg, #6b7280, #4b5563); border-color: #4b5563; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    select, button, a.btn-danger {
+      padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a;
+      text-decoration: none; display: inline-block;
+    }
+    button { font-weight: 800; cursor: pointer; transition: transform .1s ease, box-shadow .2s ease; }
+    button:hover, a.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,0.08); }
+    .btn-primary { background: linear-gradient(180deg, #34d399, #10b981); color: #fff; border: 1px solid #10b981; }
+    .btn-warning { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #fff; border: 1px solid #f59e0b; }
+    .btn-danger { background: linear-gradient(180deg, #f87171, #ef4444); color: #fff; border: 1px solid #ef4444; }
+    .btn-secondary { background: linear-gradient(180deg, #6b7280, #4b5563); color: #fff; border: 1px solid #4b5563; }
 
-		/* Mini konfeti noktaları */
-		.confetti { pointer-events: none; position: absolute; inset: 0; overflow: hidden; }
-		.dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; opacity: 0; animation: pop 800ms ease-out forwards; }
-		@keyframes pop { 0%{transform:translateY(0) scale(0.2); opacity:0} 30%{opacity:1} 100%{transform:translateY(-80px) scale(1); opacity:0} }
+    .arena { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .board { display: grid; gap: 12px; grid-template-columns: 1fr; align-items: center; justify-items: center; position: relative; }
+    .question {
+      background: linear-gradient(135deg, #a7f3d0, #6ee7b7);
+      border: 2px solid #10b981; color: #064e3b; border-radius: 16px; padding: 16px; width: 100%; text-align: center;
+      box-shadow: inset 0 0 18px rgba(16,185,129,0.15);
+    }
+    .q-text { font-size: 2.6rem; font-weight: 900; letter-spacing: 1px; }
+    .round { margin-top: 6px; font-weight: 800; color: #065f46; }
 
-		/* Responsive */
-		@media (max-width: 640px) {
-			.q-text { font-size: 2.2rem; }
-			.answers { grid-template-columns: 1fr; }
-		}
+    .answers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
+    .answer {
+      padding: 16px; border-radius: 14px; border: 2px solid #e2e8f0; background: #fff; font-size: 1.4rem; font-weight: 900;
+      cursor: pointer; text-align: center; user-select: none; outline: none; position: relative;
+      transition: transform .1s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .answer:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+    .answer.correct { background: linear-gradient(180deg, #d1fae5, #a7f3d0); border-color: #10b981; }
+    .answer.wrong { background: linear-gradient(180deg, #fee2e2, #fecaca); border-color: #ef4444; }
+    .shake { animation: shake .25s ease-in-out; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
 
-		/* Mobilde sistem fontu */
-		@media (max-width: 768px) {
-			body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
-		}
-		
-		/* Skor tablosu modal */
-		.modal {
-			display: none;
-			position: fixed;
-			z-index: 1000;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%;
-			background-color: rgba(0,0,0,0.5);
-			backdrop-filter: blur(4px);
-		}
-		
-		.modal-content {
-			background: #ffffffee;
-			margin: 5% auto;
-			padding: 24px;
-			border-radius: 16px;
-			width: 90%;
-			max-width: 600px;
-			box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-			border: 1px solid #e2e8f0;
-			position: relative;
-		}
-		
-		.close {
-			position: absolute;
-			right: 16px;
-			top: 16px;
-			font-size: 24px;
-			font-weight: bold;
-			cursor: pointer;
-			color: #6b7280;
-			transition: color 0.2s;
-		}
-		
-		.close:hover {
-			color: #ef4444;
-		}
-		
-		.scoreboard {
-			margin-top: 16px;
-		}
-		
-		.scoreboard h3 {
-			text-align: center;
-			color: #1f2937;
-			margin-bottom: 16px;
-			font-size: 1.4rem;
-		}
-		
-		.score-list {
-			max-height: 300px;
-			overflow-y: auto;
-			border: 1px solid #e2e8f0;
-			border-radius: 8px;
-		}
-		
-		.score-item {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 12px 16px;
-			border-bottom: 1px solid #f1f5f9;
-			transition: background-color 0.2s;
-		}
-		
-		.score-item:hover {
-			background-color: #f8fafc;
-		}
-		
-		.score-item:last-child {
-			border-bottom: none;
-		}
-		
-		.player-info {
-			display: flex;
-			flex-direction: column;
-			gap: 4px;
-		}
-		
-		.player-name {
-			font-weight: 800;
-			color: #1f2937;
-		}
-		
-		.player-details {
-			font-size: 0.85rem;
-			color: #6b7280;
-		}
-		
-		.score-info {
-			text-align: right;
-		}
-		
-		.score-value {
-			font-size: 1.2rem;
-			font-weight: 900;
-			color: #10b981;
-		}
-		
-		.score-date {
-			font-size: 0.8rem;
-			color: #9ca3af;
-		}
-		
-		.rank-badge {
-			background: linear-gradient(45deg, #f59e0b, #f97316);
-			color: white;
-			padding: 4px 8px;
-			border-radius: 12px;
-			font-size: 0.8rem;
-			font-weight: 800;
-			margin-right: 12px;
-		}
-		
-		.rank-1 { background: linear-gradient(45deg, #fbbf24, #f59e0b); }
-		.rank-2 { background: linear-gradient(45deg, #9ca3af, #6b7280); }
-		.rank-3 { background: linear-gradient(45deg, #d97706, #b45309); }
-		
-		/* Oyuncu adı giriş modal */
-		.name-input {
-			width: 100%;
-			padding: 12px;
-			border: 2px solid #e2e8f0;
-			border-radius: 8px;
-			font-size: 1rem;
-			margin-bottom: 16px;
-			transition: border-color 0.2s;
-		}
-		
-		.name-input:focus {
-			outline: none;
-			border-color: #6366f1;
-		}
-		
-		.modal-buttons {
-			display: flex;
-			gap: 12px;
-			justify-content: flex-end;
-		}
-		
-		.btn-secondary {
-			background: linear-gradient(180deg, #6b7280, #4b5563);
-			color: #fff;
-			border: 1px solid #4b5563;
-		}
-	</style>
+    .status { text-align: center; font-weight: 800; padding: 10px; border-radius: 10px; }
+    .status.ready { background: #e0f2fe; color: #075985; }
+    .status.running { background: #fef9c3; color: #854d0e; }
+    .status.success { background: #d1fae5; color: #065f46; }
+    .status.fail { background: #fee2e2; color: #7f1d1d; }
+
+    /* Live Scoreboard */
+    .live-scoreboard {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    }
+    .live-scoreboard h3 {
+      margin: 0 0 12px 0; color: #92400e; text-align: center; font-size: 1.1rem;
+    }
+    .live-score-list { display: flex; flex-direction: column; gap: 8px; }
+    .live-score-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255, 255, 255, 0.8); padding: 8px 12px; border-radius: 8px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .live-rank { font-weight: 800; color: #92400e; min-width: 24px; }
+    .live-player-name { flex: 1; margin-left: 8px; font-weight: 600; color: #1f2937; }
+    .live-score-value { font-weight: 800; color: #dc2626; font-size: 1.1rem; }
+
+    .footer { text-align: center; color: #334155; margin-top: 12px; }
+    .footer a { color: #1e3a8a; font-weight: 800; text-decoration: none; }
+
+    /* Ses butonu */
+    .sound-btn {
+      background: linear-gradient(180deg, #6366f1, #4f46e5); color: #fff; border: 1px solid #4f46e5;
+      padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;
+      transition: transform .1s ease, box-shadow .2s ease;
+    }
+    .sound-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+    .sound-btn.muted { background: linear-gradient(180deg, #6b7280, #4b5563); border-color: #4b5563; }
+
+    /* Konfeti */
+    .confetti { pointer-events: none; position: absolute; inset: 0; overflow: hidden; }
+    .dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; opacity: 0; animation: pop 800ms ease-out forwards; }
+    @keyframes pop { 0%{transform:translateY(0) scale(0.2); opacity:0} 30%{opacity:1} 100%{transform:translateY(-80px) scale(1); opacity:0} }
+
+    /* Modal */
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: #ffffffee; margin: 5% auto; padding: 24px; border-radius: 16px; width: 90%; max-width: 600px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; position: relative;
+    }
+    .close { position: absolute; right: 16px; top: 16px; font-size: 24px; font-weight: bold; cursor: pointer; color: #6b7280; transition: color 0.2s; }
+    .close:hover { color: #ef4444; }
+
+    .scoreboard { margin-top: 16px; }
+    .scoreboard h3 { text-align: center; color: #1f2937; margin-bottom: 16px; font-size: 1.4rem; }
+    .score-list { max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .score-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s; }
+    .score-item:hover { background-color: #f8fafc; }
+    .score-item:last-child { border-bottom: none; }
+
+    .player-info { display: flex; flex-direction: column; gap: 4px; }
+    .player-name { font-weight: 800; color: #1f2937; }
+    .player-details { font-size: 0.85rem; color: #6b7280; }
+
+    .score-info { text-align: right; }
+    .score-value { font-size: 1.2rem; font-weight: 900; color: #10b981; }
+    .score-date { font-size: 0.8rem; color: #9ca3af; }
+
+    .rank-badge { background: linear-gradient(45deg, #f59e0b, #f97316); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; margin-right: 12px; }
+    .rank-1 { background: linear-gradient(45deg, #fbbf24, #f59e0b); }
+    .rank-2 { background: linear-gradient(45deg, #9ca3af, #6b7280); }
+    .rank-3 { background: linear-gradient(45deg, #d97706, #b45309); }
+
+    .name-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; margin-bottom: 16px; transition: border-color 0.2s; }
+    .name-input:focus { outline: none; border-color: #6366f1; }
+    .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+  </style>
 </head>
 <body>
-	<div class="container">
-		<div class="header">
-			<h1>🔢 Çarpım Kahramanı</h1>
-			<div class="subtitle">Renkli çoktan seçmeli sorular ile çarpım tablosunu ezberle!</div>
-		</div>
+  <div class="container">
+    <div class="header">
+      <h1>🔢 Çarpım Kahramanı</h1>
+      <div class="subtitle">Renkli çoktan seçmeli sorular ile çarpım tablosunu ezberle!</div>
+    </div>
 
-		<div class="topbar" aria-live="polite">
-			<div class="badges">
-				<span id="score-badge" class="badge">Puan: 0</span>
-				<span id="streak-badge" class="badge">Seri: 0🔥</span>
-				<span id="best-badge" class="badge">Rekor Seri: 0</span>
-				<span id="round-badge" class="badge">Soru: 0/100</span>
-				<span id="lives-badge" class="badge">❤️❤️❤️</span>
-				<span id="time-badge" class="badge">Süre: 0.0s</span>
-			</div>
-			<div class="controls">
-				<label for="mode">Seviye</label>
-				<select id="mode" aria-label="Seviye seç">
-					<option value="learn" selected>Yeni öğreniyorum (15s)</option>
-					<option value="know">Ben biliyorum (5s)</option>
-				</select>
-				<label for="table">Tablo</label>
-				<select id="table" aria-label="Tablo seç">
-					<option value="mix" selected>Karışık (2-10)</option>
-					<option value="2">2'ler</option>
-					<option value="3">3'ler</option>
-					<option value="4">4'ler</option>
-					<option value="5">5'ler</option>
-					<option value="6">6'lar</option>
-					<option value="7">7'ler</option>
-					<option value="8">8'ler</option>
-					<option value="9">9'lar</option>
-					<option value="10">10'lar</option>
-				</select>
-				<button id="new-btn" class="btn-primary">🆕 Yeni Tur</button>
-				<button id="reset-btn" class="btn-warning">↩️ Sıfırla</button>
-				<button id="sound-btn" class="sound-btn" aria-label="Ses aç/kapat">🔊</button>
-				<button id="scoreboard-btn" class="btn-secondary" aria-label="Skor tablosu">🏆 Skor Tablosu</button>
-				<a class="btn-danger" href="../index.html" aria-label="Ana sayfa">🏠 Ana Sayfa</a>
-			</div>
-		</div>
+    <div class="topbar" aria-live="polite">
+      <div class="badges">
+        <span id="score-badge" class="badge">Puan: 0</span>
+        <span id="streak-badge" class="badge">Seri: 0🔥</span>
+        <span id="best-badge" class="badge">Rekor Seri: 0</span>
+        <span id="round-badge" class="badge">Soru: 0/100</span>
+        <span id="lives-badge" class="badge">❤️❤️❤️</span>
+        <span id="time-badge" class="badge">Süre: 0.0s</span>
+      </div>
+      <div class="controls">
+        <label for="mode">Seviye</label>
+        <select id="mode" aria-label="Seviye seç">
+          <option value="learn" selected>Yeni öğreniyorum (15s)</option>
+          <option value="know">Ben biliyorum (5s)</option>
+        </select>
+        <label for="table">Tablo</label>
+        <select id="table" aria-label="Tablo seç">
+          <option value="mix" selected>Karışık (2-10)</option>
+          <option value="2">2'ler</option>
+          <option value="3">3'ler</option>
+          <option value="4">4'ler</option>
+          <option value="5">5'ler</option>
+          <option value="6">6'lar</option>
+          <option value="7">7'ler</option>
+          <option value="8">8'ler</option>
+          <option value="9">9'lar</option>
+          <option value="10">10'lar</option>
+        </select>
+        <button id="new-btn" class="btn-primary">🔄 Yeni Oyun</button>
+        <button id="sound-btn" class="sound-btn" aria-label="Ses aç/kapat">🔊</button>
+        <button id="scoreboard-btn" class="btn-secondary" aria-label="Skor tablosu">🏆 Skor Tablosu</button>
+        <a class="btn-danger" href="../index.html" aria-label="Ana sayfa">🏠 Ana Sayfa</a>
+      </div>
+    </div>
 
-		<div class="arena">
-			<div class="board">
-				<div class="question">
-					<div id="q-text" class="q-text">Hazır mısın?</div>
-					<div id="round" class="round">Tur: 0 / 10</div>
-				</div>
-				<div class="answers" id="answers" role="group" aria-label="Cevap seçenekleri"></div>
-				<div id="status" class="status ready">🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.</div>
-				<div class="confetti" id="confetti"></div>
-			</div>
-		</div>
+    <div class="arena">
+      <div class="board">
+        <div class="question">
+          <div id="q-text" class="q-text">Hazır mısın?</div>
+          <div id="round" class="round">Soru: 0 / 100</div>
+        </div>
+        <div class="answers" id="answers" role="group" aria-label="Cevap seçenekleri"></div>
+        <div id="status" class="status ready">🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.</div>
+        <div class="confetti" id="confetti"></div>
+      </div>
+    </div>
 
-		<!-- Live Top 5 Scoreboard -->
-		<div class="live-scoreboard">
-			<h3>🏆 En İyi 5 Skor</h3>
-			<div id="live-score-list" class="live-score-list">
-				<div style="text-align: center; padding: 20px; color: #6b7280;">
-					Yükleniyor...
-				</div>
-			</div>
-		</div>
+    <!-- Live Top 5 -->
+    <div class="live-scoreboard">
+      <h3>🏆 En İyi 5 Skor</h3>
+      <div id="live-score-list" class="live-score-list">
+        <div style="text-align:center; padding:20px; color:#6b7280;">Yükleniyor...</div>
+      </div>
+    </div>
 
-		<div class="footer">İpucu: 50 doğru sonrası 2 haneli sayılar gelir! Serini koru, puanın katlansın! 🎉</div>
-	</div>
+    <div class="footer">İpucu: 50 doğru sonrası 2 haneli sayılar gelir! Serini koru, puanın katlansın! 🎉</div>
+  </div>
 
-	<!-- Skor Tablosu Modal -->
-	<div id="scoreboard-modal" class="modal">
-		<div class="modal-content">
-			<span class="close" onclick="closeScoreboard()">&times;</span>
-			<h3>🏆 Skor Tablosu</h3>
-			<div class="scoreboard">
-				<div id="score-list" class="score-list">
-					<div style="text-align: center; padding: 20px; color: #6b7280;">
-						Yükleniyor...
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+  <!-- Skor Tablosu Modal -->
+  <div id="scoreboard-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeScoreboard()">&times;</span>
+      <h3>🏆 Skor Tablosu</h3>
+      <div class="scoreboard">
+        <div id="score-list" class="score-list">
+          <div style="text-align:center; padding:20px; color:#6b7280;">Yükleniyor...</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-	<!-- Oyuncu Adı Giriş Modal -->
-	<div id="name-modal" class="modal">
-		<div class="modal-content">
-			<h3>🎯 Skorunu Kaydet</h3>
-			<p id="name-modal-message" style="margin-bottom: 16px; color: #6b7280;">
-				Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?
-			</p>
-			<input type="text" id="player-name-input" class="name-input" placeholder="Adını gir..." maxlength="20">
-			<div class="modal-buttons">
-				<button class="btn-secondary" onclick="closeNameModal()">İptal</button>
-				<button class="btn-primary" onclick="saveScore()">Kaydet</button>
-			</div>
-		</div>
-	</div>
+  <!-- Oyuncu Adı Modal -->
+  <div id="name-modal" class="modal">
+    <div class="modal-content">
+      <h3>🎯 Skorunu Kaydet</h3>
+      <p id="name-modal-message" style="margin-bottom:16px; color:#6b7280;">
+        Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?
+      </p>
+      <input type="text" id="player-name-input" class="name-input" placeholder="Adını gir..." maxlength="20">
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="closeNameModal()">İptal</button>
+        <button class="btn-primary" onclick="saveScore()">Kaydet</button>
+      </div>
+    </div>
+  </div>
 
-	<script>
-		const $ = (id) => document.getElementById(id);
-		const delay = (ms) => new Promise(r => setTimeout(r, ms));
-		function rand(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
-		function shuffle(arr){ for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+  <script>
+    // ===== KÜÇÜK YARDIMCILAR =====
+    const $ = id => document.getElementById(id);
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
 
-		// Ses sistemi
-		let audioContext = null;
-		let soundEnabled = true;
-		
-		function initAudio() {
-			if (!audioContext) {
-				audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			}
-		}
-		
-		function playBeep(frequency = 800, duration = 100) {
-			if (!soundEnabled || !audioContext) return;
-			
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-			oscillator.type = 'sine';
-			
-			gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
-			
-			oscillator.start(audioContext.currentTime);
-			oscillator.stop(audioContext.currentTime + duration / 1000);
-		}
-		
-		function playPop() {
-			if (!soundEnabled || !audioContext) return;
-			
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
-			oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
-			oscillator.type = 'sine';
-			
-			gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-			
-			oscillator.start(audioContext.currentTime);
-			oscillator.stop(audioContext.currentTime + 0.1);
-		}
-		
-		function playError() {
-			if (!soundEnabled || !audioContext) return;
-			
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			// Hata sesi: düşük frekans, kısa
-			oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-			oscillator.type = 'sawtooth';
-			
-			gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-			
-			oscillator.start(audioContext.currentTime);
-			oscillator.stop(audioContext.currentTime + 0.2);
-		}
-		
-		function playGameOver() {
-			if (!soundEnabled || !audioContext) return;
-			
-			// "Dııdııdııt" sesi - üzgün melodi
-			const notes = [400, 350, 300, 250];
-			const noteDuration = 0.3;
-			
-			notes.forEach((freq, index) => {
-				setTimeout(() => {
-					const oscillator = audioContext.createOscillator();
-					const gainNode = audioContext.createGain();
-					
-					oscillator.connect(gainNode);
-					gainNode.connect(audioContext.destination);
-					
-					oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-					oscillator.type = 'triangle';
-					
-					gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
-					gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
-					
-					oscillator.start(audioContext.currentTime);
-					oscillator.stop(audioContext.currentTime + noteDuration);
-				}, index * noteDuration * 1000);
-			});
-		}
-		
-		function playSuccess() {
-			if (!soundEnabled || !audioContext) return;
-			
-			// Başarı sesi - neşeli melodi
-			const notes = [523, 659, 784, 1047]; // C, E, G, C (yüksek)
-			const noteDuration = 0.2;
-			
-			notes.forEach((freq, index) => {
-				setTimeout(() => {
-					const oscillator = audioContext.createOscillator();
-					const gainNode = audioContext.createGain();
-					
-					oscillator.connect(gainNode);
-					gainNode.connect(audioContext.destination);
-					
-					oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-					oscillator.type = 'sine';
-					
-					gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
-					gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
-					
-					oscillator.start(audioContext.currentTime);
-					oscillator.stop(audioContext.currentTime + noteDuration);
-				}, index * noteDuration * 1000);
-			});
-		}
-		
-		function toggleSound() {
-			soundEnabled = !soundEnabled;
-			const btn = $('sound-btn');
-			if (soundEnabled) {
-				btn.textContent = '🔊';
-				btn.classList.remove('muted');
-				btn.setAttribute('aria-label', 'Sesi kapat');
-			} else {
-				btn.textContent = '🔇';
-				btn.classList.add('muted');
-				btn.setAttribute('aria-label', 'Sesi aç');
-			}
-		}
+    // ===== SES SİSTEMİ (user gesture guard’lı) =====
+    let audioContext = null;
+    let soundEnabled = true;
 
-		// Skor tablosu değişkenleri
-		let gameStartTime = null;
-		let pendingScore = null;
-		
-		const game = {
-			round: 0,
-			maxRounds: 100, // Maksimum 100 soru
-			score: 0,
-			streak: 0,
-			bestStreak: 0,
-			lives: 3,
-			correctAnswers: 0, // Doğru cevap sayısı
-			current: null, // {a,b,correct,options:[...]}
-		};
+    function ensureAudioReady() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().catch(()=>{});
+      }
+    }
+    function playBeep(f = 800, d = 100) {
+      if (!soundEnabled || !audioContext) return;
+      const o = audioContext.createOscillator(); const g = audioContext.createGain();
+      o.connect(g); g.connect(audioContext.destination);
+      o.frequency.setValueAtTime(f, audioContext.currentTime); o.type = 'sine';
+      g.gain.setValueAtTime(0.1, audioContext.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + d/1000);
+      o.start(audioContext.currentTime); o.stop(audioContext.currentTime + d/1000);
+    }
+    function playPop() {
+      if (!soundEnabled || !audioContext) return;
+      const o = audioContext.createOscillator(); const g = audioContext.createGain();
+      o.connect(g); g.connect(audioContext.destination);
+      o.frequency.setValueAtTime(1200, audioContext.currentTime);
+      o.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+      o.type = 'sine'; g.gain.setValueAtTime(0.15, audioContext.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 0.1);
+    }
+    function playError() {
+      if (!soundEnabled || !audioContext) return;
+      const o = audioContext.createOscillator(); const g = audioContext.createGain();
+      o.connect(g); g.connect(audioContext.destination);
+      o.frequency.setValueAtTime(300, audioContext.currentTime); o.type = 'sawtooth';
+      g.gain.setValueAtTime(0.1, audioContext.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 0.2);
+    }
+    function playSuccess() {
+      if (!soundEnabled || !audioContext) return;
+      const notes = [523, 659, 784, 1047], dur = 0.2;
+      notes.forEach((f, i) => {
+        setTimeout(() => {
+          const o = audioContext.createOscillator(); const g = audioContext.createGain();
+          o.connect(g); g.connect(audioContext.destination);
+          o.frequency.setValueAtTime(f, audioContext.currentTime); o.type = 'sine';
+          g.gain.setValueAtTime(0.12, audioContext.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + dur);
+          o.start(audioContext.currentTime); o.stop(audioContext.currentTime + dur);
+        }, i * dur * 1000);
+      });
+    }
+    function playGameOver() {
+      if (!soundEnabled || !audioContext) return;
+      const notes = [400, 350, 300, 250], dur = 0.3;
+      notes.forEach((f, i) => {
+        setTimeout(() => {
+          const o = audioContext.createOscillator(); const g = audioContext.createGain();
+          o.connect(g); g.connect(audioContext.destination);
+          o.frequency.setValueAtTime(f, audioContext.currentTime); o.type = 'triangle';
+          g.gain.setValueAtTime(0.08, audioContext.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + dur);
+          o.start(audioContext.currentTime); o.stop(audioContext.currentTime + dur);
+        }, i * dur * 1000);
+      });
+    }
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      ensureAudioReady();
+      const btn = $('sound-btn');
+      if (soundEnabled) {
+        btn.textContent = '🔊'; btn.classList.remove('muted'); btn.setAttribute('aria-label', 'Sesi kapat');
+      } else {
+        btn.textContent = '🔇'; btn.classList.add('muted'); btn.setAttribute('aria-label', 'Sesi aç');
+      }
+    }
 
-		function updateBadges(){
-			$('score-badge').textContent = `Puan: ${game.score}`;
-			$('streak-badge').textContent = `Seri: ${game.streak}🔥`;
-			$('best-badge').textContent = `Rekor Seri: ${game.bestStreak}`;
-			$('lives-badge').textContent = '❤️'.repeat(game.lives) + '🤍'.repeat(Math.max(0, 3 - game.lives));
-			$('round-badge').textContent = `Soru: ${game.round}/${game.maxRounds}`;
-		}
+    // ===== OYUN DURUMU =====
+    let gameStartTime = null;
+    let pendingScore = null;
 
-		function setStatus(kind, text){ const s=$('status'); s.className = `status ${kind}`; s.textContent = text; }
+    const game = {
+      round: 0, maxRounds: 100,
+      score: 0, streak: 0, bestStreak: 0,
+      lives: 3, correctAnswers: 0,
+      current: null
+    };
 
-		function pickA(){
-			const t = $('table').value;
-			let maxNum = 10;
-			
-			// 50 doğru cevap sonrası 2 haneli sayılar
-			if (game.correctAnswers >= 50) {
-				maxNum = 99; // 2 haneli sayılar
-			}
-			
-			if (t === 'mix') return rand(2, maxNum);
-			return parseInt(t, 10);
-		}
+    function updateBadges(){
+      $('score-badge').textContent = `Puan: ${game.score}`;
+      $('streak-badge').textContent = `Seri: ${game.streak}🔥`;
+      $('best-badge').textContent = `Rekor Seri: ${game.bestStreak}`;
+      $('lives-badge').textContent = '❤️'.repeat(game.lives) + '🤍'.repeat(Math.max(0, 3 - game.lives));
+      $('round-badge').textContent = `Soru: ${game.round}/${game.maxRounds}`;
+    }
+    function setStatus(kind, text){ const s=$('status'); s.className = `status ${kind}`; s.textContent = text; }
 
-		function generateQuestion(){
-			const a = pickA();
-			const b = rand(2, 10);
-			const correct = a * b;
-			const options = new Set([correct]);
-			
-			// Yanlış seçenekler için maksimum değer
-			const maxValue = Math.max(10 * 10, correct + 50); // Daha geniş aralık
-			
-			while (options.size < 4){
-				// yakındaki sayılardan ve karışık sapmalardan üret
-				const delta = [ -10,-9,-7,-5,-3,-2,-1,1,2,3,5,7,9,10 ][rand(0,13)];
-				const guess = Math.max(0, correct + delta * (rand(0,1)?1:-1));
-				if (guess !== correct && guess <= maxValue) options.add(guess);
-			}
-			const picked = shuffle(Array.from(options));
-			return { a, b, correct, options: picked };
-		}
+    function pickA(){
+      const t = $('table').value; let maxNum = 10;
+      if (game.correctAnswers >= 50) maxNum = 99;
+      return t === 'mix' ? rand(2, maxNum) : parseInt(t, 10);
+    }
+    function generateQuestion(){
+      const a = pickA(), b = rand(2, 10), correct = a * b;
+      const options = new Set([correct]);
+      const maxValue = Math.max(100, correct + 50);
+      while (options.size < 4){
+        const deltas = [-10,-9,-7,-5,-3,-2,-1,1,2,3,5,7,9,10];
+        const delta = deltas[rand(0, deltas.length-1)];
+        const guess = Math.max(1, correct + delta * (rand(0,1)?1:-1));
+        if (guess !== correct && guess <= maxValue) options.add(guess);
+      }
+      return { a, b, correct, options: shuffle([...options]) };
+    }
+    function renderQuestion(){
+      const q = game.current;
+      $('q-text').textContent = `${q.a} × ${q.b} = ?`;
+      $('round').textContent = `Soru: ${game.round} / ${game.maxRounds}`;
+      const answers = $('answers'); answers.innerHTML = '';
+      q.options.forEach((val) => {
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'answer'; btn.dataset.val = String(val);
+        btn.setAttribute('aria-label', `Cevap: ${val}`); btn.textContent = String(val);
+        btn.addEventListener('click', () => onAnswer(val, btn));
+        answers.appendChild(btn);
+      });
+    }
 
-		function renderQuestion(){
-			const q = game.current;
-			$('q-text').textContent = `${q.a} × ${q.b} = ?`;
-			$('round').textContent = `Soru: ${game.round} / ${game.maxRounds}`;
-			const answers = $('answers');
-			answers.innerHTML = '';
-			q.options.forEach((val, idx) => {
-				const btn = document.createElement('button');
-				btn.type = 'button'; btn.className = 'answer'; btn.setAttribute('data-val', String(val));
-				btn.setAttribute('aria-label', `Cevap: ${val}`);
-				btn.textContent = String(val);
-				btn.addEventListener('click', () => onAnswer(val, btn));
-				answers.appendChild(btn);
-			});
-		}
+    // ===== ZAMANLAYICI =====
+    let timerId = null, timeLeftMs = 0, awaitingAnswer = false;
+    let firstRoundArmed = false;
 
-		let timerId = null; let timeLeftMs = 0; let awaitingAnswer = false;
-		function getBaseTimeMs(){
-			const m = $('mode').value; return m === 'know' ? 5000 : 15000;
-		}
+    function getBaseTimeMs(){ return $('mode').value === 'know' ? 5000 : 15000; }
+    function updateTimeBadge(){ $('time-badge').textContent = `Süre: ${(timeLeftMs/1000).toFixed(1)}s`; }
+    function stopTimer(){ if (timerId){ clearInterval(timerId); timerId = null; } }
+    function startTimer(ms){
+      timeLeftMs = ms; updateTimeBadge(); stopTimer();
+      timerId = setInterval(()=>{
+        timeLeftMs = Math.max(0, timeLeftMs - 100);
+        updateTimeBadge();
+        if (timeLeftMs > 0 && timeLeftMs % 1000 < 100) { ensureAudioReady(); playBeep(600, 50); }
+        if (timeLeftMs <= 0){ stopTimer(); if (awaitingAnswer) onTimeout(); }
+      }, 100);
+    }
+    function armFirstTimer(ms){
+      if (firstRoundArmed) return; firstRoundArmed = true;
+      const answers = $('answers');
+      const start = () => { ensureAudioReady(); if (!timerId && awaitingAnswer){ startTimer(ms); } };
+      const keyStart = (e) => {
+        if (['1','2','3','4'].includes(e.key)) {
+          ensureAudioReady(); if (!timerId && awaitingAnswer){ startTimer(ms); }
+        }
+      };
+      answers.addEventListener('pointerdown', start, { once: true });
+      document.addEventListener('keydown', keyStart, { once: true });
+    }
 
-		function updateTimeBadge(){ $('time-badge').textContent = `Süre: ${(timeLeftMs/1000).toFixed(1)}s`; }
-		function stopTimer(){ if (timerId){ clearInterval(timerId); timerId = null; } }
-		function startTimer(ms){
-			timeLeftMs = ms; updateTimeBadge(); stopTimer();
-			timerId = setInterval(()=>{
-				timeLeftMs = Math.max(0, timeLeftMs - 100);
-				updateTimeBadge();
-				
-				// Her saniyede bir beep sesi çal
-				if (timeLeftMs > 0 && timeLeftMs % 1000 < 100) {
-					playBeep(600, 50); // Düşük frekans, kısa süre
-				}
-				
-				if (timeLeftMs <= 0){ stopTimer(); if (awaitingAnswer) onTimeout(); }
-			}, 100);
-		}
+    async function onTimeout(){
+      awaitingAnswer = false;
+      const q = game.current; if (!q) return;
+      const nodes = Array.from(document.querySelectorAll('.answer'));
+      nodes.forEach(n => n.disabled = true);
+      setStatus('fail', '⏰ Süre doldu! Hızlı hesap makineleri sahnede, ama sen daha hızlı olabilirsin!');
+      nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
+      game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
 
-		let firstRoundArmed = false;
-		function armFirstTimer(ms){
-			if (firstRoundArmed) return; firstRoundArmed = true;
-			const answers = $('answers');
-			const start = () => { if (!timerId && awaitingAnswer){ startTimer(ms); } detach(); };
-			const keyStart = (e) => { if (['1','2','3','4'].includes(e.key)) { if (!timerId && awaitingAnswer){ startTimer(ms); } detach(); } };
-			function detach(){ answers.removeEventListener('pointerdown', start); document.removeEventListener('keydown', keyStart); }
-			answers.addEventListener('pointerdown', start, { once: true });
-			document.addEventListener('keydown', keyStart, { once: true });
-		}
+      if (game.lives === 0){
+        const gameDuration = Date.now() - gameStartTime;
+        if (game.score >= 5) {
+          pendingScore = {
+            score: game.score, duration: gameDuration, correctAnswers: game.correctAnswers,
+            bestStreak: game.bestStreak, mode: $('mode').value, table: $('table').value
+          };
+          setTimeout(() => {
+            openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
+          }, 2000);
+        }
+        return;
+      }
+      await delay(700); nextRound();
+    }
 
-		async function onTimeout(){
-			awaitingAnswer = false;
-			const q = game.current; if (!q) return;
-			const nodes = Array.from(document.querySelectorAll('.answer'));
-			nodes.forEach(n => n.disabled = true);
-			setStatus('fail', '⏰ Süre doldu! Hızlı hesap makineleri sahnede, ama sen daha hızlı olabilirsin!');
-			// doğru cevabı vurgula
-			nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
-			game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
-			if (game.lives === 0){ 
-				console.log('💀 TIMEOUT: Canlar bitti! Lives:', game.lives, 'Score:', game.score);
-				const gameDuration = Date.now() - gameStartTime;
-				
-				// Eğer oyuncu en az 5 puan aldıysa skor kaydetme önerisi yap
-				if (game.score >= 5) {
-					console.log('✅ TIMEOUT: Score >= 5, modal açılacak');
-					pendingScore = {
-						score: game.score,
-						duration: gameDuration,
-						correctAnswers: game.correctAnswers,
-						bestStreak: game.bestStreak,
-						mode: $('mode').value,
-						table: $('table').value
-					};
-					
-					// 2 saniye sonra skor kaydetme modalını aç
-					setTimeout(() => {
-						console.log('💀 CANLAR BİTTİ (TIMEOUT) - Modal açılıyor...');
-						console.log('Pendding score:', pendingScore);
-						openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
-					}, 2000);
-				}
-				
-				return; 
-			}
-			await delay(700);
-			nextRound();
-		}
+    function confettiBurst(){
+      const root = $('confetti');
+      for (let i=0;i<30;i++){
+        const d = document.createElement('div');
+        d.className = 'dot';
+        d.style.left = rand(10, 90) + '%';
+        d.style.bottom = '10%';
+        d.style.background = ['#f43f5e','#f97316','#22c55e','#3b82f6','#a855f7','#eab308'][rand(0,5)];
+        d.style.animationDelay = (i*10) + 'ms';
+        root.appendChild(d);
+        setTimeout(()=> d.remove(), 900);
+      }
+    }
 
-		function nextRound(){
-			if (game.round >= game.maxRounds){
-				const gameDuration = Date.now() - gameStartTime;
-				
-				setStatus('success', `Tebrikler! 100 soru tamamlandı! 🎉 — Puan: ${game.score}, Doğru: ${game.correctAnswers}, Rekor Seri: ${game.bestStreak}`);
-				confettiBurst();
-				playSuccess(); // Başarı sesi çal
-				
-				// Skor kaydetme önerisi
-				pendingScore = {
-					score: game.score,
-					duration: gameDuration,
-					correctAnswers: game.correctAnswers,
-					bestStreak: game.bestStreak,
-					mode: $('mode').value,
-					table: $('table').value
-				};
-				
-				// 2 saniye sonra skor kaydetme modalını aç
-				setTimeout(() => {
-					console.log('🎉 100 SORU TAMAMLANDI - Modal açılıyor...');
-					console.log('Pendding score:', pendingScore);
-					openNameModal(`Tebrikler! 100 soruyu ${game.score} puanla tamamladın! 🎉 Skorunu kaydet ve diğer oyuncularla yarış!`);
-				}, 2000);
-				
-				// Vercel Analytics event
-				if (window.va) {
-					va('event', 'game_completed', { 
-						game: 'carpim-tablosu-game',
-						score: game.score,
-						correct_answers: game.correctAnswers,
-						best_streak: game.bestStreak,
-						mode: $('mode').value,
-						table: $('table').value,
-						lives_remaining: game.lives
-					});
-				}
-				return;
-			}
-			game.round += 1;
-			game.current = generateQuestion();
-			renderQuestion();
-			setStatus('running', 'Soru hazır — 1–4 ile cevapla.');
-			awaitingAnswer = true; timeLeftMs = 0; updateTimeBadge();
-			const base = getBaseTimeMs();
-			if (game.round === 1){ armFirstTimer(base); }
-			else { startTimer(base); }
-		}
+    async function onAnswer(val, btn){
+      const q = game.current; if (!q) return;
+      const nodes = Array.from(document.querySelectorAll('.answer'));
+      nodes.forEach(n => n.disabled = true);
+      awaitingAnswer = false; stopTimer(); playPop();
 
-		function confettiBurst(){
-			const root = $('confetti');
-			for (let i=0;i<30;i++){
-				const d = document.createElement('div');
-				d.className = 'dot';
-				d.style.left = rand(10, 90) + '%';
-				d.style.bottom = '10%';
-				d.style.background = ['#f43f5e','#f97316','#22c55e','#3b82f6','#a855f7','#eab308'][rand(0,5)];
-				d.style.animationDelay = (i*10) + 'ms';
-				root.appendChild(d);
-				setTimeout(()=> d.remove(), 900);
-			}
-		}
+      if (val === q.correct){
+        btn.classList.add('correct');
+        game.streak += 1; game.bestStreak = Math.max(game.bestStreak, game.streak);
+        game.correctAnswers += 1;
+        const bonus = 1 + Math.floor(Math.max(0, game.streak - 1) / 3);
+        game.score += bonus; updateBadges(); confettiBurst();
+        if (window.va) va('event', 'correct_answer', { game: 'carpim-tablosu-game', current_score: game.score, correct_answers: game.correctAnswers, streak: game.streak, bonus, mode: $('mode').value, table: $('table').value });
+        await delay(450); nextRound();
+      } else {
+        btn.classList.add('wrong'); btn.classList.add('shake');
+        game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
+        playError();
+        nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
+        if (window.va) va('event', 'wrong_answer', { game: 'carpim-tablosu-game', current_score: game.score, lives_remaining: game.lives, mode: $('mode').value, table: $('table').value });
 
-		async function onAnswer(val, btn){
-			const q = game.current; if (!q) return;
-			const nodes = Array.from(document.querySelectorAll('.answer'));
-			nodes.forEach(n => n.disabled = true);
-			awaitingAnswer = false; stopTimer();
-			
-			// Cevap seçildiğinde pop sesi çal
-			playPop();
-			if (val === q.correct){
-				btn.classList.add('correct');
-				game.streak += 1; game.bestStreak = Math.max(game.bestStreak, game.streak);
-				game.correctAnswers += 1; // Doğru cevap sayısını artır
-				const bonus = 1 + Math.floor(Math.max(0, game.streak - 1) / 3); // her 3 seride +1 bonus
-				game.score += bonus;
-				updateBadges();
-				confettiBurst();
-				
-				// Vercel Analytics event
-				if (window.va) {
-					va('event', 'correct_answer', { 
-						game: 'carpim-tablosu-game',
-						current_score: game.score,
-						correct_answers: game.correctAnswers,
-						streak: game.streak,
-						bonus: bonus,
-						mode: $('mode').value,
-						table: $('table').value
-					});
-				}
-				
-				await delay(450);
-				nextRound();
-			} else {
-				btn.classList.add('wrong');
-				btn.classList.add('shake');
-				game.streak = 0; game.lives = Math.max(0, game.lives - 1); updateBadges();
-				
-				// Yanlış cevap sesi çal
-				playError();
-				
-				// doğru cevabı vurgula
-				nodes.forEach(n => { if (parseInt(n.getAttribute('data-val')||'0',10) === q.correct){ n.classList.add('correct'); }});
-				
-				// Vercel Analytics event
-				if (window.va) {
-					va('event', 'wrong_answer', { 
-						game: 'carpim-tablosu-game',
-						current_score: game.score,
-						lives_remaining: game.lives,
-						mode: $('mode').value,
-						table: $('table').value
-					});
-				}
-				
-				if (game.lives === 0){ 
-					console.log('💀 WRONG ANSWER: Canlar bitti! Lives:', game.lives, 'Score:', game.score);
-					const gameDuration = Date.now() - gameStartTime;
-					setStatus('fail', 'Üzgünüm, canların bitti 😢 — Yeni tur ile tekrar dene!'); 
-					playGameOver(); // Üzgün ses çal
-					
-					// Eğer oyuncu en az 5 puan aldıysa skor kaydetme önerisi yap
-					if (game.score >= 5) {
-						console.log('✅ WRONG ANSWER: Score >= 5, modal açılacak');
-						pendingScore = {
-							score: game.score,
-							duration: gameDuration,
-							correctAnswers: game.correctAnswers,
-							bestStreak: game.bestStreak,
-							mode: $('mode').value,
-							table: $('table').value
-						};
-						
-						// 2 saniye sonra skor kaydetme modalını aç
-						setTimeout(() => {
-							console.log('💀 CANLAR BİTTİ (WRONG ANSWER) - Modal açılıyor...');
-							console.log('Pendding score:', pendingScore);
-							openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
-						}, 2000);
-					}
-					
-					return; 
-				}
-				await delay(650);
-				nextRound();
-			}
-		}
+        if (game.lives === 0){
+          const gameDuration = Date.now() - gameStartTime;
+          setStatus('fail', 'Üzgünüm, canların bitti 😢 — Yeni tur ile tekrar dene!');
+          playGameOver();
+          if (game.score >= 5) {
+            pendingScore = {
+              score: game.score, duration: gameDuration, correctAnswers: game.correctAnswers,
+              bestStreak: game.bestStreak, mode: $('mode').value, table: $('table').value
+            };
+            setTimeout(() => {
+              openNameModal(`Canların bitti ama ${game.score} puan aldın! Skorunu kaydetmek ister misin?`);
+            }, 2000);
+          }
+          return;
+        }
+        await delay(650); nextRound();
+      }
+    }
 
-		function resetGame(){
-			game.round = 0; game.score = 0; game.streak = 0; game.bestStreak = 0; game.lives = 3; game.correctAnswers = 0; game.current = null;
-			$('answers').innerHTML = '';
-			$('q-text').textContent = 'Hazır mısın?';
-			$('round').textContent = 'Soru: 0 / 100';
-			setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
-			stopTimer(); timeLeftMs = 0; updateTimeBadge();
-			updateBadges();
-		}
+    function resetGame(){
+      game.round = 0; game.score = 0; game.streak = 0; game.bestStreak = 0; game.lives = 3; game.correctAnswers = 0; game.current = null;
+      $('answers').innerHTML = ''; $('q-text').textContent = 'Hazır mısın?'; $('round').textContent = 'Soru: 0 / 100';
+      setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
+      stopTimer(); timeLeftMs = 0; awaitingAnswer = false; updateTimeBadge(); updateBadges();
+      firstRoundArmed = false;              // ← kritik düzeltme
+    }
 
-		// Skor tablosu fonksiyonları
-		function openScoreboard() {
-			$('scoreboard-modal').style.display = 'block';
-			loadScoreboard();
-		}
-		
-		function closeScoreboard() {
-			$('scoreboard-modal').style.display = 'none';
-		}
-		
-		function openNameModal(message = null) {
-			console.log('📝 openNameModal çağrıldı!');
-			console.log('Mesaj:', message);
-			console.log('Modal element:', $('name-modal'));
-			
-			// Mesajı güncelle
-			if (message) {
-				$('name-modal-message').textContent = message;
-			} else {
-				$('name-modal-message').textContent = 'Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?';
-			}
-			
-			console.log('Modal mesajı ayarlandı:', $('name-modal-message').textContent);
-			
-			$('name-modal').style.display = 'block';
-			console.log('Modal display set to block');
-			
-			$('player-name-input').focus();
-			console.log('Input focus edildi');
-		}
-		
-		function closeNameModal() {
-			$('name-modal').style.display = 'none';
-			$('player-name-input').value = '';
-		}
-		
-		async function loadScoreboard() {
-			const scoreList = $('score-list');
-			scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Yükleniyor...</div>';
-			
-			try {
-				const scores = await window.Scoreboard.getTopScores(20);
-				
-				if (scores.length === 0) {
-					scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Henüz skor yok. İlk skoru sen yap!</div>';
-					return;
-				}
-				
-				scoreList.innerHTML = scores.map((score, index) => {
-					const rank = index + 1;
-					const rankClass = rank <= 3 ? `rank-${rank}` : '';
-					const duration = Math.round(score.duration / 1000);
-					const date = new Date(score.created_at).toLocaleDateString('tr-TR');
-					
-					return `
-						<div class="score-item">
-							<div class="player-info">
-								<span class="rank-badge ${rankClass}">#${rank}</span>
-								<span class="player-name">${score.player_name}</span>
-								<span class="player-details">
-									${score.correct_answers} doğru • ${score.best_streak} seri • ${duration}s • ${score.mode === 'know' ? 'Hızlı' : 'Öğrenme'}
-								</span>
-							</div>
-							<div class="score-info">
-								<div class="score-value">${score.score}</div>
-								<div class="score-date">${date}</div>
-							</div>
-						</div>
-					`;
-				}).join('');
-				
-			} catch (error) {
-				scoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Skorlar yüklenirken hata oluştu.</div>';
-			}
-		}
-		
-		// Live Top 5 Scoreboard 
-		async function loadLiveScoreboard() {
-			const liveScoreList = $('live-score-list');
-			liveScoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280; font-size: 0.9rem;">Yükleniyor...</div>';
-			
-			try {
-				const scores = await window.Scoreboard.getTopScores(5);
-				
-				if (scores.length === 0) {
-					liveScoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280; font-size: 0.9rem;">Henüz skor yok. İlk skoru sen yap! 🎯</div>';
-					return;
-				}
-				
-				liveScoreList.innerHTML = scores.map((score, index) => {
-					const rank = index + 1;
-					return `
-						<div class="live-score-item">
-							<span class="live-rank">#${rank}</span>
-							<span class="live-player-name">${score.player_name}</span>
-							<span class="live-score-value">${score.score}</span>
-						</div>
-					`;
-				}).join('');
-				
-			} catch (error) {
-				console.error('Live scoreboard yüklenirken hata:', error);
-				liveScoreList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444; font-size: 0.9rem;">Yükleme hatası</div>';
-			}
-		}
-		
-		async function saveScore() {
-			const playerName = $('player-name-input').value.trim();
-			
-			// Oyuncu adı doğrulama
-			if (!playerName) {
-				alert('Lütfen bir isim gir!');
-				return;
-			}
-			
-			if (playerName.length < 2 || playerName.length > 20) {
-				alert('İsim 2-20 karakter arasında olmalı!');
-				return;
-			}
-			
-			// Sadece harf, rakam ve boşluk kabul et
-			if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]+$/.test(playerName)) {
-				alert('İsim sadece harf, rakam ve boşluk içerebilir!');
-				return;
-			}
-			
-			if (!pendingScore) {
-				alert('Kaydedilecek skor bulunamadı!');
-				return;
-			}
-			
-			try {
-				console.log('🎯 saveScore: Skor kaydetme başlatılıyor...');
-				console.log('Player name:', playerName);
-				console.log('Pending score:', pendingScore);
-				
-				const result = await window.Scoreboard.addScore(
-					playerName,
-					pendingScore.score,
-					pendingScore.duration,
-					pendingScore.correctAnswers,
-					pendingScore.bestStreak,
-					pendingScore.mode,
-					pendingScore.table
-				);
-				
-				console.log('🎯 saveScore: Gelen result:', result);
-				
-				// Supabase insert başarılıysa result null olabilir, o yüzden exception yoksa başarılı kabul et
-				closeNameModal();
-				pendingScore = null;
-				console.log('✅ saveScore: Skor başarıyla kaydedildi!');
-				
-				// Live scoreboard'u güncelle (kullanıcı burada skorunun kaydedildiğini görecek)
-				loadLiveScoreboard();
-				
-			} catch (error) {
-				console.error('❌ saveScore: Skor kaydetme hatası:', error);
-				alert('Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.');
-			}
-		}
-		
-		function newRun(){ 
-			resetGame(); 
-			gameStartTime = Date.now(); // Oyun başlangıç zamanını kaydet
-			nextRound(); 
-			
-			// Vercel Analytics event
-			if (window.va) {
-				va('event', 'game_started', { 
-					game: 'carpim-tablosu-game',
-					mode: $('mode').value,
-					table: $('table').value
-				});
-			}
-		}
+    function nextRound(){
+      if (game.round >= game.maxRounds){
+        const gameDuration = Date.now() - gameStartTime;
+        setStatus('success', `Tebrikler! 100 soru tamamlandı! 🎉 — Puan: ${game.score}, Doğru: ${game.correctAnswers}, Rekor Seri: ${game.bestStreak}`);
+        confettiBurst(); playSuccess();
+        pendingScore = {
+          score: game.score, duration: gameDuration, correctAnswers: game.correctAnswers,
+          bestStreak: game.bestStreak, mode: $('mode').value, table: $('table').value
+        };
+        setTimeout(() => {
+          openNameModal(`Tebrikler! 100 soruyu ${game.score} puanla tamamladın! 🎉 Skorunu kaydet ve diğer oyuncularla yarış!`);
+        }, 2000);
+        if (window.va) va('event', 'game_completed', { game: 'carpim-tablosu-game', score: game.score, correct_answers: game.correctAnswers, best_streak: game.bestStreak, mode: $('mode').value, table: $('table').value, lives_remaining: game.lives });
+        return;
+      }
+      game.round += 1; game.current = generateQuestion(); renderQuestion();
+      setStatus('running', 'Soru hazır — 1–4 ile cevapla.');
+      awaitingAnswer = true; timeLeftMs = 0; updateTimeBadge();
+      const base = getBaseTimeMs();
+      if (game.round === 1){ armFirstTimer(base); } else { startTimer(base); }
+    }
 
-		document.addEventListener('DOMContentLoaded', ()=>{
-			// Ses sistemini başlat
-			initAudio();
-			
-			$('new-btn').addEventListener('click', newRun);
-			$('reset-btn').addEventListener('click', resetGame);
-			$('sound-btn').addEventListener('click', toggleSound);
-			$('scoreboard-btn').addEventListener('click', openScoreboard);
-			updateBadges();
-			setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
-			
-			// Live scoreboard'u yükle
-			loadLiveScoreboard();
-			
-			// Sayfa yüklenince otomatik başla
-			newRun();
-		});
+    // ===== MODALLAR & SKOR TAHTASI =====
+    function openScoreboard(){ $('scoreboard-modal').style.display = 'block'; loadScoreboard(); }
+    function closeScoreboard(){ $('scoreboard-modal').style.display = 'none'; }
+    function openNameModal(message = null){
+      $('name-modal-message').textContent = message || 'Harika bir skor elde ettin! Adını girerek skorunu kaydetmek ister misin?';
+      $('name-modal').style.display = 'block';
+      $('player-name-input').focus();
+    }
+    function closeNameModal(){ $('name-modal').style.display = 'none'; $('player-name-input').value = ''; }
 
-		// Klavye kısayolları 1-4
-		document.addEventListener('keydown', (e)=>{
-			if (['1','2','3','4'].includes(e.key)){
-				const idx = parseInt(e.key, 10) - 1;
-				const nodes = Array.from(document.querySelectorAll('.answer'));
-				if (nodes[idx]) { nodes[idx].click(); e.preventDefault(); }
-			}
-		});
-		
-		// Modal dışına tıklayınca kapat
-		window.addEventListener('click', (e) => {
-			if (e.target.classList.contains('modal')) {
-				e.target.style.display = 'none';
-			}
-		});
-		
-		// Enter tuşu ile skor kaydet
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' && $('name-modal').style.display === 'block') {
-				saveScore();
-			}
-		});
-	</script>
+    // Fallback Scoreboard (localStorage) – Supabase yoksa devreye girer
+    (function(){
+      if (!window.Scoreboard) {
+        const KEY = 'carpim_kahramani_scores';
+        window.Scoreboard = {
+          async getTopScores(limit=20){
+            const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+            return arr.sort((a,b)=> b.score - a.score).slice(0, limit);
+          },
+          async addScore(player_name, score, duration, correct_answers, best_streak, mode, table){
+            const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+            const rec = { player_name, score, duration, correct_answers, best_streak, mode, table, created_at: new Date().toISOString() };
+            arr.push(rec); localStorage.setItem(KEY, JSON.stringify(arr));
+            return rec;
+          }
+        };
+      }
+    })();
+
+    async function loadScoreboard() {
+      const scoreList = $('score-list');
+      scoreList.innerHTML = '<div style="text-align:center; padding:20px; color:#6b7280;">Yükleniyor...</div>';
+      try {
+        if (!window.Scoreboard || !window.Scoreboard.getTopScores) {
+          scoreList.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">Skor servisi hazır değil.</div>'; return;
+        }
+        const scores = await window.Scoreboard.getTopScores(20);
+        if (!scores.length) {
+          scoreList.innerHTML = '<div style="text-align:center; padding:20px; color:#6b7280;">Henüz skor yok. İlk skoru sen yap!</div>'; return;
+        }
+        scoreList.innerHTML = scores.map((s, i) => {
+          const rank = i + 1, rankClass = rank <= 3 ? `rank-${rank}` : '';
+          const duration = Math.round((s.duration || 0) / 1000);
+          const date = s.created_at ? new Date(s.created_at).toLocaleDateString('tr-TR') : '';
+          return `
+            <div class="score-item">
+              <div class="player-info">
+                <span class="rank-badge ${rankClass}">#${rank}</span>
+                <span class="player-name">${s.player_name}</span>
+                <span class="player-details">
+                  ${s.correct_answers||0} doğru • ${s.best_streak||0} seri • ${duration}s • ${s.mode === 'know' ? 'Hızlı' : 'Öğrenme'}
+                </span>
+              </div>
+              <div class="score-info">
+                <div class="score-value">${s.score}</div>
+                <div class="score-date">${date}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        scoreList.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">Skorlar yüklenirken hata oluştu.</div>';
+      }
+    }
+
+    async function loadLiveScoreboard() {
+      const live = $('live-score-list');
+      live.innerHTML = '<div style="text-align:center; padding:20px; color:#6b7280; font-size:0.9rem;">Yükleniyor...</div>';
+      try {
+        if (!window.Scoreboard || !window.Scoreboard.getTopScores) {
+          live.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444; font-size:0.9rem;">Skor servisi hazır değil.</div>'; return;
+        }
+        const scores = await window.Scoreboard.getTopScores(5);
+        if (!scores.length) {
+          live.innerHTML = '<div style="text-align:center; padding:20px; color:#6b7280; font-size:0.9rem;">Henüz skor yok. İlk skoru sen yap! 🎯</div>'; return;
+        }
+        live.innerHTML = scores.map((s, i) => `
+          <div class="live-score-item">
+            <span class="live-rank">#${i+1}</span>
+            <span class="live-player-name">${s.player_name}</span>
+            <span class="live-score-value">${s.score}</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        live.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444; font-size:0.9rem;">Yükleme hatası</div>';
+      }
+    }
+
+    async function saveScore() {
+      const playerName = $('player-name-input').value.trim();
+      if (!playerName) return alert('Lütfen bir isim gir!');
+      if (playerName.length < 2 || playerName.length > 20) return alert('İsim 2-20 karakter arasında olmalı!');
+      if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ0-9\s]+$/.test(playerName)) return alert('İsim sadece harf, rakam ve boşluk içerebilir!');
+      if (!pendingScore) return alert('Kaydedilecek skor bulunamadı!');
+
+      try {
+        if (!window.Scoreboard || !window.Scoreboard.addScore) throw new Error('Skor servisi yok');
+        await window.Scoreboard.addScore(
+          playerName,
+          pendingScore.score,
+          pendingScore.duration,
+          pendingScore.correctAnswers,
+          pendingScore.bestStreak,
+          pendingScore.mode,
+          pendingScore.table
+        );
+        closeNameModal(); pendingScore = null; loadLiveScoreboard();
+      } catch (e) {
+        alert('Bağlantı hatası. Lütfen internet bağlantını kontrol et.');
+      }
+    }
+
+    // ===== AKIŞ =====
+    function newRun(){
+      resetGame(); gameStartTime = Date.now(); nextRound();
+      if (window.va) va('event', 'game_started', { game: 'carpim-tablosu-game', mode: $('mode').value, table: $('table').value });
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      ensureAudioReady(); // Context oluştur
+      $('new-btn').addEventListener('click', newRun);
+      $('sound-btn').addEventListener('click', toggleSound);
+      $('scoreboard-btn').addEventListener('click', openScoreboard);
+      updateBadges(); setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
+      loadLiveScoreboard();
+      newRun(); // otomatik başlat
+    });
+
+    // Tek klavye dinleyicisi (modal ve odak kontrolü ile)
+    document.addEventListener('keydown', (e) => {
+      const nameModalOpen = $('name-modal').style.display === 'block';
+      const scoreboardOpen = $('scoreboard-modal').style.display === 'block';
+      const tag = document.activeElement?.tagName;
+      const inputFocused = ['INPUT','TEXTAREA','SELECT'].includes(tag);
+
+      if (nameModalOpen) {            // yalnızca Enter çalışsın
+        if (e.key === 'Enter') { e.preventDefault(); saveScore(); }
+        return;
+      }
+      if (scoreboardOpen || inputFocused) return;
+
+      if (['1','2','3','4'].includes(e.key)) {
+        ensureAudioReady();
+        const idx = parseInt(e.key, 10) - 1;
+        const nodes = Array.from(document.querySelectorAll('.answer'));
+        if (nodes[idx]) { e.preventDefault(); nodes[idx].click(); }
+      }
+    });
+
+    // Modal dışına tıklayınca kapat
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+    });
+  </script>
 </body>
 </html>
-
-
