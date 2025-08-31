@@ -199,6 +199,151 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(testSupabaseConnection, 1000);
 });
 
+// Online Presence sistemi (Real-time online kullanıcı sayısı)
+const OnlinePresence = {
+    channel: null,
+    onlineCount: 0,
+    userUuid: null,
+
+    // Presence sistemini başlat
+    async initialize() {
+        try {
+            if (!supabase) {
+                console.error('Supabase client mevcut değil, presence başlatılamıyor');
+                return false;
+            }
+
+            // Unique user ID oluştur
+            this.userUuid = this.generateUserUuid();
+            console.log('Presence User UUID:', this.userUuid);
+
+            // Channel oluştur
+            this.channel = supabase.channel('carpim-tablosu-game', {
+                config: {
+                    presence: {
+                        key: this.userUuid
+                    }
+                }
+            });
+
+            // Presence eventlerini dinle
+            this.channel
+                .on('presence', { event: 'sync' }, () => {
+                    this.handlePresenceSync();
+                })
+                .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+                    console.log('Kullanıcı katıldı:', key, newPresences);
+                    this.updateOnlineCount();
+                })
+                .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+                    console.log('Kullanıcı ayrıldı:', key, leftPresences);
+                    this.updateOnlineCount();
+                });
+
+            // Channel'a abone ol ve presence'ı track et
+            await this.channel.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('Presence channel\'a başarıyla abone olundu');
+                    
+                    // Kendimizi presence'a ekle
+                    await this.channel.track({
+                        user_uuid: this.userUuid,
+                        joined_at: new Date().toISOString(),
+                        game: 'carpim-tablosu',
+                        user_agent: navigator.userAgent.substring(0, 100)
+                    });
+                    
+                    console.log('Presence tracking başlatıldı');
+                } else {
+                    console.error('Presence channel abone olma başarısız:', status);
+                }
+            });
+
+            // Sayfa kapatılırken presence'dan çık
+            window.addEventListener('beforeunload', () => {
+                this.cleanup();
+            });
+
+            // Sayfa gizlenirken/görünürken
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // Sayfa gizli - presence'ı durdur
+                    this.channel?.untrack();
+                } else {
+                    // Sayfa görünür - presence'ı yeniden başlat
+                    this.channel?.track({
+                        user_uuid: this.userUuid,
+                        joined_at: new Date().toISOString(),
+                        game: 'carpim-tablosu',
+                        user_agent: navigator.userAgent.substring(0, 100)
+                    });
+                }
+            });
+
+            return true;
+        } catch (error) {
+            console.error('Presence başlatma hatası:', error);
+            return false;
+        }
+    },
+
+    // Presence sync eventini handle et
+    handlePresenceSync() {
+        console.log('Presence sync eventı alındı');
+        this.updateOnlineCount();
+    },
+
+    // Online kullanıcı sayısını güncelle
+    updateOnlineCount() {
+        if (!this.channel) return;
+
+        const presenceState = this.channel.presenceState();
+        const count = Object.keys(presenceState).length;
+        
+        this.onlineCount = count;
+        console.log('Online kullanıcı sayısı:', count);
+
+        // UI'ı güncelle
+        this.updateUI(count);
+    },
+
+    // UI'daki online badge'i güncelle
+    updateUI(count) {
+        const onlineBadge = document.getElementById('online-badge');
+        if (onlineBadge) {
+            const emoji = count === 1 ? '🟢' : '🔥';
+            onlineBadge.textContent = `${emoji} Online: ${count}`;
+            onlineBadge.title = `${count} kişi şu anda çarpım tablosu oyunu oynuyor`;
+        }
+    },
+
+    // Unique user UUID oluştur
+    generateUserUuid() {
+        return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    },
+
+    // Temizlik (sayfa kapatılırken)
+    async cleanup() {
+        try {
+            if (this.channel) {
+                await this.channel.untrack();
+                await this.channel.unsubscribe();
+                console.log('Presence temizlendi');
+            }
+        } catch (error) {
+            console.error('Presence temizleme hatası:', error);
+        }
+    },
+
+    // Manuel olarak online sayısını al
+    async getOnlineCount() {
+        if (!this.channel) return 0;
+        const presenceState = this.channel.presenceState();
+        return Object.keys(presenceState).length;
+    }
+};
+
 // Global olarak erişilebilir yap
 window.Scoreboard = Scoreboard;
 window.testSupabaseConnection = testSupabaseConnection;
+window.OnlinePresence = OnlinePresence;

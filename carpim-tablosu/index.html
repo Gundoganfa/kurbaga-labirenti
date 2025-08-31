@@ -203,6 +203,7 @@
         <span id="round-badge" class="badge">Soru: 0/100</span>
         <span id="lives-badge" class="badge">❤️❤️❤️</span>
         <span id="time-badge" class="badge">Süre: 0.0s</span>
+        <span id="online-badge" class="badge">🟢 Online: ⚡</span>
       </div>
       <div class="controls">
         <label for="mode">Seviye</label>
@@ -681,6 +682,23 @@
       $('scoreboard-btn').addEventListener('click', openScoreboard);
       updateBadges(); setStatus('ready', '🟢 Hazır — 1–4 tuşlarıyla da cevap verebilirsin.');
       loadLiveScoreboard();
+      
+      // Online Presence sistemini başlat
+      setTimeout(() => {
+        if (window.OnlinePresence) {
+          window.OnlinePresence.initialize().then(success => {
+            if (success) {
+              console.log('Online Presence sistemi başarıyla başlatıldı! 🟢');
+            } else {
+              console.log('Online Presence başlatılamadı, offline mode devam ediyor ⚡');
+              // Fallback: Sadece "⚡" göster
+              const onlineBadge = $('online-badge');
+              if (onlineBadge) onlineBadge.textContent = '⚡ Offline';
+            }
+          });
+        }
+      }, 1500); // Supabase yüklenmesini bekle
+      
       newRun(); // otomatik başlat
     });
 
