@@ -441,48 +441,65 @@ class CookingManager {
         this.renderAllSlots();
     }
     
+    setupSlotEventListeners(slot) {
+        // Remove existing listeners by cloning the node
+        const newSlot = slot.cloneNode(true);
+        slot.parentNode.replaceChild(newSlot, slot);
+        
+        // Preserve draggable state if occupied
+        if (newSlot.classList.contains('occupied')) {
+            newSlot.draggable = true;
+        }
+        
+        // Add fresh event listeners
+        newSlot.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            newSlot.classList.add('drag-over');
+        });
+        
+        newSlot.addEventListener('dragleave', () => {
+            newSlot.classList.remove('drag-over');
+        });
+        
+        newSlot.addEventListener('drop', (e) => {
+            e.preventDefault();
+            newSlot.classList.remove('drag-over');
+            
+            const dragData = e.dataTransfer.getData('text/plain');
+            console.log('Drop data:', dragData);
+            
+            const targetStationType = newSlot.classList.contains('prep-slot') ? 'prep' :
+                                    newSlot.classList.contains('grill-slot') ? 'grill' : 'oven';
+            const targetSlotIndex = parseInt(newSlot.dataset.slot);
+            
+            // Check if dragging from inventory
+            if (!dragData.startsWith('slot:')) {
+                const ingredientId = dragData;
+                const ingredient = game.inventory.getIngredient(ingredientId);
+                
+                if (ingredient) {
+                    this.addToSlot(targetStationType, targetSlotIndex, { type: ingredientId, ...ingredient });
+                }
+            } else {
+                // Dragging from another slot
+                const [, sourceStationType, sourceSlotIndex] = dragData.split(':');
+                const sourceItem = this.stations[sourceStationType][parseInt(sourceSlotIndex)];
+                
+                if (sourceItem && this.moveItem(sourceStationType, parseInt(sourceSlotIndex), targetStationType, targetSlotIndex)) {
+                    console.log(`Moved from ${sourceStationType}:${sourceSlotIndex} to ${targetStationType}:${targetSlotIndex}`);
+                }
+            }
+        });
+        
+        console.log('Event listeners refreshed for slot:', newSlot.className);
+        return newSlot;
+    }
+
     setupDragDrop() {
         // Wait for DOM to be ready, then setup drag and drop
         setTimeout(() => {
             document.querySelectorAll('.slot').forEach(slot => {
-                slot.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    slot.classList.add('drag-over');
-                });
-                
-                slot.addEventListener('dragleave', () => {
-                    slot.classList.remove('drag-over');
-                });
-                
-                slot.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    slot.classList.remove('drag-over');
-                    
-                    const dragData = e.dataTransfer.getData('text/plain');
-                    console.log('Drop data:', dragData);
-                    
-                    const targetStationType = slot.classList.contains('prep-slot') ? 'prep' :
-                                            slot.classList.contains('grill-slot') ? 'grill' : 'oven';
-                    const targetSlotIndex = parseInt(slot.dataset.slot);
-                    
-                    // Check if dragging from inventory
-                    if (!dragData.startsWith('slot:')) {
-                        const ingredientId = dragData;
-                        const ingredient = game.inventory.getIngredient(ingredientId);
-                        
-                        if (ingredient) {
-                            this.addToSlot(targetStationType, targetSlotIndex, { type: ingredientId, ...ingredient });
-                        }
-                    } else {
-                        // Dragging from another slot
-                        const [, sourceStationType, sourceSlotIndex] = dragData.split(':');
-                        const sourceItem = this.stations[sourceStationType][parseInt(sourceSlotIndex)];
-                        
-                        if (sourceItem && this.moveItem(sourceStationType, parseInt(sourceSlotIndex), targetStationType, targetSlotIndex)) {
-                            console.log(`Moved from ${sourceStationType}:${sourceSlotIndex} to ${targetStationType}:${targetSlotIndex}`);
-                        }
-                    }
-                });
+                this.setupSlotEventListeners(slot);
             });
             
             // Envanter drop zone ekle
@@ -683,30 +700,11 @@ class CookingManager {
             }
             slotEl.innerHTML = content;
             
-            // Event listener'ları temizle
-            const newSlotEl = slotEl.cloneNode(true);
-            slotEl.parentNode.replaceChild(newSlotEl, slotEl);
+            // Event listener'ları yenile - BOŞKEN DE DROP EDİLEBİLİR OLMALI
+            this.setupSlotEventListeners(slotEl);
         } else {
             slotEl.classList.add('occupied');
             slotEl.draggable = true; // Slot içeriği sürüklenebilir yap
-            
-            // Event listener'ları temizle ve yeniden ekle
-            const newSlotEl = slotEl.cloneNode(false);
-            newSlotEl.className = slotEl.className;
-            newSlotEl.draggable = true;
-            
-            // Slot drag events
-            newSlotEl.addEventListener('dragstart', (e) => {
-                console.log('Slot drag started:', stationType, slotIndex);
-                e.dataTransfer.setData('text/plain', `slot:${stationType}:${slotIndex}`);
-                e.dataTransfer.effectAllowed = 'move';
-                newSlotEl.classList.add('dragging');
-            });
-            
-            newSlotEl.addEventListener('dragend', (e) => {
-                console.log('Slot drag ended');
-                newSlotEl.classList.remove('dragging');
-            });
             
             const progress = this.getItemProgress(item);
             const progressClass = progress > 90 ? 'danger' : progress > 70 ? 'warning' : '';
@@ -727,11 +725,24 @@ class CookingManager {
                 content += this.getHeatControlHTML(slotIndex);
             }
             
-            newSlotEl.innerHTML = content;
-            newSlotEl.className = `slot ${stationType}-slot occupied cooking-state-${item.state}`;
+            slotEl.innerHTML = content;
+            slotEl.className = `slot ${stationType}-slot occupied cooking-state-${item.state}`;
             
-            // Eski element'i yenisiyle değiştir
-            slotEl.parentNode.replaceChild(newSlotEl, slotEl);
+            // Event listener'ları yenile + slot drag events ekle
+            const refreshedSlot = this.setupSlotEventListeners(slotEl);
+            
+            // Slot drag events
+            refreshedSlot.addEventListener('dragstart', (e) => {
+                console.log('Slot drag started:', stationType, slotIndex);
+                e.dataTransfer.setData('text/plain', `slot:${stationType}:${slotIndex}`);
+                e.dataTransfer.effectAllowed = 'move';
+                refreshedSlot.classList.add('dragging');
+            });
+            
+            refreshedSlot.addEventListener('dragend', (e) => {
+                console.log('Slot drag ended');
+                refreshedSlot.classList.remove('dragging');
+            });
         }
     }
     
