@@ -1,0 +1,103 @@
+şimdi, Kebapci klasörü altında farklı bir oyun geliştireceksin. GÖREV
+Saf HTML, CSS ve vanilla JS ile tek sayfalık, mobil uyumlu “Kebapçı” oyunu geliştir.
+Hiçbir harici kütüphane kullanma. Tüm dosyalar: index.html, styles.css, game.js.
+Toplam kod okunur ve kompakt olsun (tercihen 700–900 satır aralığı, 1.000’i geçme).
+Modern, esnek, basit görsel stil (UI için sadece CSS).
+
+OYUN FİKRİ (KISACA)
+Oyuncu, bir kebapçı işletiyor. Solda “Envanter Dolabı”, ortada “Pişirme Alanı (Ocak + Fırın + Tezgâh)”, sağda “Sipariş Kuyruğu”. Siparişlere tıklayınca içerik (tarif) açılır. Malzemeleri tezgâha ve pişirme istasyonlarına sürükle-bırak; pişir, hazırla ve doğru siparişe zamanında servis et.
+
+EKRAN DÜZENİ
+- Üst Çubuk: Gün/Saat simülasyonu, Kasa (₺), İtibar (★), Bekleyen Sipariş Rozeti, “Ayarlar” (ses aç/kapat, zorluk), “Durdur/Devam”.
+- Sol Panel (ENVANTER DOLABI): Malzeme kartları (ikon+isim+adet ya da sınırsız mod). Kartlar sürüklenebilir.
+- Orta Panel (PİŞİRME ALANI):
+  - Tezgâh: Doğrama/Marinasyon/Toplama alanı (1–2 slot). Burada malzeme birleştirme yapılır.
+  - Ocak/Izgara: 3 slot. Her slotta ilerleme çubuğu, ısı seviyesi (düşük/orta/yüksek).
+  - Fırın: 2 slot. İlerleme çubuğu, sabit ısı (basit tut).
+- Sağ Panel (SİPARİŞ KUYRUĞU): Her sipariş kutusunda müşteri adı/emoji, kalan süre çubuğu ve tahmini ödül. Tıklayınca modal/panelde tarif detayları görünür.
+- Alt Bildirim Alanı: Kısa metinler (“Adana kebap ideal pişirildi!”, “Lavaş yandı!” vb.)
+
+ETKİLEŞİM ve MEKANİKLER
+- Sürükle-Bırak:
+  - Dolaptan → Tezgâh (hazırlık).
+  - Tezgâhtan → Ocak/Fırın (pişirme).
+  - Pişenden → Tezgâh/Tabak (toplama/servis).
+- Sipariş seçimi: Siparişe tıklayınca “aktif sipariş” olur; “Servis Et” butonu sadece o siparişi kontrol eder.
+- Pişirme durumları: çiğ → az → ideal → fazla → yanık. İdeal zaman aralığı tarifte tanımlı.
+- Zaman baskısı: Her sipariş için geri sayım. Süre biterse iptal/ceza.
+- Basit fizik yok; sadece durum makineleri ve sayaçlar.
+- Klavye kısayolları (opsiyonel): 1–3 ocak slot seç, F fırın görünümü, Space durdur/başlat.
+- Erişilebilirlik: Klavye ile dolaşılabilir; butonlara focus stili; “prefers-reduced-motion” varsa animasyonları azalt.
+
+TARİF SİSTEMİ (JSON)
+JS içinde küçük bir JSON dizi ile 3–4 örnek tarif tanımla (basit tut):
+- "Adana Kebap": gerekliler = { "kıyma":1, "şiş":1, "lavaş":1, "soğan-maydanoz":1 }; adımlar = [ “tepsi/tezgâhta hazırlık (opsiyonel baharat)”, “ızgarada 35sn orta ısı (ideal: 30–40sn)”, “lavaş 5sn ısıt”, “tabakta toplama” ]
+- "Tavuk Şiş": gerekliler = { "tavuk":1, "şiş":1, "lavaş":1 }; ızgarada 45sn (ideal: 40–50sn), marinasyon yaparsan +puan.
+- "Lahmacun": gerekliler = { "hamur":1, "harç":1 }; fırında 25sn (ideal: 22–28sn).
+- (İsteğe bağlı) "Döner Dürüm": gerekliler = { "döner":1, "lavaş":1, "domates":1 }, ızgara 10sn ısıtma (lavaş), + hızlı hazırlık.
+
+SİPARİŞ ÜRETİMİ
+- Zorluk = Kolay/Orta/Zor:
+  - Kolay: 2–3 sipariş kuyruğu, uzun süre.
+  - Orta: 4–5 sipariş, orta süre.
+  - Zor: 6+ sipariş, kısa süre ve daha dar ideal pişirme penceresi.
+- Rasgele ama dengeli: Aynı anda çok zor tarifler yığılmasın.
+
+PUANLAMA ve EKONOMİ
+- Temel ödül (₺) + Bahşiş: İdeal pişirme ve hızlı servis bahşişi arttırır.
+- Hatalar: Yanık/çiğ/eksik malzeme → puan ve itibar (★) düşer.
+- Seri bonusu: Üst üste 3 başarılı servis → +%10 bahşiş.
+- Servis gecikmesi: Kalan süre düşükse ödeme azalır; süre biterse iptal/ceza.
+- Tur süresi: 3 dakikalık “Öğle Servisi”. Tur bitince skor ekranı; en iyi skor localStorage’a kaydedilsin.
+
+OYUN DÖNGÜSÜ ve MİMARİ
+- requestAnimationFrame ile hafif bir oyun döngüsü (zamanlayıcı ve animasyonlar).
+- Durum makineleri:
+  - GameState (menu/running/paused/results)
+  - OrderManager (kuyruk, aktif siparişler, süreler)
+  - Inventory (malzemeler, adet ya da sınırsız mod)
+  - Stations (Tezgâh, OcakSlots[3], FırınSlots[2])
+  - Scoring (puan/para/itibar hesapları)
+- Basit EventBus (publish/subscribe) ya da küçük bir Observer ile bileşenler arası iletişim.
+- localStorage: en iyi skor, ses açık/kapalı, son seçilen zorluk.
+
+UI/UX
+- Kart tabanlı envanter. Emoji veya basit SVG ikonlar (harici görsel olmadan).
+- Slotlarda dairesel/lineer ilerleme çubuğu.
+- Sağ panelde sipariş kutularında kalan süre progress bar.
+- Modal/panelde tarif adımları; kullanıcı ipucu görebilir.
+- Toast/mini bildirimler (saf CSS/JS ile kısa ömürlü).
+
+SES (opsiyonel ama küçük)
+- “Sizzle” (ızgara), “ding” (pişti), “error” (yanık/eksik) için 3 küçük ses. Varsayılan açık; Ayarlar’dan kapatılabilir.
+
+PERFORMANS ve KALİTE
+- 60fps hedefi, ama ağır iş yok; zamanlayıcılar setTimeout/raf karışık değil, tek zaman kaynağı kullan.
+- Kod modüler ve yorumlu olsun. Fonksiyonlar tek sorumluluk prensibine yakın.
+- Dosya boyutu makul, inline resim/ikon yerine emoji/CSS kullan.
+
+TEST/DEBUG
+- “Geliştirici Modu” anahtarı (UI’de küçük bir ikon):
+  - Aktif siparişleri ve pişirme slot durumlarını overlay’de göster.
+  - Hızlı ekleme: “+Sipariş”, “+100₺”, “Hepsini Pişmiş Yap” (sadece debug).
+- Basit kabul kriterleri:
+  1) Siparişi seçmeden “Servis Et” çalışma.
+  2) Yanık veya eksik malzemeyle servis edince ceza uygula.
+  3) En az 3 tarifi sorunsuz pişir ve servis et.
+  4) Tur sonunda skor ekranı ve “Yeniden Başlat” çalışsın.
+  5) En iyi skor localStorage’da saklansın.
+
+TESLİMAT
+- Proje kökü: index.html, styles.css, game.js.
+- Çalıştırma: index.html’yi tarayıcıda açınca direkt çalışmalı.
+- Kısa README (index’in başında HTML yorum olarak) kullanım notları.
+
+BONUS (v1’e sığarsa)
+- Basit “müşteri tipi” farklılıkları (sabırsız/sabırlı).
+- Gün sonu raporu: hizmet edilen sipariş sayısı, doğru/yanık, ortalama süre.
+
+LÜTFEN YAP
+- Temiz, okunaklı ve açıklamalı kod.
+- Harici kütüphane yok.
+- Mobil ve masaüstü destekli responsive yerleşim.
+- Oyunu gerçekçi değil, **eğlenceli ve basit** tut.

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥙 Kebapçı Ustası</title>
+    
+    <!-- Vercel Analytics -->
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 
+    KEBAPCı USTASI - Kebab Restaurant Game
+    Kullanım:
+    - Sol panel: Malzemeleri envanter dolabından sürükle
+    - Orta panel: Tezgâh, ocak ve fırında pişir
+    - Sağ panel: Siparişlere tıkla ve detayları gör
+    - Malzemeleri doğru istasyonlara sürükle-bırak
+    - Pişirme sürelerini takip et (ideal zaman aralığı)
+    - Siparişi seç ve "Servis Et" ile teslim et
+    Klavye: 1-3 ocak slotları, F fırın, Space oyunu durdur
+    -->
+    
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <div class="time-display">
+            <span id="game-time">11:30</span>
+            <span id="day-counter">Gün 1</span>
+        </div>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-icon">💰</span>
+                <span id="money">0₺</span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">⭐</span>
+                <span id="reputation">5.0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">📋</span>
+                <span id="order-count">0</span>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="settings-btn" class="icon-btn" title="Ayarlar">⚙️</button>
+            <button id="pause-btn" class="icon-btn" title="Durdur/Devam">⏸️</button>
+        </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="game-container">
+        <!-- Left Panel: Inventory -->
+        <section class="panel inventory-panel">
+            <h3>🗄️ Envanter Dolabı</h3>
+            <div id="inventory-grid" class="inventory-grid">
+                <!-- Ingredient cards will be generated here -->
+            </div>
+        </section>
+
+        <!-- Center Panel: Cooking Area -->
+        <section class="panel cooking-panel">
+            <h3>👨‍🍳 Pişirme Alanı</h3>
+            
+            <!-- Preparation Counter -->
+            <div class="station prep-station">
+                <h4>🔪 Tezgâh</h4>
+                <div class="slots">
+                    <div class="slot prep-slot" data-slot="0" id="prep-0">
+                        <div class="slot-placeholder">Hazırlık</div>
+                    </div>
+                    <div class="slot prep-slot" data-slot="1" id="prep-1">
+                        <div class="slot-placeholder">Hazırlık</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grill/Stove -->
+            <div class="station grill-station">
+                <h4>🔥 Izgara</h4>
+                <div class="slots">
+                    <div class="slot grill-slot" data-slot="0" id="grill-0">
+                        <div class="slot-placeholder">Ocak 1</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="heat-control">
+                            <button class="heat-btn" data-heat="low">🔥</button>
+                            <button class="heat-btn" data-heat="medium">🔥🔥</button>
+                            <button class="heat-btn active" data-heat="high">🔥🔥🔥</button>
+                        </div>
+                    </div>
+                    <div class="slot grill-slot" data-slot="1" id="grill-1">
+                        <div class="slot-placeholder">Ocak 2</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="heat-control">
+                            <button class="heat-btn" data-heat="low">🔥</button>
+                            <button class="heat-btn active" data-heat="medium">🔥🔥</button>
+                            <button class="heat-btn" data-heat="high">🔥🔥🔥</button>
+                        </div>
+                    </div>
+                    <div class="slot grill-slot" data-slot="2" id="grill-2">
+                        <div class="slot-placeholder">Ocak 3</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="heat-control">
+                            <button class="heat-btn active" data-heat="low">🔥</button>
+                            <button class="heat-btn" data-heat="medium">🔥🔥</button>
+                            <button class="heat-btn" data-heat="high">🔥🔥🔥</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oven -->
+            <div class="station oven-station">
+                <h4>🔥 Fırın</h4>
+                <div class="slots">
+                    <div class="slot oven-slot" data-slot="0" id="oven-0">
+                        <div class="slot-placeholder">Fırın 1</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+                    <div class="slot oven-slot" data-slot="1" id="oven-1">
+                        <div class="slot-placeholder">Fırın 2</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Orders -->
+        <section class="panel orders-panel">
+            <h3>📋 Sipariş Kuyruğu</h3>
+            <div id="orders-queue" class="orders-queue">
+                <!-- Order cards will be generated here -->
+            </div>
+            <div class="serve-area">
+                <button id="serve-btn" class="serve-btn" disabled>🍽️ Servis Et</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notification Area -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Modals -->
+    <div id="recipe-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="recipe-title">Tarif Detayları</h3>
+                <button id="close-recipe" class="close-btn">✕</button>
+            </div>
+            <div id="recipe-content" class="modal-body">
+                <!-- Recipe details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ayarlar</h3>
+                <button id="close-settings" class="close-btn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="sound-toggle" checked>
+                        🔊 Ses Efektleri
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="difficulty">Zorluk Seviyesi:</label>
+                    <select id="difficulty">
+                        <option value="easy">Kolay</option>
+                        <option value="medium" selected>Orta</option>
+                        <option value="hard">Zor</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <button id="dev-mode-toggle" class="dev-btn">🐛 Geliştirici Modu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏁 Tur Sonucu</h3>
+            </div>
+            <div class="modal-body">
+                <div id="final-score" class="score-display"></div>
+                <div id="score-breakdown" class="score-details"></div>
+                <button id="restart-btn" class="primary-btn">🔄 Yeniden Başla</button>
+                <button id="menu-btn" class="secondary-btn">🏠 Ana Menü</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dev Mode Overlay -->
+    <div id="dev-overlay" class="dev-overlay hidden">
+        <div class="dev-controls">
+            <button id="add-order-btn">+Sipariş</button>
+            <button id="add-money-btn">+100₺</button>
+            <button id="cook-all-btn">Hepsini Pişir</button>
+        </div>
+        <div id="game-state" class="game-state"></div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
