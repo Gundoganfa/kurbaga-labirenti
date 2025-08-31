@@ -9,8 +9,8 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Emir'in Oyun Dünyası - Çocuklar için eğitici ve eğlenceli oyunlar. Saat öğrenme, matematik, hafıza, mantık bulmacaları ve daha fazlası!">
-    <meta name="keywords" content="çocuk oyunları, eğitici oyunlar, saat öğrenme, matematik oyunları, hafıza oyunları, mantık bulmacaları">
+    <meta name="description" content="Emir'in Oyun Dünyası - Çocuklar için eğitici ve eğlenceli oyunlar. Saat öğrenme, matematik, hafıza, mantık bulmacaları, kebapçı ustası oyunu ve daha fazlası!">
+    <meta name="keywords" content="çocuk oyunları, eğitici oyunlar, saat öğrenme, matematik oyunları, hafıza oyunları, mantık bulmacaları, kebapçı oyunu, yemek yapma oyunu">
     <meta name="author" content="Emir">
     <meta name="robots" content="index, follow">
     
@@ -19,7 +19,7 @@
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Emir'in Oyun Dünyası - Ana Sayfa">
-    <meta property="og:description" content="Çocuklar için eğitici ve eğlenceli oyunlar koleksiyonu">
+    <meta property="og:description" content="Çocuklar için eğitici ve eğlenceli oyunlar koleksiyonu. Saat öğrenme, matematik, kebapçı ustası ve daha fazlası!">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://egiticioyunlar.vercel.app/">
     <meta property="og:image" content="https://egiticioyunlar.vercel.app/og-image.jpg">
@@ -56,6 +56,50 @@
         "@type": "Person",
         "name": "Emir"
       }
+    }
+    </script>
+    
+    <!-- Games ItemList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Eğitici Oyunlar",
+      "description": "Çocuklar için eğitici ve eğlenceli oyunlar koleksiyonu",
+      "itemListElement": [
+        {
+          "@type": "Game",
+          "position": 1,
+          "name": "Kurbağa Labirenti",
+          "description": "Kurbağayı komutlarla yönlendirerek peynire ulaştır! Temel programlama kavramlarını öğren.",
+          "url": "https://egiticioyunlar.vercel.app/kurbaga-labirenti.html",
+          "applicationCategory": "Game"
+        },
+        {
+          "@type": "Game",
+          "position": 2,
+          "name": "Saat Ustası",
+          "description": "Saat okumayı öğren! Analog ve dijital saatleri karşılaştır.",
+          "url": "https://egiticioyunlar.vercel.app/saat-ustasi.html",
+          "applicationCategory": "Game"
+        },
+        {
+          "@type": "Game",
+          "position": 3,
+          "name": "Çarpım Kahramanı",
+          "description": "Çarpım tablosunu öğren ve matematik kahramanı ol!",
+          "url": "https://egiticioyunlar.vercel.app/carpim-tablosu/",
+          "applicationCategory": "Game"
+        },
+        {
+          "@type": "Game",
+          "position": 4,
+          "name": "Kebapçı",
+          "description": "Lezzetli kebapları doğru sırayla hazırla, müşterileri mutlu et! Tezgâhta malzemeleri birleştir, marine et ve mükemmel lezzetler oluştur.",
+          "url": "https://egiticioyunlar.vercel.app/Kebapci/",
+          "applicationCategory": "Game"
+        }
+      ]
     }
     </script>
     <!-- Vercel Analytics - Sadece production'da yükle -->
@@ -449,15 +493,14 @@
                     <a href="masa-tenisi.html" class="play-button">🎮 Oyna</a>
                 </div>
 
-                <!-- Onuncu Oyun: Kebapçı (Yakında) -->
-                <div class="game-card coming-soon">
-                    <span class="coming-soon-badge">Çok Yakında</span>
+                <!-- Onuncu Oyun: Kebapçı -->
+                <div class="game-card">
                     <span class="game-icon">🍢</span>
                     <div class="game-title">Kebapçı</div>
                     <div class="game-description">
-                        Lezzetli kebapları doğru sırayla hazırla, müşterileri mutlu et!
+                        Lezzetli kebapları doğru sırayla hazırla, müşterileri mutlu et! Tezgâhta malzemeleri birleştir, marine et ve mükemmel lezzetler oluştur.
                     </div>
-                    <!-- Link eklenmedi, sadece ön izleme -->
+                    <a href="Kebapci/" class="play-button">🎮 Oyna</a>
                 </div>
 
             </div>

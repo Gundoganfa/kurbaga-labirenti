@@ -157,29 +157,95 @@ body {
     padding-bottom: 8px;
 }
 
+/* Collapsible Headers */
+.collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.collapsible-header:hover {
+    color: #3498db;
+}
+
+.collapsible-header.menu-header:hover {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.15));
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.collapsible-header.menu-header {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding: 8px 0;
+    margin: 12px 0 10px 0;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(52, 152, 219, 0.1));
+    border-radius: 6px 6px 0 0;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.toggle-icon {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+}
+
+.toggle-icon.collapsed {
+    transform: rotate(-90deg);
+}
+
+.collapsible-content {
+    overflow: hidden;
+    transition: all 0.3s ease;
+    max-height: 500px; /* Default açık durumda maksimum yükseklik */
+    opacity: 1;
+}
+
+.collapsible-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
 /* Inventory Panel */
 .inventory-panel {
-    overflow-y: auto;
+    overflow-y: visible;
     max-height: calc(100vh - 120px);
+    min-width: 200px;
+    max-width: 280px;
 }
 
 .inventory-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    position: relative;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .ingredient-card {
     background: linear-gradient(145deg, #ffffff, #f8f9fa);
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    padding: 12px;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 4px;
     text-align: center;
     cursor: grab;
     transition: all 0.2s ease;
     position: relative;
     user-select: none;
     touch-action: none;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .ingredient-card:hover {
@@ -194,31 +260,61 @@ body {
     transform: scale(0.95);
 }
 
+/* Envanter Drop Zone */
+.drag-over-inventory {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9) !important;
+    border: 3px dashed #4caf50 !important;
+    border-radius: 12px !important;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+
+.drag-over-inventory::before {
+    content: "🔄 Buraya bırak";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    z-index: 10;
+    pointer-events: none;
+}
+
 .ingredient-icon {
-    font-size: 2em;
-    margin-bottom: 5px;
+    font-size: 1.2em;
+    margin-bottom: 2px;
     display: block;
 }
 
 .ingredient-name {
-    font-size: 0.85em;
+    font-size: 0.6em;
     color: #34495e;
     font-weight: 600;
+    line-height: 1.1;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .ingredient-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: -3px;
+    right: -3px;
     background: #e74c3c;
     color: white;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7em;
+    font-size: 0.6em;
     font-weight: bold;
 }
 
@@ -288,6 +384,39 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 5px;
+    position: relative;
+}
+
+/* Trash Button */
+.trash-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(220, 53, 69, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7em;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+    z-index: 10;
+}
+
+.trash-btn:hover {
+    background: #dc3545;
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4);
+}
+
+.trash-btn:active {
+    transform: scale(0.95);
 }
 
 .progress-bar {
@@ -453,6 +582,112 @@ body {
 .serve-btn:focus {
     outline: 2px solid #28a745;
     outline-offset: 2px;
+}
+
+/* Menu Containers - Unified Style */
+.combination-reference,
+.recipe-reference {
+    margin-top: 15px;
+    padding: 0;
+    background: rgba(52, 152, 219, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    overflow: hidden;
+}
+
+.combination-list,
+.recipe-list {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 8px 12px;
+    margin: 0;
+}
+
+.combination-category {
+    margin: 8px 0 4px 0;
+    color: #2c3e50;
+    font-size: 0.7em;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 2px;
+}
+
+.combination-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 6px;
+    margin: 2px 0;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    border: 1px solid rgba(155, 89, 182, 0.2);
+    transition: all 0.2s ease;
+}
+
+.combination-item:hover {
+    background: rgba(155, 89, 182, 0.1);
+    transform: translateX(2px);
+}
+
+.combination-formula {
+    font-size: 0.7em;
+    font-weight: bold;
+    color: #9b59b6;
+    font-family: monospace;
+}
+
+.combination-item small {
+    font-size: 0.6em;
+    color: #7f8c8d;
+    line-height: 1.2;
+}
+
+/* Recipe List Items */
+.recipe-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.recipe-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    transition: all 0.2s ease;
+    margin: 2px 0;
+}
+
+.recipe-item:hover {
+    background: rgba(52, 152, 219, 0.1);
+    border-color: #3498db;
+    transform: translateX(2px);
+}
+
+.recipe-icon {
+    font-size: 1.2em;
+    min-width: 24px;
+    text-align: center;
+}
+
+.recipe-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.recipe-details strong {
+    font-size: 0.85em;
+    color: #2c3e50;
+}
+
+.recipe-details small {
+    font-size: 0.75em;
+    color: #6c757d;
+    font-weight: normal;
 }
 
 /* Notifications */
@@ -673,7 +908,21 @@ body {
     }
     
     .inventory-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+    }
+    
+    .ingredient-card {
+        padding: 3px;
+        min-height: 45px;
+    }
+    
+    .ingredient-icon {
+        font-size: 1.1em;
+    }
+    
+    .ingredient-name {
+        font-size: 0.55em;
     }
 }
 
@@ -692,6 +941,26 @@ body {
     
     .stats {
         gap: 10px;
+    }
+    
+    /* Envanter responsive optimizasyonu */
+    .inventory-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        max-height: 300px;
+    }
+    
+    .ingredient-card {
+        padding: 5px;
+        min-height: 50px;
+    }
+    
+    .ingredient-icon {
+        font-size: 1.2em;
+    }
+    
+    .ingredient-name {
+        font-size: 0.6em;
     }
     
     .stat {
@@ -715,6 +984,47 @@ body {
         max-height: 300px;
         overflow-y: auto;
     }
+    
+    .combination-reference,
+    .recipe-reference {
+        margin-top: 12px;
+        border-radius: 6px;
+    }
+    
+    .combination-list,
+    .recipe-list {
+        max-height: 150px;
+        padding: 6px 8px;
+    }
+    
+    .collapsible-header.menu-header {
+        font-size: 0.85em;
+        padding: 6px;
+    }
+    
+    .combination-category {
+        font-size: 0.65em;
+    }
+    
+    .combination-formula {
+        font-size: 0.65em;
+    }
+    
+    .combination-item small {
+        font-size: 0.55em;
+    }
+    
+    .recipe-item {
+        padding: 5px 6px;
+    }
+    
+    .recipe-details strong {
+        font-size: 0.8em;
+    }
+    
+    .recipe-details small {
+        font-size: 0.7em;
+    }
 }
 
 @media (max-width: 600px) {
@@ -728,6 +1038,85 @@ body {
     
     .top-bar {
         font-size: 0.9em;
+    }
+    
+    /* Küçük ekranlar için envanter optimizasyonu */
+    .inventory-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        max-height: 250px;
+    }
+    
+    .ingredient-card {
+        padding: 3px;
+        min-height: 40px;
+    }
+    
+    .ingredient-icon {
+        font-size: 1em;
+    }
+    
+    .ingredient-name {
+        font-size: 0.5em;
+    }
+    
+    .ingredient-count {
+        width: 14px;
+        height: 14px;
+        font-size: 0.5em;
+    }
+    
+    /* Mobile unified menu styles */
+    .combination-reference,
+    .recipe-reference {
+        margin-top: 8px;
+        border-radius: 4px;
+    }
+    
+    .combination-list,
+    .recipe-list {
+        max-height: 120px;
+        padding: 4px 6px;
+    }
+    
+    .collapsible-header.menu-header {
+        font-size: 0.8em;
+        padding: 5px;
+        border-radius: 4px 4px 0 0;
+    }
+    
+    .combination-category {
+        font-size: 0.6em;
+        margin: 6px 0 3px 0;
+    }
+    
+    .combination-item,
+    .recipe-item {
+        padding: 3px 4px;
+        margin: 1px 0;
+        border-radius: 3px;
+    }
+    
+    .combination-formula {
+        font-size: 0.6em;
+    }
+    
+    .combination-item small,
+    .recipe-details small {
+        font-size: 0.5em;
+    }
+    
+    .recipe-details strong {
+        font-size: 0.75em;
+    }
+    
+    /* Mobile trash button */
+    .trash-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8em;
+        top: 1px;
+        right: 1px;
     }
     
     .time-display {

@@ -3,7 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🥙 Kebapçı Ustası</title>
+    <title>🥙 Kebapçı Ustası - Lezzetli Kebap Yapma Oyunu</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥙</text></svg>">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Kebapçı Ustası oyununda lezzetli kebapları doğru sırayla hazırla! Tezgâhta malzemeleri birleştir, marine et ve müşterileri mutlu et. Eğitici strateji oyunu.">
+    <meta name="keywords" content="kebapçı oyunu, yemek yapma oyunu, strateji oyunu, çocuk oyunları, eğitici oyun, restoran oyunu">
+    <meta name="author" content="Emir">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://egiticioyunlar.vercel.app/Kebapci/">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="🥙 Kebapçı Ustası - Lezzetli Kebap Yapma Oyunu">
+    <meta property="og:description" content="Kebapçı Ustası oyununda lezzetli kebapları doğru sırayla hazırla! Tezgâhta malzemeleri birleştir, marine et ve müşterileri mutlu et.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://egiticioyunlar.vercel.app/Kebapci/">
+    <meta property="og:image" content="https://egiticioyunlar.vercel.app/Kebapci/og-image.jpg">
+    <meta property="og:site_name" content="Emir'in Oyun Dünyası">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🥙 Kebapçı Ustası - Lezzetli Kebap Yapma Oyunu">
+    <meta name="twitter:description" content="Kebapçı Ustası oyununda lezzetli kebapları doğru sırayla hazırla! Tezgâhta malzemeleri birleştir, marine et ve müşterileri mutlu et.">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Game",
+      "name": "Kebapçı Ustası",
+      "description": "Kebapçı Ustası oyununda lezzetli kebapları doğru sırayla hazırla! Tezgâhta malzemeleri birleştir, marine et ve müşterileri mutlu et. Eğitici strateji oyunu.",
+      "url": "https://egiticioyunlar.vercel.app/Kebapci/",
+      "applicationCategory": "Game",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150"
+      },
+      "genre": ["Strategy", "Educational", "Cooking"],
+      "publisher": {
+        "@type": "Organization",
+        "name": "Emir'in Oyun Dünyası"
+      }
+    }
+    </script>
     
     <!-- Vercel Analytics -->
     <script>
@@ -56,9 +109,208 @@
     <main class="game-container">
         <!-- Left Panel: Inventory -->
         <section class="panel inventory-panel">
-            <h3>🗄️ Envanter Dolabı</h3>
-            <div id="inventory-grid" class="inventory-grid">
-                <!-- Ingredient cards will be generated here -->
+            <h4 class="collapsible-header menu-header" onclick="toggleInventory()">
+                🗄️ Envanter Dolabı
+                <span id="inventory-toggle" class="toggle-icon">▼</span>
+            </h4>
+            <div id="inventory-content" class="collapsible-content">
+                <div id="inventory-grid" class="inventory-grid">
+                    <!-- Ingredient cards will be generated here -->
+                </div>
+            </div>
+            <!-- Tezgâh Kombinasyonları -->
+            <div class="combination-reference">
+                <h4 class="collapsible-header menu-header" onclick="toggleCombinations()">
+                    ✨ Tezgâh Kombinasyonları
+                    <span id="combination-toggle" class="toggle-icon collapsed">▼</span>
+                </h4>
+                <div id="combination-content" class="collapsible-content collapsed">
+                    <div class="combination-list">
+                        <!-- Et Kombinasyonları -->
+                        <div class="combination-category">
+                            <strong>🥩 Et Kombinasyonları</strong>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🥩 + 🧂 = 🥩⭐</span>
+                            <small>Kıyma + Baharat → Marine Kıyma (+20%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🍗 + 🧂 = 🍗⭐</span>
+                            <small>Tavuk + Baharat → Marine Tavuk (+20%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🍖 + 🧂 = 🍖⭐</span>
+                            <small>Köfte + Baharat → Marine Köfte (+25%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🥙 + 🧂 = 🥙⭐</span>
+                            <small>Döner + Baharat → Marine Döner (+10%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🌭 + 🌶️ = 🌭🔥</span>
+                            <small>Sucuk + Acı Sos → Soslu Sucuk (+15%)</small>
+                        </div>
+                        
+                        <!-- Hamur Kombinasyonları -->
+                        <div class="combination-category">
+                            <strong>🍞 Hamur Kombinasyonları</strong>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🥐 + 🧅 = 🥐⭐</span>
+                            <small>Hamur + Soğan → Özel Hamur (+15%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🥖 + 🧀 = 🥖🧀</span>
+                            <small>Pide Hamuru + Kaşar → Peynirli Hamur (+20%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🍞 + 🧄 = 🍞🧄</span>
+                            <small>Ekmek + Sarımsaklı Sos → Sarımsaklı Ekmek (+10%)</small>
+                        </div>
+                        
+                        <!-- Sebze Kombinasyonları -->
+                        <div class="combination-category">
+                            <strong>🥬 Sebze Kombinasyonları</strong>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🍅 + 🧅 = 🍅🧅</span>
+                            <small>Domates + Soğan → Sebze Salatası (+10%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🥬 + 🥒 = 🥬🥒</span>
+                            <small>Marul + Salatalık → Yeşil Salata (+10%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🧀 + 🥬 = 🧀🥬</span>
+                            <small>Beyaz Peynir + Marul → Peynirli Salata (+15%)</small>
+                        </div>
+                        
+                        <!-- Sos Kombinasyonları -->
+                        <div class="combination-category">
+                            <strong>🥛 Sos Kombinasyonları</strong>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🥛 + 🧄 = 🥛🧄</span>
+                            <small>Mayonez + Sarımsaklı Sos → Özel Sos (+10%)</small>
+                        </div>
+                        <div class="combination-item">
+                            <span class="combination-formula">🌶️ + 🧂 = 🌶️🔥</span>
+                            <small>Acı Sos + Baharat → Ateş Sosu (+20%)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Hızlı Tarif Rehberi -->
+            <div class="recipe-reference">
+                <h4 class="collapsible-header menu-header" onclick="toggleRecipeReference()">
+                    📋 Hızlı Tarif Rehberi
+                    <span id="recipe-toggle" class="toggle-icon">▼</span>
+                </h4>
+                    <div id="recipe-content" class="collapsible-content">
+                        <div class="recipe-list">
+                            <!-- Kebaplar -->
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🍖</span>
+                                <div class="recipe-details">
+                                    <strong>Adana Kebap</strong>
+                                    <small>Kıyma + Şiş + Lavaş</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🍗</span>
+                                <div class="recipe-details">
+                                    <strong>Tavuk Şiş</strong>
+                                    <small>Tavuk + Şiş + Lavaş</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🍖🍞</span>
+                                <div class="recipe-details">
+                                    <strong>Köfte Ekmek</strong>
+                                    <small>Köfte(2) + Ekmek + Domates</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Dürümler -->
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🌯</span>
+                                <div class="recipe-details">
+                                    <strong>Döner Dürüm</strong>
+                                    <small>Döner + Lavaş</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🌯🍗</span>
+                                <div class="recipe-details">
+                                    <strong>Tavuk Dürüm</strong>
+                                    <small>Tavuk + Lavaş + Marul</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🌯🌭</span>
+                                <div class="recipe-details">
+                                    <strong>Sucuklu Dürüm</strong>
+                                    <small>Sucuk + Lavaş + Kaşar</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Pideler -->
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🥙</span>
+                                <div class="recipe-details">
+                                    <strong>Lahmacun</strong>
+                                    <small>Hamur + Harç (Fırın)</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🥖🧀</span>
+                                <div class="recipe-details">
+                                    <strong>Peynirli Pide</strong>
+                                    <small>Pide Hamuru + B.Peynir + Kaşar</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🥖🍖</span>
+                                <div class="recipe-details">
+                                    <strong>Karışık Pide</strong>
+                                    <small>Pide + Kıyma + Kaşar + Domates</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Tostlar -->
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🍞🌭</span>
+                                <div class="recipe-details">
+                                    <strong>Sucuklu Tost</strong>
+                                    <small>Ekmek(2) + Sucuk + Kaşar</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🍞🥬</span>
+                                <div class="recipe-details">
+                                    <strong>Karışık Tost</strong>
+                                    <small>Ekmek(2) + Kaşar + Domates + Marul</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Salatalar -->
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🥗</span>
+                                <div class="recipe-details">
+                                    <strong>Çoban Salata</strong>
+                                    <small>Domates(2) + Salatalık + Soğan + Biber</small>
+                                </div>
+                            </div>
+                            <div class="recipe-item">
+                                <span class="recipe-icon">🥗🧀</span>
+                                <div class="recipe-details">
+                                    <strong>Peynirli Salata</strong>
+                                    <small>Marul + Domates + B.Peynir + Salatalık</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </section>
 

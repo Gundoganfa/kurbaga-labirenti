@@ -209,6 +209,7 @@ class GameManager {
 // Recipe System
 class RecipeManager {
     static recipes = {
+        // Geleneksel Kebaplar
         'adana-kebap': {
             name: 'Adana Kebap',
             icon: '🍖',
@@ -221,17 +222,79 @@ class RecipeManager {
             ingredients: { 'tavuk': 1, 'sis': 1, 'lavas': 1 },
             basePrice: 20
         },
+        'kofte-ekmek': {
+            name: 'Köfte Ekmek',
+            icon: '🍖🍞',
+            ingredients: { 'kofte': 2, 'ekmek': 1, 'domates': 1 },
+            basePrice: 22
+        },
+        
+        // Dürüm ve Wrap'ler
+        'doner-durum': {
+            name: 'Döner Dürüm',
+            icon: '🌯',
+            ingredients: { 'doner': 1, 'lavas': 1 },
+            basePrice: 18
+        },
+        'tavuk-durum': {
+            name: 'Tavuk Dürüm',
+            icon: '🌯🍗',
+            ingredients: { 'tavuk': 1, 'lavas': 1, 'marul': 1 },
+            basePrice: 19
+        },
+        'sucuklu-durum': {
+            name: 'Sucuklu Dürüm',
+            icon: '🌯🌭',
+            ingredients: { 'sucuk': 1, 'lavas': 1, 'kasar': 1 },
+            basePrice: 17
+        },
+        
+        // Pideler
         'lahmacun': {
             name: 'Lahmacun',
             icon: '🥙',
             ingredients: { 'hamur': 1, 'harc': 1 },
             basePrice: 15
         },
-        'doner-durum': {
-            name: 'Döner Dürüm',
-            icon: '🌯',
-            ingredients: { 'doner': 1, 'lavas': 1 },
+        'peynirli-pide': {
+            name: 'Peynirli Pide',
+            icon: '🥖🧀',
+            ingredients: { 'pide_hamur': 1, 'beyaz_peynir': 1, 'kasar': 1 },
+            basePrice: 20
+        },
+        'karisik-pide': {
+            name: 'Karışık Pide',
+            icon: '🥖🍖',
+            ingredients: { 'pide_hamur': 1, 'kiyma': 1, 'kasar': 1, 'domates': 1 },
+            basePrice: 28
+        },
+        
+        // Tostlar
+        'sucuklu-tost': {
+            name: 'Sucuklu Tost',
+            icon: '🍞🌭',
+            ingredients: { 'ekmek': 2, 'sucuk': 1, 'kasar': 1 },
+            basePrice: 16
+        },
+        'karisik-tost': {
+            name: 'Karışık Tost',
+            icon: '🍞🥬',
+            ingredients: { 'ekmek': 2, 'kasar': 1, 'domates': 1, 'marul': 1 },
             basePrice: 18
+        },
+        
+        // Salatalar
+        'coban-salata': {
+            name: 'Çoban Salata',
+            icon: '🥗',
+            ingredients: { 'domates': 2, 'salatalik': 1, 'soğan': 1, 'biber': 1 },
+            basePrice: 12
+        },
+        'peynirli-salata': {
+            name: 'Peynirli Salata',
+            icon: '🥗🧀',
+            ingredients: { 'marul': 1, 'domates': 1, 'beyaz_peynir': 1, 'salatalik': 1 },
+            basePrice: 14
         }
     };
     
@@ -251,13 +314,37 @@ class RecipeManager {
 class InventoryManager {
     constructor() {
         this.ingredients = {
+            // Et Ürünleri
             'kiyma': { name: 'Kıyma', icon: '🥩', count: -1 },
             'tavuk': { name: 'Tavuk', icon: '🍗', count: -1 },
             'doner': { name: 'Döner', icon: '🥙', count: -1 },
+            'kofte': { name: 'Köfte', icon: '🍖', count: -1 },
+            'sucuk': { name: 'Sucuk', icon: '🌭', count: -1 },
+            
+            // Hamur İşleri
             'sis': { name: 'Şiş', icon: '🍢', count: -1 },
             'lavas': { name: 'Lavaş', icon: '🫓', count: -1 },
             'hamur': { name: 'Hamur', icon: '🥐', count: -1 },
-            'harc': { name: 'Harç', icon: '🍅', count: -1 }
+            'pide_hamur': { name: 'Pide Hamuru', icon: '🥖', count: -1 },
+            'ekmek': { name: 'Ekmek', icon: '🍞', count: -1 },
+            
+            // Sebzeler
+            'harc': { name: 'Harç', icon: '🍅', count: -1 },
+            'soğan': { name: 'Soğan', icon: '🧅', count: -1 },
+            'domates': { name: 'Domates', icon: '🍅', count: -1 },
+            'salatalik': { name: 'Salatalık', icon: '🥒', count: -1 },
+            'marul': { name: 'Marul', icon: '🥬', count: -1 },
+            'biber': { name: 'Biber', icon: '🌶️', count: -1 },
+            
+            // Soslar & Baharatlar
+            'baharat': { name: 'Baharat', icon: '🧂', count: -1 },
+            'aci_sos': { name: 'Acı Sos', icon: '🌶️', count: -1 },
+            'sarmisakli_sos': { name: 'Sarımsaklı Sos', icon: '🧄', count: -1 },
+            'mayonez': { name: 'Mayonez', icon: '🥛', count: -1 },
+            
+            // Peynirler
+            'beyaz_peynir': { name: 'Beyaz Peynir', icon: '🧀', count: -1 },
+            'kasar': { name: 'Kaşar', icon: '🧀', count: -1 }
         };
         
         this.render();
@@ -325,6 +412,30 @@ class CookingManager {
             oven: [null, null]
         };
         
+        // Kombinasyon tarifleri
+        this.combinations = {
+            // Et Kombinasyonları
+            'kiyma+baharat': { result: 'marine_kiyma', name: 'Marine Kıyma', icon: '🥩⭐', bonus: 1.2 },
+            'tavuk+baharat': { result: 'marine_tavuk', name: 'Marine Tavuk', icon: '🍗⭐', bonus: 1.2 },
+            'doner+baharat': { result: 'marine_doner', name: 'Marine Döner', icon: '🥙⭐', bonus: 1.1 },
+            'kofte+baharat': { result: 'marine_kofte', name: 'Marine Köfte', icon: '🍖⭐', bonus: 1.25 },
+            'sucuk+aci_sos': { result: 'soslu_sucuk', name: 'Soslu Sucuk', icon: '🌭🔥', bonus: 1.15 },
+            
+            // Hamur Kombinasyonları
+            'hamur+soğan': { result: 'ozel_hamur', name: 'Özel Hamur', icon: '🥐⭐', bonus: 1.15 },
+            'pide_hamur+kasar': { result: 'peynirli_hamur', name: 'Peynirli Hamur', icon: '🥖🧀', bonus: 1.2 },
+            'ekmek+sarmisakli_sos': { result: 'sarmisakli_ekmek', name: 'Sarımsaklı Ekmek', icon: '🍞🧄', bonus: 1.1 },
+            
+            // Sebze Kombinasyonları
+            'domates+soğan': { result: 'salata', name: 'Sebze Salatası', icon: '🍅🧅', bonus: 1.1 },
+            'marul+salatalik': { result: 'yesil_salata', name: 'Yeşil Salata', icon: '🥬🥒', bonus: 1.1 },
+            'beyaz_peynir+marul': { result: 'peynirli_salata', name: 'Peynirli Salata', icon: '🧀🥬', bonus: 1.15 },
+            
+            // Sos Kombinasyonları
+            'mayonez+sarmisakli_sos': { result: 'ozel_sos', name: 'Özel Sos', icon: '🥛🧄', bonus: 1.1 },
+            'aci_sos+baharat': { result: 'ates_sos', name: 'Ateş Sosu', icon: '🌶️🔥', bonus: 1.2 }
+        };
+        
         this.setupDragDrop();
         this.setupHeatControls();
         this.renderAllSlots();
@@ -347,35 +458,85 @@ class CookingManager {
                     e.preventDefault();
                     slot.classList.remove('drag-over');
                     
-                    const ingredientId = e.dataTransfer.getData('text/plain');
-                    const ingredient = game.inventory.getIngredient(ingredientId);
+                    const dragData = e.dataTransfer.getData('text/plain');
+                    console.log('Drop data:', dragData);
                     
-                    if (ingredient) {
-                        const stationType = slot.classList.contains('prep-slot') ? 'prep' :
-                                          slot.classList.contains('grill-slot') ? 'grill' : 'oven';
-                        const slotIndex = parseInt(slot.dataset.slot);
+                    const targetStationType = slot.classList.contains('prep-slot') ? 'prep' :
+                                            slot.classList.contains('grill-slot') ? 'grill' : 'oven';
+                    const targetSlotIndex = parseInt(slot.dataset.slot);
+                    
+                    // Check if dragging from inventory
+                    if (!dragData.startsWith('slot:')) {
+                        const ingredientId = dragData;
+                        const ingredient = game.inventory.getIngredient(ingredientId);
                         
-                        this.addToSlot(stationType, slotIndex, { type: ingredientId, ...ingredient });
+                        if (ingredient) {
+                            this.addToSlot(targetStationType, targetSlotIndex, { type: ingredientId, ...ingredient });
+                        }
+                    } else {
+                        // Dragging from another slot
+                        const [, sourceStationType, sourceSlotIndex] = dragData.split(':');
+                        const sourceItem = this.stations[sourceStationType][parseInt(sourceSlotIndex)];
+                        
+                        if (sourceItem && this.moveItem(sourceStationType, parseInt(sourceSlotIndex), targetStationType, targetSlotIndex)) {
+                            console.log(`Moved from ${sourceStationType}:${sourceSlotIndex} to ${targetStationType}:${targetSlotIndex}`);
+                        }
                     }
                 });
             });
+            
+            // Envanter drop zone ekle
+            const inventoryGrid = document.getElementById('inventory-grid');
+            if (inventoryGrid) {
+                inventoryGrid.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    inventoryGrid.classList.add('drag-over-inventory');
+                });
+                
+                inventoryGrid.addEventListener('dragleave', () => {
+                    inventoryGrid.classList.remove('drag-over-inventory');
+                });
+                
+                inventoryGrid.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    inventoryGrid.classList.remove('drag-over-inventory');
+                    
+                    const dragData = e.dataTransfer.getData('text/plain');
+                    console.log('Dropping to inventory:', dragData);
+                    
+                    // Sadece slot'tan gelen item'ları kabul et
+                    if (dragData.startsWith('slot:')) {
+                        const [, fromStationType, fromSlotIndex] = dragData.split(':');
+                        this.returnToInventory(fromStationType, parseInt(fromSlotIndex));
+                    }
+                });
+            }
         }, 100);
     }
     
     setupHeatControls() {
-        document.querySelectorAll('.heat-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        // Event delegation - parent container'a listener ekle
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('heat-btn')) {
+                console.log('Heat button clicked:', e.target.dataset.heat);
+                
                 const slot = e.target.closest('.grill-slot');
+                if (!slot) return;
+                
                 const slotIndex = parseInt(slot.dataset.slot);
                 const heat = e.target.dataset.heat;
                 
+                // Active class güncelle
                 slot.querySelectorAll('.heat-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 
+                // Heat level güncelle
                 if (this.stations.grill[slotIndex]) {
                     this.stations.grill[slotIndex].heatLevel = heat;
+                    console.log(`Grill ${slotIndex} heat set to: ${heat}`);
+                    game.ui.showNotification(`🔥 Ocak ${slotIndex + 1}: ${heat === 'low' ? 'Düşük' : heat === 'medium' ? 'Orta' : 'Yüksek'} ateş`, 'info');
                 }
-            });
+            }
         });
     }
     
@@ -385,14 +546,114 @@ class CookingManager {
         const item = {
             ...ingredient,
             startTime: Date.now(),
-            cookTime: 0,
-            state: 'raw',
+            cookTime: ingredient.type === 'lavas' ? 1 : 0, // Lavaş hazır sayılsın
+            state: ingredient.type === 'lavas' ? 'ready' : 'raw',
             heatLevel: stationType === 'grill' ? 'medium' : 'fixed'
         };
         
         this.stations[stationType][slotIndex] = item;
         this.renderSlot(stationType, slotIndex);
         game.ui.showNotification(`${ingredient.name} eklendi`, 'success');
+        
+        // Tezgâhta kombinasyon kontrol et
+        if (stationType === 'prep') {
+            setTimeout(() => this.checkPrepCombinations(), 100);
+        }
+        
+        return true;
+    }
+    
+    returnToInventory(stationType, slotIndex) {
+        const item = this.stations[stationType][slotIndex];
+        if (!item) {
+            game.ui.showNotification('❌ Slot boş!', 'error');
+            return false;
+        }
+        
+        // Sadece tezgâh malzemelerini geri alabilirsin
+        if (stationType !== 'prep') {
+            game.ui.showNotification('❌ Sadece tezgâhtaki malzemeler geri alınabilir!', 'warning');
+            return false;
+        }
+        
+        // Slot'u temizle
+        this.stations[stationType][slotIndex] = null;
+        this.renderSlot(stationType, slotIndex);
+        
+        game.ui.showNotification(`✅ ${item.name} envantere geri eklendi`, 'success');
+        console.log(`Returned ${item.name} from ${stationType}:${slotIndex} to inventory`);
+        
+        return true;
+    }
+    
+    checkPrepCombinations() {
+        const prepItems = this.stations.prep.filter(item => item !== null);
+        if (prepItems.length !== 2) return; // Sadece 2 malzeme varsa kombinasyon kontrol et
+        
+        const [item1, item2] = prepItems;
+        const combo1 = `${item1.type}+${item2.type}`;
+        const combo2 = `${item2.type}+${item1.type}`;
+        
+        const combination = this.combinations[combo1] || this.combinations[combo2];
+        
+        if (combination) {
+            console.log('Combination found:', combination);
+            
+            // Kombinasyonu oluştur
+            const combinedItem = {
+                type: combination.result,
+                name: combination.name,
+                icon: combination.icon,
+                startTime: Date.now(),
+                cookTime: 5, // Hazırlanmış sayılsın
+                state: 'prepared',
+                bonus: combination.bonus,
+                heatLevel: 'fixed'
+            };
+            
+            // Tezgâhı temizle ve yeni item ekle
+            this.stations.prep[0] = combinedItem;
+            this.stations.prep[1] = null;
+            
+            // Render et
+            this.renderSlot('prep', 0);
+            this.renderSlot('prep', 1);
+            
+            game.ui.showNotification(`✨ ${combination.name} oluşturuldu! +%${Math.round((combination.bonus - 1) * 100)} bonus`, 'success');
+        }
+    }
+    
+    moveItem(fromStationType, fromSlotIndex, toStationType, toSlotIndex) {
+        // Hedef slot dolu mu kontrol et
+        if (this.stations[toStationType][toSlotIndex]) {
+            game.ui.showNotification('❌ Hedef slot dolu!', 'error');
+            return false;
+        }
+        
+        const item = this.stations[fromStationType][fromSlotIndex];
+        if (!item) return false;
+        
+        // Eğer pişirme durumundan başka bir yere taşınıyorsa, pişirme durumunu sıfırla
+        if (fromStationType !== 'prep' && toStationType === 'prep') {
+            item.cookTime = 0;
+            item.state = 'raw';
+            item.startTime = Date.now();
+        } else if (toStationType !== 'prep') {
+            // Yeni pişirme istasyonuna taşınıyorsa
+            item.startTime = Date.now();
+            item.cookTime = 0;
+            item.heatLevel = toStationType === 'grill' ? 'medium' : 'fixed';
+        }
+        
+        // Taşı
+        this.stations[toStationType][toSlotIndex] = item;
+        this.stations[fromStationType][fromSlotIndex] = null;
+        
+        // Render et
+        this.renderSlot(fromStationType, fromSlotIndex);
+        this.renderSlot(toStationType, toSlotIndex);
+        
+        game.ui.showNotification(`${item.name} taşındı`, 'success');
         return true;
     }
     
@@ -404,7 +665,12 @@ class CookingManager {
         const item = this.stations[stationType][slotIndex];
         
         if (!item) {
-            slotEl.classList.remove('occupied');
+            // Slot tamamen temizle - Tüm state class'larını kaldır
+            slotEl.className = `slot ${stationType}-slot`; // Sadece temel class'ları bırak
+            slotEl.draggable = false;
+            slotEl.style.backgroundColor = ''; // Arka plan rengini temizle
+            slotEl.style.background = ''; // Gradient'i de temizle
+            
             const placeholder = stationType === 'prep' ? 'Hazırlık' :
                               stationType === 'grill' ? `Ocak ${slotIndex + 1}` : `Fırın ${slotIndex + 1}`;
             
@@ -416,8 +682,32 @@ class CookingManager {
                 content += this.getHeatControlHTML(slotIndex);
             }
             slotEl.innerHTML = content;
+            
+            // Event listener'ları temizle
+            const newSlotEl = slotEl.cloneNode(true);
+            slotEl.parentNode.replaceChild(newSlotEl, slotEl);
         } else {
             slotEl.classList.add('occupied');
+            slotEl.draggable = true; // Slot içeriği sürüklenebilir yap
+            
+            // Event listener'ları temizle ve yeniden ekle
+            const newSlotEl = slotEl.cloneNode(false);
+            newSlotEl.className = slotEl.className;
+            newSlotEl.draggable = true;
+            
+            // Slot drag events
+            newSlotEl.addEventListener('dragstart', (e) => {
+                console.log('Slot drag started:', stationType, slotIndex);
+                e.dataTransfer.setData('text/plain', `slot:${stationType}:${slotIndex}`);
+                e.dataTransfer.effectAllowed = 'move';
+                newSlotEl.classList.add('dragging');
+            });
+            
+            newSlotEl.addEventListener('dragend', (e) => {
+                console.log('Slot drag ended');
+                newSlotEl.classList.remove('dragging');
+            });
+            
             const progress = this.getItemProgress(item);
             const progressClass = progress > 90 ? 'danger' : progress > 70 ? 'warning' : '';
             
@@ -426,6 +716,7 @@ class CookingManager {
                     <span style="font-size: 1.5em">${item.icon}</span>
                     <span style="font-size: 0.8em">${item.name}</span>
                     <span style="font-size: 0.7em">${item.state}</span>
+                    <button class="trash-btn" onclick="trashItem('${stationType}', ${slotIndex})" title="Çöpe At">🗑️</button>
                 </div>
             `;
             
@@ -436,8 +727,11 @@ class CookingManager {
                 content += this.getHeatControlHTML(slotIndex);
             }
             
-            slotEl.innerHTML = content;
-            slotEl.className = `slot ${stationType}-slot occupied cooking-state-${item.state}`;
+            newSlotEl.innerHTML = content;
+            newSlotEl.className = `slot ${stationType}-slot occupied cooking-state-${item.state}`;
+            
+            // Eski element'i yenisiyle değiştir
+            slotEl.parentNode.replaceChild(newSlotEl, slotEl);
         }
     }
     
@@ -474,7 +768,8 @@ class CookingManager {
                 if (item) {
                     const elapsed = (Date.now() - item.startTime) / 1000;
                     const heatMultiplier = item.heatLevel === 'low' ? 0.8 : item.heatLevel === 'high' ? 1.2 : 1.0;
-                    item.cookTime = elapsed * heatMultiplier;
+                    const bonusMultiplier = item.bonus || 1.0; // Kombinasyon bonusu
+                    item.cookTime = elapsed * heatMultiplier * bonusMultiplier;
                     
                     const oldState = item.state;
                     if (item.cookTime < 15) item.state = 'cooking';
@@ -504,8 +799,10 @@ class CookingManager {
         const items = [];
         Object.entries(this.stations).forEach(([stationType, slots]) => {
             slots.forEach((item) => {
-                if (item && (stationType === 'prep' || item.state === 'done')) {
+                if (item) {
+                    // Tüm item'ları al (durum fark etmez - servis sırasında kontrol edilir)
                     items.push(item);
+                    console.log(`Available item: ${item.name} (${item.state}) from ${stationType}`);
                 }
             });
         });
@@ -515,9 +812,11 @@ class CookingManager {
     clearPreparedItems() {
         Object.entries(this.stations).forEach(([stationType, slots]) => {
             slots.forEach((item, slotIndex) => {
-                if (item && (stationType === 'prep' || item.state === 'done')) {
+                if (item) {
+                    // Tüm item'ları temizle (durum fark etmez)
                     this.stations[stationType][slotIndex] = null;
                     this.renderSlot(stationType, slotIndex);
+                    console.log(`Cleared ${stationType} slot ${slotIndex}: ${item.name}`);
                 }
             });
         });
@@ -646,8 +945,14 @@ class OrderManager {
             }
         }
         
-        const cookedItems = preparedItems.filter(item => item.cookTime > 0);
-        const burntItems = cookedItems.filter(item => item.state === 'burnt');
+        // Pişmiş item'lar VEYA hazırlanmış item'lar
+        const usableItems = preparedItems.filter(item => 
+            item.cookTime > 0 || 
+            item.state === 'prepared' || 
+            item.state === 'ready' || 
+            item.type === 'lavas'
+        );
+        const burntItems = usableItems.filter(item => item.state === 'burnt');
         
         if (burntItems.length > 0) {
             return {
@@ -781,6 +1086,75 @@ class UIManager {
         });
     }
 }
+
+// UI Toggle Functions
+function toggleInventory() {
+    const content = document.getElementById('inventory-content');
+    const toggle = document.getElementById('inventory-toggle');
+    
+    content.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed');
+    
+    console.log('Inventory toggled:', content.classList.contains('collapsed') ? 'closed' : 'open');
+}
+
+function toggleCombinations() {
+    console.log('toggleCombinations called');
+    const content = document.getElementById('combination-content');
+    const toggle = document.getElementById('combination-toggle');
+    
+    if (!content || !toggle) {
+        console.error('Combination elements not found:', { content, toggle });
+        return;
+    }
+    
+    content.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed');
+    
+    console.log('Combinations toggled:', content.classList.contains('collapsed') ? 'closed' : 'open');
+    console.log('Content classes:', content.className);
+    console.log('Toggle classes:', toggle.className);
+}
+
+function toggleRecipeReference() {
+    const content = document.getElementById('recipe-content');
+    const toggle = document.getElementById('recipe-toggle');
+    
+    content.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed');
+    
+    console.log('Recipe reference toggled:', content.classList.contains('collapsed') ? 'closed' : 'open');
+}
+
+// Trash Item Function
+function trashItem(stationType, slotIndex) {
+    console.log(`Trashing item from ${stationType}:${slotIndex}`);
+    
+    const item = game.cooking.stations[stationType][slotIndex];
+    if (!item) {
+        game.ui.showNotification('❌ Slot zaten boş!', 'error');
+        return;
+    }
+    
+    // Confirm dialog
+    const confirmTrash = confirm(`${item.name} çöpe atılsın mı?\n\nBu işlem geri alınamaz!`);
+    if (!confirmTrash) {
+        return;
+    }
+    
+    // Clear the slot
+    game.cooking.stations[stationType][slotIndex] = null;
+    game.cooking.renderSlot(stationType, slotIndex);
+    
+    game.ui.showNotification(`🗑️ ${item.name} çöpe atıldı`, 'info');
+    console.log(`Trashed: ${item.name} from ${stationType}:${slotIndex}`);
+}
+
+// Make functions globally accessible
+window.toggleInventory = toggleInventory;
+window.toggleCombinations = toggleCombinations;
+window.toggleRecipeReference = toggleRecipeReference;
+window.trashItem = trashItem;
 
 // Initialize Game
 const game = new GameManager();
