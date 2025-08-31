@@ -91,7 +91,7 @@ const Scoreboard = {
     // Skor doğrulama fonksiyonu
     validateScore(score, duration, correctAnswers, bestStreak) {
         // Temel kontroller
-        if (score < 0 || score > 1000) return false; // Makul skor aralığı
+        if (score < 0 || score > 10000) return false; // Makul skor aralığı (1000 -> 10000)
         if (duration < 1000 || duration > 3600000) return false; // 1 saniye - 1 saat
         if (correctAnswers < 0 || correctAnswers > 100) return false; // 0-100 doğru
         if (bestStreak < 0 || bestStreak > 100) return false; // 0-100 seri
