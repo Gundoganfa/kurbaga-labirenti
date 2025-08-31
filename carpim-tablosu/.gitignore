@@ -1,0 +1,12 @@
+# Supabase güvenlik dosyaları
+supabase-setup.sql
+*.sql
+
+# Environment dosyaları  
+.env
+.env.local
+.env.production
+
+# Geçici dosyalar
+*.tmp
+*.log

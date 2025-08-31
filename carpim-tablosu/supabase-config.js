@@ -1,6 +1,7 @@
 // Supabase konfigürasyonu
+// NOT: Anon key frontend'de görünür olması normal (RLS ile korunur)
 const SUPABASE_URL = 'https://tdbdohmeunhfldfqztdk.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_YbCLsKr4OMkvTyErSE6j1A_cdYlF2Bn';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkYmRvaG1ldW5oZmxkZnF6dGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzE5NzAsImV4cCI6MjA1MDU0Nzk3MH0.YbCLsKr4OMkvTyErSE6j1A_cdYlF2Bn';
 
 // Supabase client oluştur
 let supabase;
