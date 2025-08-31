@@ -159,7 +159,7 @@ class GameManager {
             this.streak++;
             
             this.ui.showNotification(`✅ Harika! +${result.payment}₺`, 'success');
-            this.cooking.clearPreparedItems();
+            // clearPreparedItems() artık checkOrder içinde yapılıyor
             this.orders.completeOrder(selectedOrder.id);
         } else {
             this.reputation = Math.max(1.0, this.reputation - 0.2);
@@ -939,39 +939,72 @@ class OrderManager {
     checkOrder(order, preparedItems) {
         const recipe = order.recipe;
         const requiredIngredients = recipe.ingredients;
-        const availableIngredients = {};
         
-        preparedItems.forEach(item => {
-            const ingredientId = item.type;
-            availableIngredients[ingredientId] = (availableIngredients[ingredientId] || 0) + 1;
-        });
+        // Marine malzeme normalize sistemi
+        const normalize = (id) => ({
+            'marine_kiyma': 'kiyma',
+            'marine_tavuk': 'tavuk',
+            'marine_doner': 'doner',
+            'marine_kofte': 'kofte',
+            'soslu_sucuk': 'sucuk',
+            'ozel_hamur': 'hamur',
+            'peynirli_hamur': 'pide_hamur',
+            'sarmisakli_ekmek': 'ekmek',
+            'salata': 'domates',
+            'yesil_salata': 'marul',
+            'peynirli_salata': 'marul',
+            'ozel_sos': 'mayonez',
+            'ates_sos': 'aci_sos'
+        }[id] || id);
+        
+        // Sadece gerekli malzemeleri topla
+        const usedItems = [];
+        const pool = [...preparedItems];
         
         for (const [ingredient, required] of Object.entries(requiredIngredients)) {
-            if ((availableIngredients[ingredient] || 0) < required) {
-                return {
-                    success: false,
-                    message: `Eksik malzeme: ${game.inventory.getIngredient(ingredient)?.name || ingredient}`,
-                    payment: 0
-                };
+            for (let i = 0; i < required; i++) {
+                const itemIndex = pool.findIndex(item => normalize(item.type) === ingredient);
+                if (itemIndex === -1) {
+                    return {
+                        success: false,
+                        message: `Eksik malzeme: ${game.inventory.getIngredient(ingredient)?.name || ingredient}`,
+                        payment: 0
+                    };
+                }
+                usedItems.push(pool.splice(itemIndex, 1)[0]);
             }
         }
         
-        // Pişmiş item'lar VEYA hazırlanmış item'lar
-        const usableItems = preparedItems.filter(item => 
-            item.cookTime > 0 || 
-            item.state === 'prepared' || 
-            item.state === 'ready' || 
-            item.type === 'lavas'
-        );
-        const burntItems = usableItems.filter(item => item.state === 'burnt');
-        
-        if (burntItems.length > 0) {
+        // Sadece kullanılan malzemeler için kontrollerFINAL
+        // 1. Yanmış kontrolü
+        if (usedItems.some(item => item.state === 'burnt')) {
             return {
                 success: false,
                 message: 'Malzemeler yanmış!',
                 payment: 0
             };
         }
+        
+        // 2. Pişmiş olma kontrolü
+        if (usedItems.some(item => !['done', 'ready', 'prepared'].includes(item.state))) {
+            return {
+                success: false,
+                message: 'Malzemeler tam pişmemiş!',
+                payment: 0
+            };
+        }
+        
+        // Başarılı servis - Sadece kullanılan malzemeleri temizle
+        usedItems.forEach(usedItem => {
+            for (const [stationType, slots] of Object.entries(game.cooking.stations)) {
+                const slotIndex = slots.findIndex(slotItem => slotItem === usedItem);
+                if (slotIndex !== -1) {
+                    slots[slotIndex] = null;
+                    game.cooking.renderSlot(stationType, slotIndex);
+                    break;
+                }
+            }
+        });
         
         let payment = order.reward;
         if (order.timeRemaining > order.timeLimit * 0.7) {
@@ -1061,7 +1094,7 @@ class UIManager {
         document.getElementById('recipe-modal').classList.remove('hidden');
         document.getElementById('recipe-title').textContent = `${recipe.icon} ${recipe.name}`;
         
-        const content = document.getElementById('recipe-content');
+        const content = document.getElementById('recipe-modal-content');
         const ingredients = Object.entries(recipe.ingredients)
             .map(([id, count]) => `${count}x ${game.inventory.getIngredient(id)?.name || id}`)
             .join('<br>');
