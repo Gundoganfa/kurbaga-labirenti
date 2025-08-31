@@ -311,9 +311,42 @@ const OnlinePresence = {
     updateUI(count) {
         const onlineBadge = document.getElementById('online-badge');
         if (onlineBadge) {
-            const emoji = count === 1 ? '🟢' : '🔥';
-            onlineBadge.textContent = `${emoji} Online: ${count}`;
-            onlineBadge.title = `${count} kişi şu anda çarpım tablosu oyunu oynuyor`;
+            if (count === 0) {
+                // Hiç kullanıcı yok - muhtemelen bağlantı sorunu
+                onlineBadge.textContent = '⚡ Bağlanıyor...';
+                onlineBadge.title = 'Online kullanıcı sayısı yükleniyor';
+            } else if (count === 1) {
+                onlineBadge.textContent = '🟢 Online: 1';
+                onlineBadge.title = 'Sadece sen çevrimiçisin';
+            } else {
+                onlineBadge.textContent = `🔥 Online: ${count}`;
+                onlineBadge.title = `${count} kişi şu anda çarpım tablosu oyunu oynuyor`;
+            }
+        }
+    },
+
+    // Bağlantı durumunu kontrol et ve UI'ı güncelle
+    setConnectionStatus(status, message = '') {
+        const onlineBadge = document.getElementById('online-badge');
+        if (onlineBadge) {
+            switch(status) {
+                case 'connecting':
+                    onlineBadge.textContent = '⚡ Bağlanıyor...';
+                    onlineBadge.title = 'Online sayacı bağlantısı kuruluyor';
+                    break;
+                case 'connected':
+                    onlineBadge.textContent = '🟢 Online: 1';
+                    onlineBadge.title = 'Bağlantı başarılı! Online kullanıcı sayısı aktif';
+                    break;
+                case 'failed':
+                    onlineBadge.textContent = '⚡ Offline';
+                    onlineBadge.title = 'Online sayacı şu an çalışmıyor (internet bağlantısı gerekli)';
+                    break;
+                case 'retry':
+                    onlineBadge.textContent = '🔄 Yeniden...';
+                    onlineBadge.title = 'Bağlantı yeniden deneniyor';
+                    break;
+            }
         }
     },
 

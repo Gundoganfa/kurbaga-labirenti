@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://kurbaga-labirenti.vercel.app/sitemap.xml
+Sitemap: https://egiticioyunlar.vercel.app/sitemap.xml
 
 # Crawl-delay (isteğe bağlı)
 Crawl-delay: 1

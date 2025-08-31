@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/Gundoganfa/kurbaga-labirenti/issues"
   },
-  "homepage": "https://github.com/Gundoganfa/kurbaga-labirenti#readme",
+  "homepage": "https://egiticioyunlar.vercel.app",
   "dependencies": {
     "@supabase/supabase-js": "^2.56.1",
     "@vercel/analytics": "^1.5.0"
