@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍖 Angry Meatballs - Kızgın Köfteler</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍖</text></svg>">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Angry Meatballs - Kızgın köfteleri sapanla fırlatarak sebze düşmanlarını yen! Fizik tabanlı eğlenceli oyun.">
+    <meta name="keywords" content="angry meatballs, kızgın köfteler, sapan oyunu, fizik oyunu, çocuk oyunları, eğitici oyun">
+    <meta name="author" content="Emir">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Vercel Analytics -->
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+        // Sadece production'da analytics yükle
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = '/_vercel/insights/script.js';
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Game Container -->
+    <div class="game-container">
+        <!-- Header -->
+        <header class="game-header">
+            <div class="logo">
+                <div class="logo-image">
+                    <!-- Angry Meatballs Logo -->
+                    <div class="meatball angry-face">😠</div>
+                    <div class="meatball angry-face">😡</div>
+                    <div class="meatball angry-face">🤬</div>
+                </div>
+                <h1>ANGRY MEATBALLS</h1>
+                <p>Kızgın Köfteler</p>
+            </div>
+            <div class="game-stats">
+                <div class="stat">
+                    <span class="stat-icon">⭐</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">🍖</span>
+                    <span id="meatballs-left">5</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">🎯</span>
+                    <span id="level">1</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Game Canvas -->
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="1200" height="600"></canvas>
+            
+            <!-- Game UI Overlay -->
+            <div class="game-ui">
+                <!-- Power Meter -->
+                <div class="power-meter" id="powerMeter">
+                    <div class="meter-label">Güç</div>
+                    <div class="meter-bar">
+                        <div class="meter-fill" id="powerFill"></div>
+                    </div>
+                    <div class="meter-value" id="powerValue">0%</div>
+                </div>
+                
+                <!-- Angle Display -->
+                <div class="angle-meter" id="angleMeter">
+                    <div class="meter-label">Açı</div>
+                    <div class="meter-value" id="angleValue">45°</div>
+                </div>
+
+                <!-- Trajectory Preview -->
+                <div class="trajectory-info" id="trajectoryInfo">
+                    <span>🏹 Yörünge Tahmini</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button id="resetBtn" class="control-btn">🔄 Yeniden Başla</button>
+            <button id="pauseBtn" class="control-btn">⏸️ Duraklat</button>
+            <button id="soundBtn" class="control-btn">🔊 Ses</button>
+            <button id="nextLevelBtn" class="control-btn hidden">➡️ Sonraki Seviye</button>
+            <button id="homeBtn" class="control-btn">🏠 Ana Sayfa</button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h3>🎮 Nasıl Oynanır?</h3>
+            <div class="instruction-grid">
+                <div class="instruction-item">
+                    <span class="instruction-icon">🖱️</span>
+                    <span>Mouse ile sapanı çek ve köfteyi fırlat</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="instruction-icon">🎯</span>
+                    <span>Tüm sebze düşmanlarını yok et</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="instruction-icon">⭐</span>
+                    <span>Az köfte kullanarak yüksek puan kazan</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="instruction-icon">💥</span>
+                    <span>Farklı köfte türleri farklı güçlerde</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Info -->
+        <div class="level-info" id="levelInfo">
+            <h4>Seviye 1: Sebze Bahçesi</h4>
+            <p>🥕 Havuçları yok et! 🥦 Brokoli kalelerini yık!</p>
+        </div>
+    </div>
+
+    <!-- Game Over/Win Modal -->
+    <div id="gameModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle">Seviye Tamamlandı!</h2>
+            <div class="modal-body">
+                <div class="stars" id="starsEarned">
+                    <span class="star">⭐</span>
+                    <span class="star">⭐</span>
+                    <span class="star">⭐</span>
+                </div>
+                <div class="modal-stats">
+                    <div class="modal-stat">
+                        <span>Puan:</span>
+                        <span id="finalScore">0</span>
+                    </div>
+                    <div class="modal-stat">
+                        <span>Kullanılan Köfte:</span>
+                        <span id="meatballsUsed">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="retryBtn" class="modal-btn retry">🔄 Tekrar Dene</button>
+                <button id="continueBtn" class="modal-btn continue">➡️ Devam Et</button>
+                <button id="menuBtn" class="modal-btn menu">🏠 Ana Menü</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <img src="images/logo.jpg" alt="Angry Meatballs Logo" class="game-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="loading-meatball" style="display: none;">🍖</div>
+            </div>
+            <h2>🍖 ANGRY MEATBALLS 🍖</h2>
+            <p class="loading-subtitle">Kızgın Köfteler Hazırlanıyor...</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <p class="loading-tip">💡 İpucu: Sapanı çekerek gücü ayarlayın!</p>
+        </div>
+    </div>
+
+            <!-- Load modules in correct order -->
+            <script type="module" src="config.js"></script>
+            <script type="module" src="physics.js"></script>
+            <script type="module" src="gameObjects.js"></script>
+            <script type="module" src="slingshot.js"></script>
+            <script type="module" src="levelManager.js"></script>
+            <script type="module" src="particles.js"></script>
+            <script type="module" src="soundManager.js"></script>
+            <script type="module" src="game.js"></script>
+</body>
+</html>
