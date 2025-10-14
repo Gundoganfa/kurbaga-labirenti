@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍭 Renkli Mangala - Bonbon Topla!</title>
+    
+    <!-- Vercel Analytics -->
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+        // Sadece production'da analytics yükle
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = '/_vercel/insights/script.js';
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏺</text></svg>">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Renkli Mangala - Çocuklar için eğlenceli bonbon toplama oyunu! Renkli taşlarla strateji geliştir.">
+    <meta name="keywords" content="çocuk oyunu, mangala, bonbon oyunu, renkli oyun, strateji oyunu, eğitici oyun">
+    <meta name="author" content="Emir">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .pit {
+            transition: all 0.3s ease;
+        }
+        
+        .pit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .pit.active {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .stone {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .kalah {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+        }
+        
+        .wood-texture {
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(160, 82, 45, 0.1) 0%, transparent 50%),
+                linear-gradient(45deg, #D2B48C, #DEB887);
+        }
+        
+        .game-board {
+            background: 
+                linear-gradient(135deg, #FF6B9D 0%, #4ECDC4 25%, #45B7D1 50%, #96CEB4 75%, #FFEAA7 100%),
+                url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3Ccircle cx='10' cy='10' r='2'/%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: boardShimmer 4s ease-in-out infinite;
+        }
+        
+        @keyframes boardShimmer {
+            0%, 100% { 
+                background: linear-gradient(135deg, #FF6B9D 0%, #4ECDC4 25%, #45B7D1 50%, #96CEB4 75%, #FFEAA7 100%);
+            }
+            50% { 
+                background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 25%, #96CEB4 50%, #FFEAA7 75%, #FF6B9D 100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-amber-50 to-orange-100 min-h-screen kalah-mode" id="gameBody">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <span class="text-4xl animate-bounce">🍭</span>
+                    <div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-pink-200 to-yellow-200 bg-clip-text text-transparent">
+                            RENKLİ MANGALA
+                        </h1>
+                        <p class="text-amber-100">🌈 Bonbon Topla!</p>
+                    </div>
+                </div>
+                
+                <!-- Game Mode Selection in Header -->
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-amber-200 mr-2">Oyun Modu:</div>
+                    <button class="mode-selector active bg-white/20 hover:bg-white/30 border-2 border-white/50 rounded-lg p-2 transition-all text-white text-sm font-bold min-w-[80px]" data-mode="kalah">
+                        🏛️ KALAH
+                    </button>
+                    <button class="mode-selector bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-2 transition-all text-white/80 text-sm font-bold min-w-[80px]" data-mode="turk">
+                        𐱅𐰇𐰼𐰚 TÜRK
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="helpBtn" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">
+                        ❓ Nasıl Oynanır?
+                    </button>
+                    <button id="homeBtn" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">
+                        🏠 Ana Sayfa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Game Container -->
+    <div class="container mx-auto px-4 py-8">
+
+        <!-- Stone Selection Menu -->
+        <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl shadow-lg p-6 mb-6">
+            <h3 class="text-xl font-bold text-center text-purple-800 mb-4">🎨 Taş Seçin</h3>
+            <div class="flex justify-center space-x-4 flex-wrap gap-3">
+                <button class="stone-selector active bg-white hover:bg-gray-50 border-3 border-purple-500 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="💖">
+                    <span class="text-3xl">💖</span>
+                    <div class="text-xs text-purple-600 mt-1">Kalp</div>
+                </button>
+                <button class="stone-selector bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="⭐">
+                    <span class="text-3xl">⭐</span>
+                    <div class="text-xs text-gray-600 mt-1">Yıldız</div>
+                </button>
+                <button class="stone-selector bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="🍬">
+                    <span class="text-3xl">🍬</span>
+                    <div class="text-xs text-gray-600 mt-1">Şeker</div>
+                </button>
+                <button class="stone-selector bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="💎">
+                    <span class="text-3xl">💎</span>
+                    <div class="text-xs text-gray-600 mt-1">Elmas</div>
+                </button>
+                <button class="stone-selector bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="🌟">
+                    <span class="text-3xl">🌟</span>
+                    <div class="text-xs text-gray-600 mt-1">Işık</div>
+                </button>
+                <button class="stone-selector bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="🦋">
+                    <span class="text-3xl">🦋</span>
+                    <div class="text-xs text-gray-600 mt-1">Kelebek</div>
+                </button>
+                <button class="stone-selector bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="🌸">
+                    <span class="text-3xl">🌸</span>
+                    <div class="text-xs text-gray-600 mt-1">Çiçek</div>
+                </button>
+                <button class="stone-selector bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl p-3 transition-all transform hover:scale-110" data-stone="🎈">
+                    <span class="text-3xl">🎈</span>
+                    <div class="text-xs text-gray-600 mt-1">Balon</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Info -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <div class="text-center">
+                    <div class="text-4xl mb-2">👧</div>
+                    <h3 class="text-lg font-semibold text-purple-600">Oyuncu 2</h3>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <span class="text-2xl">🍬</span>
+                        <span id="player2Score" class="text-2xl font-bold text-purple-600">0</span>
+                        <span class="text-gray-500">bonbon</span>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div id="currentPlayerDisplay" class="text-xl font-bold text-amber-600 mb-2">
+                        🎯 Oyuncu 1'in Sırası
+                    </div>
+                    <button id="resetBtn" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all">
+                        🔄 Yeni Oyun
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-4xl mb-2">👦</div>
+                    <h3 class="text-lg font-semibold text-orange-600">Oyuncu 1</h3>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <span class="text-2xl">🍭</span>
+                        <span id="player1Score" class="text-2xl font-bold text-orange-600">0</span>
+                        <span class="text-gray-500">bonbon</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KALAH BOARD -->
+        <div id="boardKalah" class="game-board rounded-3xl shadow-2xl p-8 mb-8">
+            <!-- Player 2 Row (Top) -->
+            <div class="flex justify-center space-x-4 mb-6">
+                <div class="w-24 h-32 bg-gradient-to-b from-purple-400 to-purple-600 rounded-2xl shadow-inner flex flex-col items-center justify-center text-white font-bold border-4 border-purple-300">
+                    <div class="text-2xl mb-1">👧</div>
+                    <div class="text-xs mb-1">Kasa</div>
+                    <div id="kalah2" class="text-2xl">0</div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="12">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="11">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="10">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="9">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="8">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="7">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                </div>
+                
+                <div class="w-24 h-32 bg-gradient-to-b from-orange-400 to-orange-600 rounded-2xl shadow-inner flex flex-col items-center justify-center text-white font-bold border-4 border-orange-300">
+                    <div class="text-2xl mb-1">👦</div>
+                    <div class="text-xs mb-1">Kasa</div>
+                    <div id="kalah1" class="text-2xl">0</div>
+                </div>
+            </div>
+            
+            <!-- Player 1 Row (Bottom) -->
+            <div class="flex justify-center space-x-4">
+                <div class="w-24 h-32"></div> <!-- Spacer -->
+                
+                <div class="flex space-x-4">
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="0">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="1">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="2">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="3">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="4">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="5">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                </div>
+                
+                <div class="w-24 h-32"></div> <!-- Spacer -->
+            </div>
+        </div>
+
+        <!-- TÜRK MANGALA BOARD (12 pit, store yok) -->
+        <div id="boardTurk" class="game-board rounded-3xl shadow-2xl p-8 mb-8 hidden">
+            <!-- Üst sıra: P2 çukurları 11 → 6 -->
+            <div class="flex justify-center space-x-4 mb-6">
+                <div class="flex space-x-4">
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="11">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="10">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="9">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="8">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="7">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="6">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt sıra: P1 çukurları 0 → 5 -->
+            <div class="flex justify-center space-x-4">
+                <div class="flex space-x-4">
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="0">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="1">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="2">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="3">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="4">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                    <div class="pit w-24 h-24 rounded-2xl shadow-lg flex items-center justify-center cursor-pointer" data-pit="5">
+                        <div class="bonbon-display pit-count">💖💖💖💖</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Rules -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">🎯 Oyun Kuralları</h3>
+            
+            <!-- Kalah Kuralları -->
+            <div id="rulesKalah" class="grid md:grid-cols-2 gap-4 text-gray-700">
+                <div class="space-y-2">
+                    <p><span class="font-semibold">🎮 Amaç:</span> En çok taşı kendi deponuzda (kalah) toplamak</p>
+                    <p><span class="font-semibold">🎯 Hamle:</span> Bir çukurdaki tüm taşları alıp saat yönünde dağıtın</p>
+                    <p><span class="font-semibold">🔄 Extra Tur:</span> Son taş kendi kalah'ınıza düşerse tekrar oynayın</p>
+                </div>
+                <div class="space-y-2">
+                    <p><span class="font-semibold">💎 Taş Alma:</span> Son taş boş çukurunuza düşerse karşıdaki tüm taşları + o taşı alın</p>
+                    <p><span class="font-semibold">🏆 Kazanma:</span> Tüm taşlar toplanınca en çok taşa sahip olan kazanır</p>
+                    <p><span class="font-semibold">⏱️ Sıra:</span> Sırayla oynayın, sadece kendi çukurlarınızdan seçin</p>
+                </div>
+            </div>
+
+            <!-- Türk Mangala Kuralları -->
+            <div id="rulesTurk" class="text-gray-700 hidden">
+                <div class="space-y-3">
+                    <p><span class="font-semibold">🏺 Başlangıç:</span> 12 çukur, her birinde 4 taş. Kalah (kasa) yok.</p>
+                    <p><span class="font-semibold">🎯 Hamle:</span> Seçtiğin çukurdaki tüm taşları al ve saat yönünde dağıt.</p>
+                    <p><span class="font-semibold">⚡ Yakalama:</span> Son taş <em>rakip</em> çukuruna düştüğünde o çukurdaki taş sayısı <em>çift</em> olursa, o çukurdaki tüm taşları kendi hanene yaz.</p>
+                    <p><span class="font-semibold">❌ Ekstra Tur:</span> Yok. Her hamlede sıra değişir.</p>
+                    <p><span class="font-semibold">🏆 Bitiş:</span> Bir taraf boşalınca kalan taşlar sahiplerine eklenir; en çok taş kazanan kazanır.</p>
+                    <p><span class="font-semibold">⏱️ Sıra:</span> Alt sıra (0-5) → Üst sıra (6-11) → Alt sıra...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl mx-4">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🏺 Nasıl Oynanır?</h2>
+
+            <!-- Kalah Help -->
+            <div id="helpKalah" class="space-y-4 text-gray-700 mb-6">
+                <p><strong>1.</strong> Her çukurda 4 taş, iki "Kasa" var.</p>
+                <p><strong>2.</strong> Kendi tarafındaki çukurdan al, saat yönünde dağıt; rakip kasayı atla.</p>
+                <p><strong>3.</strong> Son taş kendi kasana düşerse ekstra tur.</p>
+                <p><strong>4.</strong> Son taş kendi boş çukuruna düşerse karşısıyla birlikte topla.</p>
+                <p><strong>5.</strong> Bir taraf boşalınca kalanlar kasalara; en çok bonbon kazanan kazanır.</p>
+            </div>
+
+            <!-- Türk Help -->
+            <div id="helpTurk" class="space-y-4 text-gray-700 mb-6 hidden">
+                <p><strong>1.</strong> 12 çukur, kasa yok.</p>
+                <p><strong>2.</strong> Kendi tarafındaki çukurdan al, saat yönünde dağıt.</p>
+                <p><strong>3.</strong> Son taş rakip çukuruna düşüp taş sayısı <em>çift</em> olursa o çukurdakilerin hepsini hanene yaz.</p>
+                <p><strong>4.</strong> Ekstra tur yok. Bir taraf boşalınca kalanlar sahiplerine gider; en çok bonbon kazanan kazanır.</p>
+            </div>
+
+            <button id="closeHelp" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg transition-colors">
+                Anladım!
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md mx-4 text-center">
+            <div id="winnerIcon" class="text-6xl mb-4">🏆</div>
+            <h2 id="winnerText" class="text-2xl font-bold text-gray-800 mb-4">Oyun Bitti!</h2>
+            <div id="finalScores" class="text-lg text-gray-700 mb-6"></div>
+            <button id="newGameBtn" class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-3 rounded-lg transition-all">
+                🎮 Yeni Oyun
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="game.js"></script>
+</body>
+</html>
